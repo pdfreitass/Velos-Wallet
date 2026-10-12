@@ -36,6 +36,7 @@
 | Etapa | Escopo | Depende de |
 |---|---|---|
 | **3 — Autenticação** | Solution .NET + front Vite (T10–T13), depois email/senha (confirmação adiada), Google, recuperação de senha, bloqueio de tentativas, rotas privadas por padrão, logout | 2 |
+| **Página inicial** ([spec 003](specs/003-pagina-inicial/spec.md)) | Página pública em `/` com o iPhone interativo e as seções; painel das telas de entrada com o mesmo iPhone. Pedida em 2026-10-12 | 3 (telas de entrada) |
 | **4 — Contas e categorias** | CRUD de contas (4 tipos) e categorias (cor + ícone), `MoneyInput`, `CategoryBadge` | 3 |
 | **5 — Transações** | CRUD, filtro por mês/categoria, transferências entre contas | 4 |
 | **6 — Dashboard** | Saldo total (sem cartão), card de dívida do cartão, receitas × despesas do mês, gráfico por categoria (Recharts); conteúdo real do `/painel` e layout para desktop | 5 |
