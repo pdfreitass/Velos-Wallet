@@ -7,6 +7,21 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L12 — Estado medido a cada quadro no topo da árvore derruba o desempenho
+*2026-10-12 · spec 003*
+
+- **O que aconteceu:** os fios da página inicial são recalculados a cada quadro da inclinação com o mouse. O resultado ficava em `useState` no `Story`, que re-renderizava a página inteira a ~60 fps. Lighthouse no celular: 85–90.
+- **Como foi resolvido:** o hook passou para dentro do `ConvergeWires`, o único componente que desenha os fios. Lighthouse: 93–96.
+- **Como evitar:** estado que muda a cada quadro mora no componente que o desenha (ou vai direto para CSS vars/atributos do DOM), nunca num componente alto da árvore.
+- **Regra em:** comentário em `web/src/features/landing/ConvergeWires.tsx`.
+
+## L11 — Destaque que troca o fundo quebra o contraste medido
+*2026-10-12 · spec 003*
+
+- **O que aconteceu:** a linha destacada no iPhone ganhava fundo de card. No tema escuro, o vermelho da dívida sobre esse card caiu para 3,71:1 (Lighthouse).
+- **Como evitar:** destacar com contorno e sombra, sem mudar o fundo, para os pares de texto continuarem os já medidos em `globals.css`. Se um estado trocar o fundo, remedir todos os textos que ficam em cima dele.
+- **Regra em:** comentário de `.account-row[data-active]` em `web/src/styles/globals.css`.
+
 ## L10 — PR integrado antes de ter descrição e revisão
 *2026-10-12 · PR #1*
 

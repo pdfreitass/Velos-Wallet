@@ -27,6 +27,12 @@
 - `database.types.ts` gerado do banco real
 - RLS verificada: sem sessão, a chave publicável recebe `[]`
 
+### Página inicial ([spec 003](specs/003-pagina-inicial/tasks.md))
+- Página pública em `/` (composição "Tudo converge"): as contas ligadas por fios ao iPhone desenhado em código, 4 telas trocáveis, seções com o iPhone fixo no desktop, faixa "Privado por padrão", fechamento "Sem loja de apps."
+- Mesmo iPhone, compacto, no painel das telas de entrada; logado em `/` vai ao painel
+- Telas do app em `lazy()`: pacote inicial 99 KB gzip; Lighthouse no celular 93–96 / acessibilidade 100
+- `DESIGN.md` do sistema visual (Impeccable)
+
 ## 🟡 Em andamento
 
 **Etapa 3 — Autenticação** ([spec 001](specs/001-autenticacao/tasks.md)). Em 2026-10-12 a stack mudou para **API ASP.NET + React/Vite** ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)): o banco e a configuração do Supabase continuam; o código Next da etapa foi substituído pela **Revisão 2 do plano**, que recomeça na T10 (front em `web/`).
@@ -36,7 +42,6 @@
 | Etapa | Escopo | Depende de |
 |---|---|---|
 | **3 — Autenticação** | Solution .NET + front Vite (T10–T13), depois email/senha (confirmação adiada), Google, recuperação de senha, bloqueio de tentativas, rotas privadas por padrão, logout | 2 |
-| **Página inicial** ([spec 003](specs/003-pagina-inicial/spec.md)) | Página pública em `/` com o iPhone interativo e as seções; painel das telas de entrada com o mesmo iPhone. Pedida em 2026-10-12 | 3 (telas de entrada) |
 | **4 — Contas e categorias** | CRUD de contas (4 tipos) e categorias (cor + ícone), `MoneyInput`, `CategoryBadge` | 3 |
 | **5 — Transações** | CRUD, filtro por mês/categoria, transferências entre contas | 4 |
 | **6 — Dashboard** | Saldo total (sem cartão), card de dívida do cartão, receitas × despesas do mês, gráfico por categoria (Recharts); conteúdo real do `/painel` e layout para desktop | 5 |
@@ -59,4 +64,6 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | ~~T3~~ | ~~Textos de UI sem acento~~ | ✅ resolvida na T10 da spec 001 (`web/index.html` e página provisória com acento) | — |
 | ~~T4~~ | ~~`hasSupabaseEnv()` do middleware~~ | ✅ obsoleta: o middleware do Next saiu na troca de stack (ADR 0013) | — |
 | ~~T5~~ | ~~Imagens padrão do create-next-app sem uso~~ | ✅ removidas na T10 da spec 001 (`e4da686`) | — |
+| T7 | Fios das seções da página inicial apontam para o iPhone fixo, mas não chegam à linha exata da tela (revisor de acabamento: "parcial") | `web/src/features/landing/StepArtifacts.tsx` | **A DEFINIR** pelo Pedro |
+| T8 | Botões de 32–40 px abaixo do alvo de 44 px do PRODUCT.md (Button padrão, "Entrar" do cabeçalho); `--sidebar-ring` claro em #2ED38C (1,80:1, ainda sem uso) | `web/src/components/ui/button.tsx`, `globals.css` | Etapa 4 |
 | T6 | Logos originais duplicados na raiz (`velos-perfil-*.png`) e em `web/public/brand/` (`velos-*.png`) | raiz | **A DEFINIR**: manter na raiz como fonte? |

@@ -6,6 +6,19 @@
 
 ## [Não lançado]
 
+### 2026-10-12 — Página inicial (spec 003)
+#### Adicionado
+- Página pública em `/`: composição "Tudo converge" (quatro contas ligadas por fios ao iPhone desenhado em CSS), abas acessíveis Contas · Mês · Gastos · Metas, número que rola como contador, seções com o iPhone fixo no desktop, faixa "Privado por padrão" em tema invertido, fechamento "Sem loja de apps.", barra fixa "Criar conta" no celular, rodapé com @veloswallet.
+- Vitrine do app reutilizável em `web/src/features/showcase/` (tamanhos hero, compact, peek e mini), com dados de exemplo rotulados.
+- `DESIGN.md` e `.impeccable/design.json`: o sistema visual documentado a partir do código.
+#### Alterado
+- Painel das telas de entrada: o bloco de contas virou o iPhone compacto com abas.
+- `/` para visitante mostra a página; logado vai ao painel (`GuestOnly`); `RootRedirect` removido.
+- Entrar, cadastro, painel e 404 carregam sob demanda (`lazy()`).
+- `ThemeToggle` ganhou a variante só com ícone.
+#### Corrigido
+- Linha destacada no iPhone não troca mais o fundo (o vermelho da dívida sobre card escuro dava 3,71:1).
+
 ### 2026-10-12 — Documentação SDD
 #### Adicionado
 - Pasta `docs/` no padrão Spec-Driven Development: `VISAO`, `ARQUITETURA`, `ROADMAP`, `LICOES`, `CHANGELOG`, 12 ADRs e templates de spec/plan/tasks.

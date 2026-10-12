@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Tudo converge · Velos Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1440px; height: 900px; overflow: hidden; position: relative;
+    font-family: Geist, system-ui, sans-serif; background: #F4F7F2; color: #0A2E24; }
+  header { position: absolute; top: 28px; left: 80px; right: 80px; display: flex;
+    align-items: center; justify-content: space-between; z-index: 3; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+  .mark { width: 22px; height: 30px; }
+  .nav { display: flex; gap: 12px; }
+  .btn { height: 44px; padding: 0 22px; border-radius: 10px; display: inline-flex; align-items: center; font-size: 16px; font-weight: 500; }
+  .outline { border: 1px solid #7D928A; }
+  .primary { background: #0A2E24; color: #F4F7F2; }
+  .copy { position: absolute; left: 80px; top: 130px; width: 760px; z-index: 3; }
+  h1 { font-size: 72px; line-height: 1.02; letter-spacing: -0.035em; font-weight: 600; }
+  .sub { margin-top: 20px; font-size: 20px; line-height: 1.45; color: #5E766E; max-width: 560px; }
+  .ctas { margin-top: 30px; display: flex; gap: 12px; }
+  .ctas .btn { height: 52px; padding: 0 28px; font-size: 17px; }
+  svg.wires { position: absolute; inset: 0; z-index: 1; }
+  .acct { position: absolute; z-index: 2; width: 236px; padding: 16px 18px; border-radius: 16px; background: #FFFFFF;
+    box-shadow: 0 16px 36px rgba(4,20,15,.14); border: 1px solid #D3DBD5; }
+  .acct .t { font-size: 13px; color: #5E766E; }
+  .acct .v { margin-top: 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+  .acct.dark { background: #0A2E24; color: #F4F7F2; border-color: #0A2E24; }
+  .acct.dark .t { color: #A9B7B0; }
+  .a1 { left: 90px; top: 520px; transform: rotate(-4deg); }
+  .a2 { left: 360px; top: 600px; transform: rotate(3deg); }
+  .a3 { left: 150px; top: 720px; transform: rotate(2deg); }
+  .a4 { left: 470px; top: 760px; transform: rotate(-3deg); }
+  .debt { color: #E96368; }
+  .phone { position: absolute; left: 960px; top: 150px; width: 320px; height: 660px; border-radius: 54px; background: #0A2E24;
+    padding: 11px; box-shadow: 0 50px 90px rgba(4,20,15,.35); z-index: 2; }
+  .screen { height: 100%; border-radius: 44px; background: #F4F7F2; padding: 56px 22px 20px; position: relative; overflow: hidden; }
+  .island { position: absolute; top: 12px; left: 50%; width: 96px; height: 28px; margin-left: -48px; border-radius: 20px; background: #0A2E24; }
+  .small { font-size: 13px; color: #5E766E; }
+  .balance { font-size: 36px; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
+  .tag { display: inline-block; margin-top: 8px; font-size: 11px; padding: 3px 8px; border-radius: 6px; background: #E6EBE6; color: #5E766E; }
+  .sum { margin-top: 22px; border-top: 1px solid #D3DBD5; }
+  .sum div { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #D3DBD5; font-size: 14px; }
+  .sum b { font-weight: 600; }
+  .debt-l { color: #CA3F44; }
+  .total { margin-top: 16px; display: flex; justify-content: space-between; font-weight: 600; }
+  .dot { position: absolute; width: 12px; height: 12px; border-radius: 6px; background: #2ED38C; z-index: 3; box-shadow: 0 0 0 6px rgba(46,211,140,.18); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="318 245 442 608"><polygon points="323,390 409,390 510,641 510,848" fill="#0A2E24"/><polygon points="669,250 755,250 514,848 514,641" fill="#2ED38C"/></svg>
+      Velos Wallet
+    </div>
+    <nav class="nav"><span class="btn outline">Entrar</span><span class="btn primary">Criar conta</span></nav>
+  </header>
+
+  <section class="copy">
+    <h1>Seu dinheiro na direção certa.</h1>
+    <p class="sub">Banco, poupança, dinheiro vivo e cartão: tudo chega num lugar só e vira um saldo que você entende.</p>
+    <div class="ctas"><span class="btn primary">Criar conta grátis</span><span class="btn outline">Entrar</span></div>
+  </section>
+
+  <svg class="wires" viewBox="0 0 1440 900" fill="none" stroke="#7D928A" stroke-width="1.5" stroke-dasharray="4 6">
+    <path d="M326 560 C 640 520, 820 470, 960 430" />
+    <path d="M596 640 C 760 610, 880 520, 960 470" />
+    <path d="M386 760 C 700 720, 860 600, 960 520" />
+    <path d="M706 800 C 860 760, 920 640, 960 560" />
+  </svg>
+
+  <div class="acct a1"><p class="t">Conta corrente</p><p class="v">R$ 2.350,00</p></div>
+  <div class="acct a2"><p class="t">Poupança</p><p class="v">R$ 8.120,45</p></div>
+  <div class="acct a3"><p class="t">Dinheiro</p><p class="v">R$ 180,00</p></div>
+  <div class="acct a4 dark"><p class="t">Cartão de crédito</p><p class="v debt">-R$ 640,90</p></div>
+  <span class="dot" style="left:954px; top:424px"></span>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="island"></div>
+      <p class="small">Saldo total</p>
+      <p class="balance">R$ 10.650,45</p>
+      <span class="tag">Exemplo</span>
+      <div class="sum">
+        <div><span>Conta corrente</span><b>R$ 2.350,00</b></div>
+        <div><span>Poupança</span><b>R$ 8.120,45</b></div>
+        <div><span>Dinheiro</span><b>R$ 180,00</b></div>
+      </div>
+      <p class="total"><span>Cartão, fora do saldo</span><span class="debt-l">-R$ 640,90</span></p>
+    </div>
+  </div>
+</body>
+</html>
