@@ -1,0 +1,4 @@
+# Só para os projetos de teste.
+[*.cs]
+# Nomes de teste com sublinhado (Metodo_situacao_resultado) são a convenção do xUnit.
+dotnet_diagnostic.CA1707.severity = none

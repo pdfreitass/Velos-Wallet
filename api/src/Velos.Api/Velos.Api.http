@@ -1,0 +1,12 @@
+# Chamadas de teste da API (VS Code: extensão REST Client · Visual Studio: nativo).
+# Pelo proxy do Vite (localhost:3000) o caminho é o mesmo que o front usa.
+@api = http://localhost:5080
+
+### API de pé (pública)
+GET {{api}}/api/health
+
+### Sem sessão → 401 (toda rota é privada por padrão)
+GET {{api}}/api/me
+
+### Rota de API inexistente, sem sessão → 401 (não revela quais rotas existem)
+GET {{api}}/api/nao-existe

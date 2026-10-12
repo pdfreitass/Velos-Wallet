@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Velos.Api/Velos.Api.csproj" />
+    <Project Path="src/Velos.Application/Velos.Application.csproj" />
+    <Project Path="src/Velos.Domain/Velos.Domain.csproj" />
+    <Project Path="src/Velos.Infrastructure/Velos.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Velos.Application.Tests/Velos.Application.Tests.csproj" />
+    <Project Path="tests/Velos.Domain.Tests/Velos.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
