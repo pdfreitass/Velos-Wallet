@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Velos.Api.Auth;
 
 namespace Velos.Api.Configuration;
 
@@ -26,7 +27,16 @@ public static class AuthenticationSetup
                 options.Audience = "authenticated";
                 // Mantém os nomes do JWT ("sub", "email"); sem isso o .NET os renomeia.
                 options.MapInboundClaims = false;
-                // T15: ler o token do cookie httpOnly "velos_at" em Events.OnMessageReceived.
+                // O token vem SÓ do cookie httpOnly (ou do token renovado nesta request), nunca do
+                // header Authorization: o navegador não tem acesso a ele.
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = SessionCookies.ReadAccessToken(context.HttpContext);
+                        return Task.CompletedTask;
+                    },
+                };
             });
 
         services

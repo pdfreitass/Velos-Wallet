@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <!-- Segredos de dev (ConnectionStrings:Velos) ficam fora do repositório: dotnet user-secrets. -->
+    <UserSecretsId>c14e6b2f-70ea-428e-a421-46f0c38f0f57</UserSecretsId>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Velos.Application\Velos.Application.csproj" />
     <ProjectReference Include="..\Velos.Infrastructure\Velos.Infrastructure.csproj" />

@@ -8,5 +8,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/Velos.Application.Tests/Velos.Application.Tests.csproj" />
     <Project Path="tests/Velos.Domain.Tests/Velos.Domain.Tests.csproj" />
+    <Project Path="tests/Velos.Infrastructure.IntegrationTests/Velos.Infrastructure.IntegrationTests.csproj" />
   </Folder>
 </Solution>
