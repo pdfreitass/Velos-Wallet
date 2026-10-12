@@ -149,6 +149,30 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          created_at: string
+          email_hash: string
+          failed_count: number
+          locked_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_hash: string
+          failed_count?: number
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string
+          failed_count?: number
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -293,7 +317,22 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      clear_my_login_failures: { Args: never; Returns: undefined }
+      login_email_hash: { Args: { p_email: string }; Returns: string }
+      login_lock_status: {
+        Args: { p_email: string }
+        Returns: {
+          failed_count: number
+          locked_until: string
+        }[]
+      }
+      register_login_failure: {
+        Args: { p_email: string }
+        Returns: {
+          failed_count: number
+          locked_until: string
+        }[]
+      }
     }
     Enums: {
       account_type: "checking" | "savings" | "cash" | "credit_card"

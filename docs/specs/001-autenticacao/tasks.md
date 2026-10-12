@@ -9,10 +9,10 @@
 - [x] **T0** — Spec e plano aprovados (2026-10-12)
 
 ## Banco
-- [ ] **T1** — Migration `0005_login_attempts.sql` (tabela sem acesso direto + 3 funções + grants)
+- [x] **T1** — Migration `0005_login_attempts.sql` (tabela sem acesso direto + 3 funções + grants)
   - Verificação: `npx supabase db push --dry-run` lista só 0005 e 0006
-- [ ] **T2** — Migration `0006_storage_brand.sql` (bucket público `brand`)
-- [ ] **T3** — Aplicar (`db push`, **com aprovação**) e `npm run types:db`
+- [x] **T2** — Migration `0006_storage_brand.sql` (bucket público `brand`)
+- [x] **T3** — Aplicar (`db push`, **com aprovação**) e `npm run types:db`
   - Verificação: `migration list` sincronizado; `login_attempts` e as 3 funções aparecem nos tipos; sem sessão, `select` em `login_attempts` não devolve nada e `clear_my_login_failures()` falha
 
 ## Configuração (Pedro, com guia)
@@ -54,4 +54,5 @@
 
 | Task | Commit | Observação |
 |---|---|---|
-| T0 | | spec + plan + tasks |
+| T0 | `927d33d` | spec + plan + tasks |
+| T1–T3 | | Aplicadas em 2026-10-12. Teste anônimo: tabela negada; 5 falhas → bloqueio de 10 min; email normalizado (maiúsculas/espaços); `clear` e `login_email_hash` negados sem login; bucket `brand` existe |
