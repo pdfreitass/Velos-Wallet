@@ -160,6 +160,8 @@
   }
   html {
     @apply font-sans;
+    /* A barra fixa "Criar conta" da página inicial (celular) não cobre o elemento com foco. */
+    scroll-padding-bottom: 6rem;
     /* Barra de rolagem com a paleta, não o cinza do sistema. */
     scrollbar-color: var(--border) transparent;
   }
@@ -178,19 +180,268 @@
   }
 }
 
-/* Assinatura das telas de entrada (spec 001): as contas do exemplo "se somam" uma vez.
-   O conteúdo já é visível por padrão; a animação só existe com movimento permitido. */
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Vitrine do app (spec 003): o iPhone desenhado em CSS, usado na página inicial e no painel das
+   telas de entrada. Componentes em web/src/features/showcase/.
+   --------------------------------------------------------------------------------------------- */
+
+.phone {
+  --phone-w: 300px;
+  /* Grafite com um toque do verde da marca; a borda clara separa o aparelho do fundo escuro. */
+  --phone-frame: #1b2220;
+  --phone-edge: #3a4643;
+  position: relative;
+  flex-shrink: 0;
+  width: var(--phone-w);
+  aspect-ratio: 1 / 2.05;
+  border-radius: calc(var(--phone-w) * 0.165);
+  background: var(--phone-frame);
+  box-shadow:
+    inset 0 0 0 calc(var(--phone-w) * 0.006) var(--phone-edge),
+    0 2px 6px rgb(4 20 15 / 0.2),
+    0 32px 64px -20px rgb(4 20 15 / 0.45);
+}
+
+/* Botões laterais: volume (dois, com a sombra repetindo o primeiro) e liga/desliga. */
+.phone::before,
+.phone::after {
+  content: "";
+  position: absolute;
+  width: calc(var(--phone-w) * 0.011);
+  background: var(--phone-edge);
+}
+.phone::before {
+  left: calc(var(--phone-w) * -0.009);
+  top: 20%;
+  height: 6.5%;
+  border-radius: 2px 0 0 2px;
+  box-shadow: 0 calc(var(--phone-w) * 0.17) 0 var(--phone-edge);
+}
+.phone::after {
+  right: calc(var(--phone-w) * -0.009);
+  top: 26%;
+  height: 10%;
+  border-radius: 0 2px 2px 0;
+}
+
+.phone-screen {
+  position: absolute;
+  inset: calc(var(--phone-w) * 0.036);
+  overflow: hidden;
+  border-radius: calc(var(--phone-w) * 0.13);
+}
+
+.phone-island {
+  position: absolute;
+  top: calc(var(--phone-w) * 0.03);
+  left: 50%;
+  z-index: 1;
+  width: calc(var(--phone-w) * 0.3);
+  height: calc(var(--phone-w) * 0.088);
+  translate: -50% 0;
+  border-radius: 999px;
+  background: #050807;
+}
+
+/* Dentro da tela, os tokens do Tailwind ficam proporcionais ao aparelho: 1 unidade = 4 px num
+   iPhone de 320 px. Assim p-4, text-sm e size-4 escalam juntos em qualquer tamanho. */
+.device-screen {
+  --device-unit: calc(var(--device-w, var(--phone-w)) / 80);
+  --spacing: var(--device-unit);
+  --radius: calc(var(--device-unit) * 2.5);
+  --text-xs: calc(var(--device-unit) * 3);
+  --text-sm: calc(var(--device-unit) * 3.5);
+  --text-base: calc(var(--device-unit) * 4);
+  --text-lg: calc(var(--device-unit) * 4.5);
+  --text-xl: calc(var(--device-unit) * 5);
+  --text-2xl: calc(var(--device-unit) * 6);
+  --text-3xl: calc(var(--device-unit) * 7.5);
+}
+
+/* Tamanhos. hero: página inicial (no desktop, limitado pela altura da tela). compact: painel
+   das telas de entrada. peek: só a parte de cima, nas seções da página no celular. */
+.phone--hero {
+  --phone-w: min(300px, calc(100vw - 4.5rem));
+}
+@media (width >= 64rem) {
+  .phone--hero {
+    --phone-w: clamp(264px, calc((100svh - 8rem) / 2.05), 320px);
+  }
+}
+.phone--compact {
+  --phone-w: clamp(212px, calc((100dvh - 24rem) / 2.05), 264px);
+}
+.phone--peek {
+  --phone-w: min(280px, calc(100vw - 6rem));
+  aspect-ratio: auto;
+  height: calc(var(--phone-w) * 1.22);
+  overflow: hidden;
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+.phone--peek::before,
+.phone--peek::after {
+  display: none;
+}
+.phone--peek .phone-screen {
+  bottom: auto;
+  height: calc(var(--phone-w) * (2.05 - 0.072));
+}
+
+/* "No celular e no computador" (fechamento da página): janela de navegador com o app em duas
+   colunas, escalada pela largura da janela, e um iPhone menor por cima. */
+.devices {
+  --browser-w: min(40rem, calc(100vw - 4rem));
+  width: var(--browser-w);
+  justify-self: center;
+}
+@media (width >= 64rem) {
+  .devices {
+    --browser-w: clamp(26rem, 40vw, 40rem);
+  }
+}
+.browser-screen {
+  --device-w: calc(var(--browser-w) * 0.5);
+}
+.phone--mini {
+  --phone-w: calc(var(--browser-w) * 0.3);
+}
+
+/* Na primeira dobra os fios chegam pela esquerda do aparelho: sem os botões de volume ali. */
+.stage-phone .phone::before {
+  display: none;
+}
+
+/* Conta destacada na tela de contas: o cartão de mesmo nome na página está com o mouse em cima,
+   ou a seção fala dela. Só contorno no verde vivo (o fio que chega nela) e sombra: o fundo não
+   muda, para os pares de texto continuarem os medidos sobre --background (o vermelho da dívida
+   sobre o card escuro dava 3.71:1, medido pelo Lighthouse na T8). */
+.account-row {
+  transition: box-shadow 200ms;
+}
+.account-row[data-active] {
+  box-shadow:
+    0 0 0 1.5px var(--accent),
+    0 4px 12px -6px rgb(4 20 15 / 0.3);
+}
+
+/* Rosca de gastos: o buraco é uma máscara, não uma camada por cima. */
+.donut {
+  mask-image: radial-gradient(farthest-side, transparent 63%, #000 64%);
+}
+
+/* Fios que ligam as contas ao iPhone (página inicial). Tracejado neutro em repouso; o fio da
+   conta destacada se desenha em verde vivo. pathLength=1 nos traços animados. */
+.wire {
+  fill: none;
+  stroke: var(--input);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+}
+.wire-lit {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.wire-active {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-active] > .wire-active {
+  stroke-dashoffset: 0;
+}
+.wire-pulse {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 0.12 2;
+  stroke-dashoffset: 0.12;
+  opacity: 0;
+}
+.wire-port {
+  fill: var(--background);
+  stroke: var(--input);
+  stroke-width: 1.5;
+}
+[data-active] > .wire-port {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+/* Cartões de conta da primeira dobra: inclinação própria + profundidade com o mouse (--tilt-*,
+   escritas pela página só com ponteiro fino e sem "reduzir movimento"). */
+.stage-card {
+  rotate: var(--card-rotate, 0deg);
+  translate: calc(var(--tilt-x, 0) * var(--depth, 1) * -7px) calc(var(--tilt-y, 0) * var(--depth, 1) * -5px);
+}
+@media (width >= 64rem) {
+  .stage-card {
+    rotate: var(--card-rotate-lg, var(--card-rotate, 0deg));
+  }
+}
+.stage-phone {
+  transform: perspective(1600px) rotateY(calc(var(--tilt-x, 0) * -3.5deg))
+    rotateX(calc(var(--tilt-y, 0) * 2.5deg));
+}
+
+/* No desktop o iPhone acompanha as seções: fica centrado na altura útil (abaixo do cabeçalho de
+   4.5rem) e começa já nessa posição, para não "pular" quando a rolagem começa. A altura repete
+   a fórmula de .phone--hero. */
+@media (width >= 64rem) {
+  .phone-sticky {
+    --phone-h: calc(clamp(264px, calc((100svh - 8rem) / 2.05), 320px) * 2.05);
+    --phone-top: max(5.5rem, calc(4.5rem + (100svh - 4.5rem - var(--phone-h)) / 2));
+    position: sticky;
+    top: var(--phone-top);
+    margin-top: calc(var(--phone-top) - 4.5rem);
+  }
+}
+
+/* Movimento: o conteúdo é visível por padrão e só se mexe com movimento permitido (RN5). */
 @media (prefers-reduced-motion: no-preference) {
+  /* Assinatura: as contas "se somam" uma vez, depois o número do saldo assenta. */
   .sum-row {
-    animation: sum-row-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: calc(120ms * var(--sum-index, 0) + 250ms);
+    animation: sum-row-in 700ms var(--ease-out-expo) both;
+    animation-delay: calc(120ms * var(--sum-index, 0) + var(--sum-base, 250ms));
   }
-  .sum-rule {
+  .ticker-char {
+    animation: ticker-in 560ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--ticker-index, 0) * 22ms);
+  }
+  .ticker-intro .ticker-char {
+    animation-delay: calc(var(--sum-base, 250ms) + 620ms + var(--ticker-index, 0) * 22ms);
+  }
+  .screen-in {
+    animation: screen-in 480ms var(--ease-out-expo) both;
+  }
+  .grow-x {
     transform-origin: left;
-    animation: sum-rule-draw 600ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+    animation: grow-x 800ms var(--ease-out-expo) 120ms both;
   }
-  .sum-total {
-    animation: sum-row-in 700ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;
+  .grow-turn {
+    animation: grow-turn 900ms var(--ease-out-expo) 80ms both;
+  }
+  .wire-active {
+    transition: stroke-dashoffset 650ms var(--ease-out-expo);
+  }
+  .wire-pulse {
+    animation: wire-pulse 950ms cubic-bezier(0.55, 0, 0.25, 1) both;
+    animation-delay: calc(250ms + var(--wire-index, 0) * 140ms);
+  }
+  .wire-port {
+    transition: fill 200ms, stroke 200ms;
+  }
+  .stage-card {
+    transition: box-shadow 250ms, border-color 250ms;
   }
 }
 
@@ -202,8 +453,45 @@
   }
 }
 
-@keyframes sum-rule-draw {
+@keyframes ticker-in {
   from {
-    transform: scaleX(0);
+    opacity: 0.15;
+    transform: translateY(70%);
+    filter: blur(3px);
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0.2;
+    transform: translateX(calc(var(--screen-dir, 1) * 8%));
+    filter: blur(4px);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0.04);
+  }
+}
+
+@keyframes grow-turn {
+  from {
+    opacity: 0.3;
+    transform: rotate(-40deg) scale(0.9);
+  }
+}
+
+@keyframes wire-pulse {
+  0% {
+    stroke-dashoffset: 0.12;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0;
   }
 }

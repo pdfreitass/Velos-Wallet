@@ -27,19 +27,15 @@ export function RequireAuth() {
   return <Outlet />;
 }
 
-/** /entrar e /cadastro: quem já está logado vai direto para o destino (CA10). */
+/**
+ * Rotas públicas ("/", /entrar e /cadastro): quem já está logado vai direto para o destino
+ * (spec 001, CA10; spec 003, RN1). Enquanto /api/me responde, a página já aparece: o visitante,
+ * que é quem abre essas rotas, nunca espera.
+ */
 export function GuestOnly() {
   const [params] = useSearchParams();
   const me = useCurrentUser();
 
   if (me.isSuccess) return <Navigate to={getSafeRedirect(params.get("next"))} replace />;
   return <Outlet />;
-}
-
-/** "/" não tem conteúdo próprio: painel com sessão, entrada sem (RN8). */
-export function RootRedirect() {
-  const me = useCurrentUser();
-
-  if (me.isPending) return <FullPageLoader />;
-  return <Navigate to={me.isSuccess ? ROUTES.home : ROUTES.signIn} replace />;
 }
