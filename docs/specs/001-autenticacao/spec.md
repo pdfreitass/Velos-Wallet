@@ -10,6 +10,12 @@ O Velos guarda dados financeiros pessoais. Antes de qualquer outra funcionalidad
 
 Liga-se ao objetivo 1 da [VISAO](../../VISAO.md): *"Cadastro e login seguros — email/senha com confirmação ou conta Google"*.
 
+## Revisão 2 — troca de stack (2026-10-12)
+
+A stack passou a ser API ASP.NET + React/Vite ([ADR 0013](../../adr/0013-api-aspnet-e-front-react-vite.md)). **Nenhum comportamento desta spec muda.** Só os critérios técnicos se adaptam:
+- **CA-seg:** no lugar do `getUser()`, a API valida o JWT pela chave pública do Supabase em toda request; a sessão fica em cookie `httpOnly`; o front não recebe nenhuma chave do Supabase.
+- **CA-build:** `dotnet build api`, `dotnet test api` e `typecheck`, `lint` e `build` do `web`.
+
 ## Revisão 1 — confirmação de email adiada (2026-10-12)
 
 **Motivo:** sem domínio próprio, os emails saem pelo servidor padrão do Supabase, que só entrega para membros do projeto e tem limite de poucos envios por hora. Esse limite foi esgotado nos testes e travou **todo** cadastro por cerca de 1 hora. Exigir confirmação agora bloquearia o desenvolvimento.

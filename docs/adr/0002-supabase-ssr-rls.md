@@ -1,6 +1,6 @@
 # ADR 0002 — Supabase com `@supabase/ssr` e segurança na RLS
 
-- **Status:** Aceita
+- **Status:** Substituída em parte por [0013](0013-api-aspnet-e-front-react-vite.md) em 2026-10-12: sai o `@supabase/ssr`; a RLS continua valendo, agora acionada pela API
 - **Data:** 2026-10-11
 - **Etapa:** 1 — Setup / 2 — Modelo de dados
 

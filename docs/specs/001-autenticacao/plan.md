@@ -1,188 +1,234 @@
 # Plano técnico — Spec 001: Autenticação
 
-- **Status:** Aprovado (2026-10-12)
+- **Status:** **Revisão 2 aprovada** (2026-10-12) · Revisão original aprovada em 2026-10-12
 - **Spec:** [spec.md](spec.md) (Aprovada em 2026-10-12)
+
+> **Revisão 2 (2026-10-12): troca de stack** ([ADR 0013](../../adr/0013-api-aspnet-e-front-react-vite.md)). O Next.js sai; entram uma **API ASP.NET Core (.NET 10, Clean Architecture)** e um **front React + Vite**. **O comportamento da spec não muda**: as mesmas telas, regras e critérios de aceite. Muda o *como*. O plano anterior (Next + `@supabase/ssr` + Server Actions) está no histórico do git (`927d33d`).
+>
+> **Revisão 1 (continua valendo):** *Confirm email* desligado; sem `/cadastro/verifique-email`; cadastro entra direto em `/painel`; email já cadastrado → mensagem própria (CA17); só o modelo de redefinição vai para o painel.
 
 ## Resumo da abordagem
 
-Autenticação 100% pelo **Supabase Auth** via `@supabase/ssr` (cookies), com o **middleware** decidindo o acesso a cada request no modelo **"tudo é privado, exceto uma lista de rotas públicas"**. Formulários com **React Hook Form + Zod** no client e **Server Actions** que revalidam com o **mesmo schema** no servidor. Links de email e Google voltam por **route handlers** em `src/app/auth/`. O **bloqueio de tentativas** vive no Postgres (tabela + funções), acionado pelas Server Actions.
-
-> **Revisão 1 da spec (2026-10-12):** *Confirm email* desligado (C1); sem `/cadastro/verifique-email` nem `resendConfirmation`; `signUp` já devolve sessão e redireciona para `/painel`; email já cadastrado → mensagem própria (CA17); o modelo de confirmação é escrito mas só o de redefinição vai para o painel (C3). O resto do plano vale como está.
+O navegador **só conversa com a API**. A API chama o **Supabase Auth pela REST** (GoTrue) com a chave publicável, que fica só no servidor, e guarda a sessão em **cookies `httpOnly`**. Em cada request, a API valida o access token pela **chave pública ES256** do projeto e, para ler ou gravar dados, abre uma **transação com `role authenticated` + claims do JWT**, de modo que a RLS da Etapa 2 continua valendo. O **bloqueio de tentativas** (migration `0005`) é aplicado pela API antes de chamar o Supabase. Toda rota da API é **privada por padrão**.
 
 ## Configuração fora do código (guiada, feita pelo Pedro)
 
-| # | Onde | O quê |
-|---|---|---|
-| C1 | Supabase → Authentication → Sign In / Providers → **Email** | *Confirm email* **ligado**; *Minimum password length* = **8**; *Password requirements* = **"Lowercase, uppercase letters, digits and symbols"** |
-| C2 | Supabase → Authentication → **URL Configuration** | *Site URL* = `http://localhost:3000`; *Redirect URLs* += `http://localhost:3000/**` |
-| C3 | Supabase → Authentication → **Email Templates** | Colar os 2 modelos de `supabase/templates/` (HTML + assunto) |
-| C4 | **Google Cloud Console** | Projeto "Velos Wallet" → tela de consentimento (externo, nome Velos Wallet) → credencial *OAuth client ID* (Web) com *Authorized redirect URI* = `https://khvottmyspapwsdeqqnm.supabase.co/auth/v1/callback` |
-| C5 | Supabase → Authentication → Providers → **Google** | Ligar e colar **Client ID** e **Client Secret** (direto no painel, **nunca** no chat/código) |
-| C6 | Supabase → **Storage** → bucket `brand` | Enviar `velos-claro.png` (logo dos emails precisa de URL pública) |
+| # | Onde | O quê | Estado |
+|---|---|---|---|
+| C1 | Supabase → Authentication → **Email** | *Confirm email* **desligado** (Revisão 1); mínimo 8; "Lowercase, uppercase letters, digits and symbols" | ✅ feito |
+| C2 | Supabase → Authentication → **URL Configuration** | *Site URL* = `http://localhost:3000`; *Redirect URLs* += `http://localhost:3000/**`. **Não muda**: o Vite roda na porta 3000 | ✅ feito |
+| C3 | Supabase → Authentication → **Email Templates** | Colar **só** o modelo de redefinição | ⬜ |
+| C4 | **Google Cloud Console** | OAuth client (Web) com *Authorized redirect URI* = `https://khvottmyspapwsdeqqnm.supabase.co/auth/v1/callback` | ⬜ |
+| C5 | Supabase → Providers → **Google** | Client ID e Client Secret direto no painel, nunca no chat/código | ⬜ |
+| C6 | Supabase → Storage → bucket `brand` | Enviar `velos-claro.png` | ⬜ |
+| **C7** | Supabase → **SQL Editor** (uma vez) + `dotnet user-secrets` | Definir a **senha do role `velos_api`** e gravar a connection string só nos user-secrets. **Exceção única à regra "nunca SQL no Editor"**: senha não pode ir para arquivo versionado | ⬜ **novo** |
 
 ## Banco de dados
 
-### Migration `0005_login_attempts.sql`
+- `0005_login_attempts.sql` e `0006_storage_brand.sql`: **já aplicadas**, sem mudança. As funções `login_lock_status` e `register_login_failure` são chamadas pela API com `set local role anon`, e `clear_my_login_failures` com `role authenticated` + claims.
+- **Nova: `0007_api_role.sql`**
 
 ```sql
-create table public.login_attempts (
-  email_hash   text primary key,          -- sha256(lower(trim(email))): não guarda email em texto
-  failed_count int not null default 0,
-  locked_until timestamptz,
-  created_at   timestamptz not null default now(),
-  updated_at   timestamptz not null default now()
-);
-alter table public.login_attempts enable row level security;
--- SEM policies: ninguém lê/escreve a tabela diretamente. Só as funções abaixo.
-create trigger login_attempts_set_updated_at before update ...;
+-- Role de login da API: sem privilégios próprios (noinherit) e sem bypassrls.
+-- Só consegue agir depois de "set local role anon|authenticated".
+create role velos_api login noinherit nobypassrls;   -- senha definida fora do git (C7)
+grant anon, authenticated to velos_api;
 ```
 
-Funções `security definer`, `set search_path = ''`:
+Conferido em 2026-10-12: o `postgres` tem `createrole` e `admin option` sobre `anon` e `authenticated`, então a migration roda pelo `db push`.
 
-| Função | Quem pode chamar | O que faz |
+**Conexão:** pelo **pooler de sessão** do Supavisor (`aws-0-sa-east-1.pooler.supabase.com:5432`, usuário `velos_api.khvottmyspapwsdeqqnm`), porque a conexão direta do plano Free é só IPv6. A API é um processo de vida longa, então o modo sessão serve.
+
+### Sessão de banco por request (`UserDbSession`)
+
+```sql
+begin;
+select set_config('role', 'authenticated', true),               -- true = só nesta transação
+       set_config('request.jwt.claims', @claims_json, true);    -- payload do JWT já validado
+-- ... queries da request: auth.uid() e as policies funcionam como no Supabase ...
+commit;
+```
+
+Para as funções de bloqueio, antes do login: `set_config('role', 'anon', true)`. Se o código esquecer a sessão, o `velos_api` (noinherit) **não tem permissão em nada** e a query falha: falha fechada.
+
+## Estrutura
+
+```
+api/
+  Velos.slnx
+  Directory.Build.props            # net10.0, Nullable, TreatWarningsAsErrors, ImplicitUsings
+  src/
+    Velos.Domain/                  # regras puras, sem dependência: PasswordPolicy
+    Velos.Application/             # casos de uso, interfaces, validators, Result
+      Abstractions/                # IIdentityProvider, ILoginLockout, IProfileReader, IUserContext
+      Auth/                        # SignIn, SignUp, SignOut, RequestPasswordReset, UpdatePassword,
+                                   #   ConfirmEmailLink, ExchangeGoogleCode (comando + handler + validator)
+      Common/                      # Result<T>, Error, SafeRedirect
+    Velos.Infrastructure/
+      Supabase/                    # SupabaseAuthClient (HttpClient tipado → GoTrue REST)
+      Persistence/                 # VelosDbContext (EF Core, sem migrations), UserDbSession,
+                                   #   LoginLockoutStore, ProfileReader
+    Velos.Api/
+      Controllers/                 # AuthController, AuthLinksController (/auth/*), MeController
+      Auth/                        # SessionCookies, TokenRefreshMiddleware, CsrfHeaderMiddleware
+      Program.cs                   # JWT (lê do cookie), FallbackPolicy, ProblemDetails, SPA
+  tests/
+    Velos.Domain.Tests/            # xUnit
+    Velos.Application.Tests/       # xUnit (handlers com dublês das interfaces)
+web/
+  index.html                       # script inline de tema (ADR 0009)
+  vite.config.ts                   # porta 3000, proxy /api, /auth/confirm, /auth/callback → API
+  src/
+    main.tsx, router.tsx           # rotas em português
+    styles/globals.css             # tokens (copiados de src/app/globals.css, contrastes mantidos)
+    components/ui/                 # button, card, input, label (copiados)
+    components/shared/             # ThemeToggle (copiado), RequireAuth, GuestOnly
+    features/auth/                 # formulários e componentes das telas
+    pages/                         # Entrar, Cadastro, RecuperarSenha, RedefinirSenha, Painel, AuthErro
+    lib/api/                       # cliente fetch (credentials, header CSRF, ProblemDetails → erro tipado)
+    lib/utils/                     # currency.ts, date.ts (copiados)
+    lib/validations/auth.ts        # Zod (copiado da T6): só para a experiência do usuário
+supabase/                          # migrations, templates
+package.json                       # raiz: só a CLI do Supabase
+```
+
+**Sai:** `src/` inteiro do Next, `next.config.ts`, `middleware.ts`, `database.types.ts` e o script `types:db` (o front não acessa mais o banco). **Reaproveitado:** tokens e contrastes, `button`/`card`/`input`/`label`, `ThemeToggle`, `currency.ts`, `date.ts`, schemas Zod e os casos de teste da T6 (portados para xUnit).
+
+## Endpoints
+
+Todas as respostas com `Cache-Control: no-store`. Erros como **`ProblemDetails`** com `code` estável (o front traduz pelo `code`, nunca mostra texto do Supabase).
+
+| Método | Rota | Acesso | O que faz |
+|---|---|---|---|
+| POST | `/api/auth/sign-up` | anônimo | Cadastro → grava cookies → `201` · `email_taken` (CA17) · `rate_limited` |
+| POST | `/api/auth/sign-in` | anônimo | Bloqueio → login → cookies · `invalid_credentials` (+`attemptsLeft` da 3ª em diante) · `locked` (+`minutesLeft`) |
+| POST | `/api/auth/sign-out` | logado | `logout` no Supabase (revoga o refresh token) + apaga cookies (RN12) |
+| POST | `/api/auth/password-reset` | anônimo | `recover` no Supabase → **sempre `202`** com a mensagem neutra (RN4) · `rate_limited` |
+| PUT | `/api/auth/password` | logado + cookie de recuperação | Troca a senha, zera o bloqueio, apaga o cookie de recuperação |
+| GET | `/api/auth/google?next=` | anônimo | Gera o PKCE → `302` para o Supabase/Google |
+| GET | `/auth/callback?code=&next=` | anônimo | Troca o `code` (PKCE) → cookies → `302` para `SafeRedirect(next)` |
+| GET | `/auth/confirm?token_hash=&type=` | anônimo | `verify` no Supabase → cookies (+ cookie de recuperação) → `302 /redefinir-senha` |
+| GET | `/api/me` | logado | `{ name, email }` do `profiles` (sob RLS) |
+| GET | `/api/health` | anônimo | Só para checar que a API está de pé |
+
+`/auth/callback` e `/auth/confirm` ficam fora de `/api` para os links de email e as Redirect URLs (C2) não mudarem.
+
+## Sessão, cookies e CSRF
+
+| Cookie | Conteúdo | Atributos |
 |---|---|---|
-| `login_lock_status(p_email)` → `(locked_until, failed_count)` | `anon`, `authenticated` | Consulta o estado (se o bloqueio já expirou, devolve zerado) |
-| `register_login_failure(p_email)` → `(locked_until, failed_count)` | `anon`, `authenticated` | +1 falha; na 5ª, `locked_until = now() + 10 min`. Se um bloqueio antigo expirou, recomeça do zero |
-| `clear_my_login_failures()` | só `authenticated` | Zera o registro **do email do próprio usuário logado** (`auth.jwt() ->> 'email'`). Usada após login certo e após redefinir a senha |
+| `velos_at` | access token | `HttpOnly; Secure; SameSite=Lax; Path=/`, vida = `expires_in` |
+| `velos_rt` | refresh token | `HttpOnly; Secure; SameSite=Lax; Path=/api`, 30 dias |
+| `velos_pw_reset` | `userId` + validade, protegido pelo **Data Protection** do ASP.NET | `HttpOnly; Secure; SameSite=Lax`, 15 min |
+| `velos_pkce` | `code_verifier`, protegido pelo Data Protection | `HttpOnly; Secure; SameSite=Lax; Path=/auth/callback`, 10 min |
 
-`revoke all on function ... from public` antes dos `grant`. **Exceção à regra "toda tabela tem `user_id`"**: os registros existem *antes* do login e para emails sem conta → **ADR 0013**.
-
-**Por que `clear` não aceita email como parâmetro:** se aceitasse, qualquer um zeraria o bloqueio de qualquer email e o bloqueio não serviria para nada. Só quem **provou** ser o dono (logou ou redefiniu a senha) zera o próprio.
-
-### Migration `0006_storage_brand.sql`
-
-Bucket público `brand` (só leitura pública; upload só pelo painel). Serve a logo dos emails.
-
-Depois de aplicar: `npx supabase db push --dry-run` → `npx supabase db push` → `npm run types:db`.
-
-## Arquivos
-
-| Ação | Caminho | Responsabilidade |
-|---|---|---|
-| criar | `src/lib/validations/auth.ts` | `passwordSchema` (RN1, com o **mesmo conjunto de símbolos do Supabase**), `signUpSchema` (nome, email, senha, confirmação — RN2), `signInSchema`, `emailSchema`, `resetPasswordSchema`, e a lista `PASSWORD_REQUIREMENTS` usada pelo checklist da tela |
-| criar | `src/lib/utils/redirect.ts` | `getSafeRedirect(next, fallback = "/painel")` — RN7 |
-| criar | `src/lib/auth/routes.ts` | Rotas públicas, de "só deslogado" e destino padrão, num lugar só |
-| alterar | `src/lib/env.ts` + `.env.example` | `NEXT_PUBLIC_SITE_URL` (base dos links de email/Google; nunca o header `Host` da request) |
-| alterar | `src/lib/supabase/middleware.ts` | `getUser()` + regras da RN8; chaves obrigatórias (T4); `Cache-Control: no-store` nas rotas privadas (CA11) |
-| criar | `src/server/actions/auth.ts` | `signUp`, `signIn`, `signInWithGoogle`, `resendConfirmation`, `requestPasswordReset`, `updatePassword`, `signOut` |
-| criar | `src/server/queries/profile.ts` | `getCurrentProfile()` para o "Olá, {nome}" |
-| criar | `src/app/auth/confirm/route.ts` | Link do email: `verifyOtp({ token_hash, type })` → `/painel` (cadastro) ou `/redefinir-senha` (recuperação) |
-| criar | `src/app/auth/callback/route.ts` | Volta do Google: `exchangeCodeForSession(code)` → `next` seguro |
-| criar | `src/app/auth/erro/page.tsx` | Erro amigável |
-| criar | `src/app/(auth)/layout.tsx` | Layout centralizado com a logo, para as telas de entrada |
-| criar | `src/app/(auth)/entrar/page.tsx` | |
-| criar | `src/app/(auth)/cadastro/page.tsx` | |
-| criar | `src/app/(auth)/cadastro/verifique-email/page.tsx` | |
-| criar | `src/app/(auth)/recuperar-senha/page.tsx` | |
-| criar | `src/app/(auth)/redefinir-senha/page.tsx` | Exige a sessão de recuperação |
-| criar | `src/app/(app)/layout.tsx` | Segunda barreira: `getUser()` e `redirect("/entrar")` se não houver sessão |
-| criar | `src/app/(app)/painel/page.tsx` | "Olá, {nome}" + Sair (provisório) |
-| alterar | `src/app/page.tsx` | Deixa de ser a página de validação: redireciona conforme a sessão (RN8) |
-| alterar | `src/app/layout.tsx` | Metadata com acento (T3) |
-| criar | `src/components/features/auth/*` | `SignInForm`, `SignUpForm`, `ForgotPasswordForm`, `ResetPasswordForm`, `PasswordInput` (mostrar/ocultar), `PasswordRequirements` (✓/✗ + texto), `GoogleButton`, `SignOutButton`, `ResendConfirmationButton`, `FormMessage` (erro com `aria-live`) — cada um < 150 linhas |
-| adicionar (CLI shadcn) | `src/components/ui/input.tsx`, `label.tsx` | Primitivos de formulário |
-| criar | `supabase/templates/confirmacao-cadastro.html` | Email de confirmação (C3) |
-| criar | `supabase/templates/redefinicao-senha.html` | Email de redefinição (C3) |
-| criar | `docs/adr/0013-bloqueio-de-tentativas-de-login.md` | Decisão + limite conhecido |
-| criar | `docs/adr/0014-rotas-privadas-por-padrao.md` | Middleware *default-deny* + rotas em português |
+- **Validação do JWT:** `AddJwtBearer` com `Authority = https://khvottmyspapwsdeqqnm.supabase.co/auth/v1` (OpenID Discovery, chave ES256 em cache), `Audience = authenticated`, e o token lido do cookie em `OnMessageReceived`.
+- **Renovação:** o `TokenRefreshMiddleware` roda antes da autenticação. Se o `velos_at` falta ou vence em menos de 60 s e existe `velos_rt`, ele chama `grant_type=refresh_token` e regrava os dois cookies.
+- **CSRF:** `SameSite=Lax` **e** todo método que não é GET em `/api` exige o header `X-Velos-Csrf: 1`. O cliente `fetch` do front sempre envia esse header; um formulário de outro site não consegue.
+- **Rotas privadas por padrão:** `FallbackPolicy = RequireAuthenticatedUser()`; as rotas anônimas acima têm `[AllowAnonymous]` explícito.
+- **No front:** `RequireAuth` consulta `/api/me` (401 → `/entrar?next=<rota>`); `GuestOnly` manda quem está logado de `/entrar` e `/cadastro` para `/painel`. É só experiência do usuário: **quem protege os dados é a API**. Depois do "Sair", o cache do front é limpo, então o botão "voltar" volta a consultar `/api/me` e recebe 401 (CA11).
 
 ## Fluxo de dados
 
 ### Login (com bloqueio)
 
 ```
-SignInForm (RHF + zodResolver)
-  └─ signIn(formData)  [Server Action]
-       ├─ signInSchema.parse()                                  ← nunca confia no client
-       ├─ rpc login_lock_status(email) ── bloqueado? ──► { status: "locked", minutesLeft }
-       ├─ auth.signInWithPassword()
-       │    ├─ invalid_credentials ─► rpc register_login_failure(email)
-       │    │                          └─► { status: "invalid", attemptsLeft }  (aviso a partir da 3ª)
-       │    ├─ email_not_confirmed ─► { status: "unconfirmed" }  (não conta como falha)
-       │    └─ ok ─► rpc clear_my_login_failures() ─► redirect(getSafeRedirect(next))
+SignInForm (RHF + zodResolver)  ──POST /api/auth/sign-in──►  AuthController
+  └─ SignInHandler
+       ├─ SignInValidator (FluentValidation)                   ← nunca confia no front
+       ├─ ILoginLockout.GetStatus(email)   [role anon] ── bloqueado? ──► locked (minutesLeft)
+       │     └─ falhou a consulta? ──► erro, sem tentar o login (falha fechada)
+       ├─ IIdentityProvider.SignInWithPassword()   → POST /auth/v1/token?grant_type=password
+       │    ├─ invalid_credentials ─► ILoginLockout.RegisterFailure(email) ─► invalid_credentials (attemptsLeft)
+       │    └─ ok ─► ILoginLockout.ClearMine() [role authenticated + claims] ─► sessão
+  └─ SessionCookies.Write(sessão) ─► 200
 ```
 
-### Cadastro → confirmação
+### Cadastro
 
 ```
-signUp → auth.signUp({ email, password, options: { data: { full_name }, emailRedirectTo } })
-       → sempre redirect("/cadastro/verifique-email?email=…")   ← mesmo se o email já existir (RN4)
-email  → {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/painel
-       → route handler: verifyOtp() → cookies de sessão → /painel
-banco  → trigger handle_new_user já criou profile + 10 categorias (RN9, RN10)
+POST /api/auth/sign-up → POST /auth/v1/signup { email, password, data: { full_name } }
+  ├─ user_already_exists ─► email_taken (CA17)
+  └─ ok (Confirm email desligado → já vem sessão) ─► cookies ─► front vai para /painel
+banco → trigger handle_new_user cria profile + 10 categorias (RN9, RN10)
 ```
 
 ### Esqueci a senha → redefinir
 
 ```
-requestPasswordReset → auth.resetPasswordForEmail(email)  → sempre a mensagem neutra (RN4)
-email  → /auth/confirm?token_hash=…&type=recovery&next=/redefinir-senha
-       → verifyOtp() cria sessão de recuperação → /redefinir-senha
-updatePassword → schema (RN1 + RN2) → auth.updateUser({ password })
-       → rpc clear_my_login_failures() (libera bloqueio) → /painel
+POST /api/auth/password-reset → POST /auth/v1/recover → sempre 202 neutro (RN4)
+email → {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery   (modelo da C3)
+      → POST /auth/v1/verify → cookies + velos_pw_reset(userId) → 302 /redefinir-senha
+PUT /api/auth/password → exige velos_pw_reset do MESMO usuário → PUT /auth/v1/user
+      → ClearMine() (libera o bloqueio) → apaga velos_pw_reset → front vai para /painel
 ```
+
+O link de recuperação **depende do modelo da C3** (`token_hash`): o modelo padrão do Supabase devolve o token no `#fragmento` da URL, que o servidor não enxerga. Por isso os modelos de email vêm **antes** das telas de recuperação nas tasks.
 
 ### Google
 
 ```
-GoogleButton → signInWithGoogle(next) → auth.signInWithOAuth({ provider: "google",
-               redirectTo: SITE_URL/auth/callback?next=… }) → redirect(data.url)
-Google → Supabase → /auth/callback?code=… → exchangeCodeForSession → getSafeRedirect(next)
-```
-
-### Middleware (toda request)
-
-```
-updateSession → getUser()
-  ├─ rota pública (/entrar, /cadastro/**, /recuperar-senha, /auth/**)
-  │    └─ logado em /entrar ou /cadastro → /painel
-  ├─ "/" → /painel ou /entrar
-  └─ qualquer outra rota sem usuário → /entrar?next=<rota>   ← default-deny: rota nova já nasce protegida
+GET /api/auth/google?next= → code_verifier → velos_pkce → 302 /auth/v1/authorize?provider=google
+     &redirect_to=SITE_URL/auth/callback?next=…&code_challenge=…&code_challenge_method=s256
+Google → Supabase → GET /auth/callback?code= → POST /auth/v1/token?grant_type=pkce
+     → cookies → 302 SafeRedirect(next)       (erro/cancelado → /auth/erro?motivo=google)
 ```
 
 ## Validação
 
-| Regra | Formulário (Zod no client) | Server Action (mesmo Zod) | Supabase / banco |
+| Regra | Front (Zod) | API (FluentValidation / handler) | Supabase / banco |
 |---|---|---|---|
-| Senha forte (RN1) | ✓ checklist ao vivo | ✓ | ✓ C1 (barreira final, vale até para quem chama a API direto) |
+| Senha forte (RN1) | ✓ checklist ao vivo | ✓ `PasswordPolicy` no Domain | ✓ C1 |
 | Senha = confirmação (RN2) | ✓ | ✓ | — |
 | Email válido | ✓ | ✓ | ✓ |
-| Nome 2–80 caracteres | ✓ | ✓ | ✓ CHECK `length(trim(name)) > 0` |
-| Bloqueio (RN5) | — | ✓ RPC | ✓ funções + tabela sem acesso direto |
-| Redirect seguro (RN7) | — | ✓ `getSafeRedirect` | ✓ Redirect URLs (C2) |
+| Nome 2–80 caracteres | ✓ | ✓ | ✓ CHECK |
+| Bloqueio (RN5) | — | ✓ handler | ✓ funções + tabela sem acesso direto |
+| Redirect seguro (RN7) | — | ✓ `SafeRedirect` | ✓ Redirect URLs (C2) |
 
-Mensagens de erro em pt-BR no próprio schema. Erros do Supabase **nunca** são repassados crus: são mapeados para as mensagens da spec.
+As regras de senha existem em dois lugares (Zod e C#). Para não divergirem, **os mesmos casos de teste** (os 31 da T6) rodam nos dois lados.
 
 ## Dependências novas
 
+**NuGet**
+
 | Pacote | Motivo |
 |---|---|
-| `zod@^4` | Validação com **um schema só** para client e servidor (já previsto no CLAUDE.md) |
-| `react-hook-form@^7` | Formulários com erro por campo e checklist de senha ao vivo sem re-render da página toda |
-| `@hookform/resolvers@^5` | Liga o Zod ao React Hook Form (`zodResolver`), compatível com Zod 4 |
+| `Microsoft.AspNetCore.Authentication.JwtBearer` | Validar o JWT do Supabase (oficial da Microsoft) |
+| `Npgsql.EntityFrameworkCore.PostgreSQL` | EF Core para o Postgres, **sem migrations**: mapeia tabelas e views |
+| `FluentValidation` + `FluentValidation.DependencyInjectionExtensions` | Validação de entrada na `Application` (regra do CLAUDE.md) |
+| `xunit` (template `dotnet new xunit`) | Testes de Domain e Application. Sem FluentAssertions (licença comercial desde a v8) e sem MediatR (idem): handlers simples |
 
-Componentes `input` e `label` vêm do **CLI do shadcn** (código copiado para o repo, não é dependência).
+**npm (`web/`)**
 
-## Decisões (ADRs novas)
+| Pacote | Motivo |
+|---|---|
+| `vite`, `@vitejs/plugin-react`, `typescript` | Base do front |
+| `react-router` (v7) | Rotas do SPA (`/entrar`, `/painel`…) |
+| `@tanstack/react-query` (v5) | Cache das chamadas à API, loading/erro por tela; vira a base das listas nas Etapas 4–7 |
+| `@fontsource-variable/geist` | A fonte Geist vinha do `next/font`; agora é servida pelo próprio app |
+| (já usados) `tailwindcss`, `@tailwindcss/vite`, `@base-ui/react`, `lucide-react`, `zod`, `react-hook-form`, `@hookform/resolvers`, `date-fns` | Migram do `package.json` atual |
 
-- **ADR 0013 — Bloqueio de tentativas no app.** Tabela + funções no Postgres. **Limite conhecido:** protege o login feito pelo app; quem chamar a API de Auth do Supabase direto, com a chave publicável, não passa pelas Server Actions. Mitigações: limite de tentativas **por IP** do próprio Supabase, senha forte imposta pelo Supabase (C1) e, no futuro, CAPTCHA (Turnstile/hCaptcha, suportado no plano Free) e/ou o *Password Verification Hook* (planos pagos).
-- **ADR 0014 — Rotas privadas por padrão.** O middleware só libera uma lista explícita de rotas públicas; o layout de `(app)` repete a checagem (defesa em profundidade).
+## Decisões (ADRs)
+
+- **0013 — API ASP.NET + React/Vite** (já aceita).
+- **0014 — Bloqueio de tentativas** (era a 0013 do plano original). Melhora em relação ao plano anterior: o navegador nem recebe a chave publicável, então contornar o bloqueio exige descobri-la por outro meio. O limite conhecido continua: a chave publicável não é secreta por natureza.
+- **0015 — Rotas privadas por padrão** (era a 0014): `FallbackPolicy` na API + `RequireAuth` no front.
 
 ## Riscos e armadilhas
 
-- **Limite de emails do Supabase:** o servidor padrão manda poucos emails por hora e só para membros do projeto. Testar com calma: reenvios repetidos vão bater no limite (e o erro precisa aparecer como "limite de envios atingido").
-- **`getUser()`, nunca `getSession()`, no servidor:** o `getSession()` confia no cookie sem revalidar o token.
-- **Símbolos da senha:** o Zod usa exatamente o conjunto do Supabase (`!@#$%^&*()_+-=[]{};':"|<>?,./\`~`). Com `[^A-Za-z0-9]`, um "ç" passaria no app e seria recusado pelo Supabase.
-- **Botão "voltar" após sair (CA11):** o navegador pode mostrar a página do cache. O `Cache-Control: no-store` nas rotas privadas evita isso.
-- **Logo no email:** Gmail e Outlook não carregam SVG nem imagens embutidas em base64 de forma confiável, por isso PNG numa URL pública (C6), com `alt="Velos Wallet"` e largura fixa.
-- **Email em modo escuro:** alguns clientes invertem cores; layout com fundo claro explícito e logo com fundo próprio.
-- **Datas/dinheiro:** não se aplicam nesta etapa.
+- **Cota de emails do Supabase:** nunca testar regras de senha pela API de cadastro (lição da sessão anterior).
+- **`Secure` em `http://localhost`:** Chrome e Firefox aceitam cookies `Secure` em localhost; se algum navegador recusar, usar o perfil HTTPS do `dotnet dev-certs`.
+- **Pooler + `set_config(..., true)`:** valores locais à transação não vazam para a próxima request que reusar a conexão. **Nunca** usar `set role` sem `local`.
+- **Refresh em paralelo:** duas requests podem tentar renovar ao mesmo tempo; o Supabase tolera reuso do refresh token por alguns segundos (*reuse interval*). Testar com duas abas.
+- **Access token após "Sair":** continua válido até expirar (ver ADR 0013); os cookies são apagados e o refresh token é revogado.
+- **Símbolos da senha:** C# e Zod usam exatamente o conjunto do Supabase (`!@#$%^&*()_+-=[]{};':"|<>?,./\`~`).
+- **Logo e modo escuro nos emails:** sem mudança em relação ao plano original (PNG em URL pública, fundo claro explícito).
 
 ## Como testar
 
-- **Manual:** um roteiro por critério de aceite (CA1–CA16) no `tasks.md`, executado no Chrome/Playwright em 375 e 1440 px, nos dois temas.
-- **Bloqueio (CA14/CA15):** 5 senhas erradas → bloqueio; conferir a linha em `login_attempts` (só o hash); 6ª com a senha certa recusada; redefinir senha libera.
-- **RLS:** com a chave publicável e sem sessão, `select` em `login_attempts` devolve `[]`/erro; `clear_my_login_failures()` sem sessão falha.
-- **Open redirect (CA9):** `/entrar?next=https://exemplo.com` e `?next=//exemplo.com` → `/painel`.
-- **Agentes:** `security` (CA-seg) e `qa` (CA-a11y, CA-build) no fim.
-- `npm run typecheck && npm run lint && npm run build`.
+- **xUnit:** `PasswordPolicy` (os 31 casos da T6), `SafeRedirect` (as 8 tentativas de open redirect), handlers com dublês (bloqueio, falha fechada, mensagens neutras).
+- **API:** arquivo `api/src/Velos.Api/Velos.Api.http` com as chamadas de cada endpoint (roda no VS/VS Code).
+- **RLS pela API:** sem sessão, `/api/me` → 401; com a sessão do Pedro, só o próprio perfil; conectado como `velos_api` sem `set role`, `select` em `profiles` → erro de permissão.
+- **Manual:** cada critério de aceite em 375 e 1440 px, nos dois temas.
+- **Agentes:** `security` (CA-seg) e `qa` (CA-a11y, CA-build), depois de atualizados para a nova stack.
+- `dotnet build api && dotnet test api` + `typecheck`, `lint` e `build` do `web`.

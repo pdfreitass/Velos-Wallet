@@ -1,6 +1,6 @@
 # ADR 0001 — Next.js 15 com App Router (e ficar no 15)
 
-- **Status:** Aceita
+- **Status:** Substituída por [0013](0013-api-aspnet-e-front-react-vite.md) em 2026-10-12
 - **Data:** 2026-10-11
 - **Etapa:** 1 — Setup
 

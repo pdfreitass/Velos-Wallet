@@ -17,44 +17,52 @@ App de gestão financeira pessoal para pessoas físicas no Brasil. Tagline: *"Se
 
 ## Stack (resumo)
 
-Next.js **15.5.27** (App Router) + React 19.1 + TypeScript strict · Tailwind **v4** + shadcn/ui sobre **`@base-ui/react`** (não Radix) · Supabase via **`@supabase/ssr`** (projeto `khvottmyspapwsdeqqnm`, **sa-east-1**) · date-fns `ptBR` · Zod + React Hook Form + Recharts (planejados) · Vercel · PWA.
+Desde o [ADR 0013](docs/adr/0013-api-aspnet-e-front-react-vite.md):
+
+- **API** (`api/`): ASP.NET Core **.NET 10**, Clean Architecture (`Domain` → `Application` → `Infrastructure` → `Api`), FluentValidation, xUnit.
+- **Front** (`web/`): React + **Vite** + TypeScript strict · Tailwind **v4** + shadcn/ui sobre **`@base-ui/react`** (não Radix) · Zod + React Hook Form · date-fns `ptBR` · Recharts (planejado) · PWA.
+- **Supabase** (projeto `khvottmyspapwsdeqqnm`, **sa-east-1**): Postgres + Auth, **chamado só pela API**. Em produção a API serve o build do front, na **mesma origem**.
 
 ## Comandos
 
 ```bash
-npm run dev                       # http://localhost:3000
-npm run typecheck                 # tsc --noEmit
-npm run lint                      # ESLint
-npm run build                     # build de produção
-npx supabase db push --dry-run    # mostra as migrations pendentes
-npx supabase db push              # aplica (altera PRODUÇÃO)
-npm run types:db                  # regenera src/types/database.types.ts
+dotnet run --project api/src/Velos.Api   # API em http://localhost:5080
+npm run dev --prefix web                 # front em http://localhost:3000 (proxy para a API)
+dotnet build api && dotnet test api      # compila e testa a API
+npm run typecheck --prefix web           # tsc --noEmit
+npm run lint --prefix web                # ESLint
+npm run build --prefix web               # build de produção do front
+npx supabase db push --dry-run           # mostra as migrations pendentes
+npx supabase db push                     # aplica (altera PRODUÇÃO)
 ```
 
 ## Regras do projeto
 
 ### Dinheiro
-- **Nunca `float`.** Centavos: `bigint` no banco, `number` inteiro no TS. O valor é sempre positivo, e o sinal vem do `type`.
+- **Nunca `float`/`double`/`decimal` para guardar dinheiro.** Centavos: `bigint` no banco, `long` no C#, `number` inteiro no TS. O valor é sempre positivo, e o sinal vem do `type`.
 - Exibir com `formatCurrency` / `formatSignedCurrency`; ler input com `parseCurrencyInput` (componente `MoneyInput`).
-- **Somar no SQL** (views), nunca no JS. Tudo o que vem do banco passa por `toCents()`.
+- **Somar no SQL** (views), nunca no C# nem no JS.
 
 ### Datas
-- **Nunca `new Date("yyyy-MM-dd")`** (em UTC-3 vira o dia anterior). Usar `parseDbDate` / `toDbDate` de `lib/utils/date.ts`.
+- `date` do banco ↔ **`DateOnly`** no C# ↔ string `"yyyy-MM-dd"` no JSON.
+- No front, **nunca `new Date("yyyy-MM-dd")`** (em UTC-3 vira o dia anterior). Usar `parseDbDate` / `toDbDate` de `web/src/lib/utils/date.ts`.
 
 ### Banco e segurança
 - Toda tabela: `user_id` + **RLS** + policies **por comando** com `(select auth.uid())` + `created_at` + `updated_at` com trigger. Exceção: `profiles` (PK = id do usuário).
 - Toda view: `with (security_invoker = on)`.
-- Schema só muda por **arquivo novo** em `supabase/migrations/`, aplicado com `npx supabase db push`. Nunca editar migration já aplicada nem colar SQL no SQL Editor. Depois: `npm run types:db`.
-- App usa só URL + chave **publicável**. Secret key / `service_role` nunca no client, num `NEXT_PUBLIC_*`, num commit ou num chat.
-- Infraestrutura nova sempre em **São Paulo** (`sa-east-1` / Vercel `gru1`).
+- Schema só muda por **arquivo novo** em `supabase/migrations/`, aplicado com `npx supabase db push`. Nunca editar migration já aplicada nem colar SQL no SQL Editor. **O EF Core não gera migrations**: só mapeia.
+- **Toda query com dados do usuário roda numa transação com `role authenticated` + claims do JWT** (a RLS vale). Além disso, a `Application` sempre filtra pelo usuário autenticado.
+- A API conecta com um role **sem `bypassrls`**. Secret key, `service_role`, senha do banco e connection string nunca no front, num commit ou num chat (dev: `dotnet user-secrets`).
+- O front **não fala com o Supabase**: só com a API. Sessão em cookie `httpOnly`, nunca em `localStorage`.
+- Toda rota da API é **privada por padrão** (`FallbackPolicy`); rota pública exige `[AllowAnonymous]` explícito.
+- Infraestrutura nova sempre em **São Paulo** (`sa-east-1`, Azure *Brazil South* ou Fly.io `gru`).
 
 ### Código
-- TypeScript strict, sem `any` (usar `unknown` + validação).
-- Server Components por padrão; `"use client"` só com interatividade (Recharts é sempre client).
-- Mutações via **Server Actions** com Zod validado **no servidor**.
-- Código em **inglês**; interface em **português do Brasil, com acento**.
-- Componente passou de ~150 linhas → quebrar.
-- **Não instalar biblioteca nova sem explicar o motivo antes.**
+- **C#:** `Nullable` e `TreatWarningsAsErrors` ligados; dependências só para dentro (`Domain` não conhece ninguém, `Application` não conhece `Infrastructure` nem `Api`). Validação de entrada com **FluentValidation na `Application`**. Erros como `ProblemDetails`, sem vazar mensagem do Supabase.
+- **TypeScript:** strict, sem `any` (usar `unknown` + validação). Zod no front é só para a experiência do usuário; quem decide é a API.
+- Código em **inglês**; interface e mensagens de erro em **português do Brasil, com acento**.
+- Componente React ou classe C# passou de ~150 linhas → quebrar.
+- **Não instalar biblioteca nova (NuGet ou npm) sem explicar o motivo antes.**
 
 ### UI e identidade visual
 - **Verde profundo `#0A2E24` é a marca; verde vivo `#2ED38C` é dinheiro.** Nunca verde vivo como botão principal no tema claro.
@@ -75,6 +83,6 @@ Fora do MVP: recorrência, parcelamento, fatura de cartão, offline-first, app n
    - `tasks.md` (passos pequenos e verificáveis)
 3. Implementar **uma task por vez**; ao terminar cada uma, parar e mostrar.
 4. Decisão nova e relevante → ADR em `docs/adr/` a partir do `0000-template.md`.
-5. Só dizer que está pronto se `npm run typecheck`, `npm run lint` e `npm run build` passarem.
+5. Só dizer que está pronto se `dotnet build api`, `dotnet test api` e `typecheck`, `lint` e `build` do `web` passarem.
 6. **Ao terminar a feature**, atualizar [ROADMAP](docs/ROADMAP.md), [CHANGELOG](docs/CHANGELOG.md) e [LICOES](docs/LICOES.md).
 7. Commits em Conventional Commits (`feat:`, `fix:`, `docs:`…), um assunto por commit. PR para `main` via `gh pr create`, com descrição e checklist de testes.

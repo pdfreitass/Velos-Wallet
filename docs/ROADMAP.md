@@ -27,7 +27,7 @@
 
 ## 🟡 Em andamento
 
-Nada. A próxima etapa é a **3 — Autenticação**, que começa por `docs/specs/001-autenticacao/`.
+**Etapa 3 — Autenticação** ([spec 001](specs/001-autenticacao/tasks.md)). Em 2026-10-12 a stack mudou para **API ASP.NET + React/Vite** ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)): o banco e a configuração do Supabase continuam; o código Next da etapa foi substituído pela **Revisão 2 do plano**, que recomeça na T10 (front em `web/`).
 
 ## ⬜ Pendente
 

@@ -6,90 +6,82 @@
 
 ## Stack
 
+Desde o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) (2026-10-12). Estado real: **em migração** (Etapa 3, Revisão 2 do plano da spec 001).
+
 | Camada | Tecnologia | Estado | ADR |
 |---|---|---|---|
-| Framework | Next.js **15.5.27** (App Router, Turbopack) + React 19.1 | instalado | [0001](adr/0001-nextjs-15-app-router.md) |
-| Linguagem | TypeScript strict, sem `any` | instalado | — |
-| Estilo | Tailwind CSS **v4** (CSS-first, sem `tailwind.config.js`) | instalado | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
-| Componentes | shadcn/ui (estilo `base-nova`) sobre **`@base-ui/react`** + lucide-react | instalado (`button`, `card`) | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
-| Backend | Supabase (Postgres 17, Auth, RLS) via **`@supabase/ssr`** | instalado | [0002](adr/0002-supabase-ssr-rls.md) |
-| Datas | date-fns 4 com locale `ptBR` | instalado | — |
-| Validação | Zod (schemas compartilhados entre form e servidor) | **planejado**, não instalado | — |
-| Formulários | React Hook Form + `zodResolver` | **planejado**, não instalado | — |
-| Gráficos | Recharts (client-only) | **planejado**, não instalado | — |
-| CLI do banco | `supabase` 2.120 (devDependency) | instalado | [0012](adr/0012-migrations-via-supabase-cli.md) |
-| Deploy | Vercel | **não configurado** | — |
+| API | ASP.NET Core **.NET 10**, Clean Architecture, Controllers | a criar (T11) | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Acesso a dados | EF Core + Npgsql, **sem migrations** (só mapeia) | a criar (T13) | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Validação (API) | FluentValidation na `Application` | a criar | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Testes | xUnit (Domain e Application) | a criar | — |
+| Front | React 19 + **Vite** + TypeScript strict, React Router, TanStack Query | a criar (T10) | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Estilo | Tailwind CSS **v4** (CSS-first) | migra do Next | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
+| Componentes | shadcn/ui (`base-nova`) sobre **`@base-ui/react`** + lucide-react | migra do Next | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
+| Validação (front) | Zod + React Hook Form (só experiência do usuário) | migra do Next | — |
+| Datas | date-fns 4 com `ptBR` (front) · `DateOnly` (C#) | — | — |
+| Gráficos | Recharts | planejado (Etapa 6) | — |
+| Banco e Auth | Supabase (Postgres 17, Auth, RLS), **chamado só pela API** | ativo | [0002](adr/0002-supabase-ssr-rls.md), [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| CLI do banco | `supabase` (devDependency do `package.json` da raiz) | instalado | [0012](adr/0012-migrations-via-supabase-cli.md) |
+| Deploy | Um app só (API serve o SPA) em São Paulo: Azure *Brazil South* ou Fly.io `gru` | **A DEFINIR** antes do deploy | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
 
 ## Estrutura de pastas
 
-Estado real em 2026-10-12. Pastas marcadas com `(vazia)` existem só com `.gitkeep`.
+Alvo da Revisão 2 (detalhes por arquivo no [plano da spec 001](specs/001-autenticacao/plan.md#estrutura)).
 
 ```
-src/
-  app/
-    layout.tsx          # <html lang="pt-BR">, fontes Geist, script inline de tema
-    page.tsx            # página TEMPORÁRIA de validação do setup (vira o dashboard na Etapa 6)
-    globals.css         # tokens de cor (claro/escuro) com contrastes medidos em comentário
-    (auth)/             # (a criar na Etapa 3) login, cadastro, recuperar senha
-    (app)/              # (a criar) rotas autenticadas: dashboard, transacoes, categorias, metas, config
-    auth/               # (a criar na Etapa 3) route handlers de OAuth / confirmação de email
-                        #   exceção necessária: o fluxo OAuth exige route handler, Server Action não serve
-    api/                # (só se Server Actions não resolverem) outros route handlers
-  middleware.ts         # chama updateSession em toda rota exceto estáticos
-  components/
-    ui/                 # shadcn gerado pelo CLI: button.tsx, card.tsx
-    shared/             # ThemeToggle.tsx
-    features/           # (vazia) componentes por domínio
-  lib/
-    env.ts              # leitura validada e PREGUIÇOSA das variáveis públicas
-    supabase/           # client.ts (browser), server.ts (RSC/Actions), middleware.ts (sessão)
-    utils/              # currency.ts, date.ts
-    utils.ts            # reexporta `cn` do pacote `cn`
-    validations/        # (vazia) schemas Zod
-  server/
-    actions/            # (vazia) Server Actions por domínio
-    queries/            # (vazia) leituras do banco por domínio
-  types/
-    database.types.ts   # GERADO por `npm run types:db` — não editar à mão
+api/
+  Velos.slnx
+  Directory.Build.props      # net10.0, Nullable, TreatWarningsAsErrors
+  src/
+    Velos.Domain/            # regras puras; não referencia nenhum outro projeto
+    Velos.Application/       # casos de uso, interfaces (Abstractions/), validators, Result
+    Velos.Infrastructure/    # Supabase (GoTrue REST), Persistence (EF Core, UserDbSession)
+    Velos.Api/               # Controllers, cookies de sessão, Program.cs; serve o SPA (wwwroot)
+  tests/                     # Velos.Domain.Tests, Velos.Application.Tests
+web/                         # SPA Vite: pages/, features/, components/ui|shared, lib/api|utils|validations
 supabase/
-  migrations/           # 0001_init, 0002_rls, 0003_triggers_seed, 0004_views
-public/brand/           # velos-claro.png, velos-escuro.png
-docs/                   # esta documentação (SDD)
+  migrations/                # 0001–0006 aplicadas; 0007 (role da API) planejada
+  templates/                 # modelos de email (T18)
+public/brand/ → web/public/brand/
+docs/                        # esta documentação (SDD)
 ```
+
+Dependências entre projetos **só para dentro**: `Api → Application, Infrastructure`; `Infrastructure → Application`; `Application → Domain`.
 
 ## Fluxo de dados
 
-### Leitura (padrão)
+### Leitura
 
 ```
-Server Component (app/(app)/.../page.tsx)
-  └─ server/queries/<dominio>.ts
-       └─ createClient() de lib/supabase/server.ts   ← novo client POR REQUEST
-            └─ SELECT em tabela ou VIEW (a RLS filtra pelo usuário)
-                 └─ toCents() na fronteira → number inteiro
-                      └─ formatCurrency() só na hora de exibir
+Página React (web/src/pages) ── useQuery ──► GET /api/<recurso>  (cookie httpOnly)
+  └─ Controller ([Authorize] implícito pela FallbackPolicy)
+       └─ handler da Application (filtra pelo usuário do IUserContext)
+            └─ Infrastructure: UserDbSession abre transação
+                 set role authenticated + request.jwt.claims  ← a RLS vale
+                 └─ SELECT em tabela ou VIEW (somas no SQL)
+                      └─ long (centavos) / DateOnly → JSON
+  └─ formatCurrency() só na hora de exibir
 ```
 
-- Somas e agregações **sempre no SQL** (views), nunca trazendo todas as linhas para o JS.
-- `sum()` sobre `bigint` devolve `numeric`, que pode chegar como string. As views já fazem cast para `bigint`, e `toCents()` é a rede de segurança.
+- Somas e agregações **sempre no SQL** (views). As views já fazem cast para `bigint`.
 
-### Escrita (planejado, a partir da Etapa 4)
+### Escrita
 
 ```
-Client Component com React Hook Form + zodResolver(schema)
-  └─ Server Action em server/actions/<dominio>.ts
-       └─ schema.parse() DE NOVO no servidor (o client não é confiável)
-            └─ insert/update via lib/supabase/server.ts
-                 └─ RLS + constraints do banco validam por último
-                      └─ revalidatePath() da rota afetada
+Formulário React (RHF + zodResolver)  ── useMutation ──► POST/PUT/DELETE /api/<recurso>
+  (header X-Velos-Csrf: 1)
+  └─ Controller → handler da Application
+       └─ FluentValidation DE NOVO (o front não é confiável)
+            └─ UserDbSession → insert/update sob RLS + constraints do banco
+  └─ ProblemDetails com `code` em caso de erro; o front invalida as queries afetadas
 ```
 
 ### Sessão
 
-1. `src/middleware.ts` roda em toda request (exceto `_next/static`, `_next/image` e imagens).
-2. `lib/supabase/middleware.ts#updateSession` chama `supabase.auth.getUser()`, que **renova o token** e reescreve os cookies.
-3. Se as variáveis do Supabase não existirem, o middleware deixa passar (degradação da Etapa 1).
-4. **Proteção de rotas ainda não existe.** Entra na Etapa 3 (redirecionar `(app)/*` para login quando não houver sessão).
+1. Login, cadastro, Google e links de email passam **pela API**, que chama o Supabase Auth (REST) com a chave publicável guardada só no servidor.
+2. A API grava `velos_at` (access token) e `velos_rt` (refresh token) em cookies `httpOnly; Secure; SameSite=Lax`.
+3. Em toda request, o `TokenRefreshMiddleware` renova o token perto de vencer, e o `JwtBearer` valida o access token pela **chave pública ES256** do projeto (OpenID Discovery).
+4. Toda rota da API é privada por padrão (`FallbackPolicy`). No front, `RequireAuth` só melhora a experiência (redireciona para `/entrar?next=`).
 
 ## Supabase
 
@@ -151,27 +143,28 @@ Categorias padrão — despesa: Alimentação, Moradia, Transporte, Saúde, Laze
 
 Todas as funções usam `set search_path = ''` e nomes totalmente qualificados (proteção contra sequestro de `search_path` em `SECURITY DEFINER`).
 
-### Auth (planejado — Etapa 3)
+### Auth
 
-- Email/senha **com confirmação** + **Google OAuth**.
-- O callback OAuth e a confirmação de email exigem **route handler** em `src/app/auth/` (Server Action não serve para esse fluxo).
-- **A DEFINIR:** URLs de redirect permitidas no painel (localhost + domínio de produção), template/idioma dos emails de confirmação e se haverá SMTP próprio.
+- Email/senha (**sem confirmação por enquanto**, Revisão 1 da spec 001) + **Google OAuth** (PKCE feito pela API).
+- Assinatura dos JWT: **ES256** (chave assimétrica), validada pela API sem segredo.
+- *Site URL* e *Redirect URLs*: `http://localhost:3000` / `http://localhost:3000/**`. O domínio de produção entra antes do deploy.
+- Role de login da API: `velos_api` (`noinherit`, sem `bypassrls`, membro de `anon` e `authenticated`), migration `0007`.
 
 ## Dinheiro, datas e tema
 
 | Assunto | Onde | Regra |
 |---|---|---|
-| Formatar valor | `lib/utils/currency.ts#formatCurrency` | `123456` → `R$ 1.234,56` |
+| Dinheiro no C# | `long` em centavos | Nunca `decimal`/`double` para guardar; sinal vem do `type` |
+| Formatar valor | `web/src/lib/utils/currency.ts#formatCurrency` | `123456` → `R$ 1.234,56` |
 | Valor com sinal | `formatSignedCurrency(cents, "in" \| "out")` | O sinal vem do tipo, nunca do número |
 | Ler input | `parseCurrencyInput` | Usa só os dígitos, sem float |
-| Fronteira do banco | `toCents` | Aceita `number \| string \| null` |
-| Data do banco | `lib/utils/date.ts#parseDbDate` | `parseISO` (hora local), **nunca** `new Date("yyyy-MM-dd")` |
-| Gravar data | `toDbDate` | `Date` → `"yyyy-MM-dd"` |
-| Tema | `app/layout.tsx` (script inline) + `components/shared/ThemeToggle.tsx` | Classe `.dark` no `<html>`, escolha em `localStorage["theme"]` |
+| Data no C# | `DateOnly` ↔ `"yyyy-MM-dd"` no JSON | — |
+| Data no front | `web/src/lib/utils/date.ts#parseDbDate` / `toDbDate` | `parseISO` (hora local), **nunca** `new Date("yyyy-MM-dd")` |
+| Tema | `web/index.html` (script inline) + `ThemeToggle` | Classe `.dark` no `<html>`, escolha em `localStorage["theme"]` ([ADR 0009](adr/0009-tema-sem-biblioteca.md)) |
 
 ## Identidade visual (tokens)
 
-Definidos em `src/app/globals.css`, com o contraste medido em comentário ao lado de cada token.
+Definidos em `web/src/styles/globals.css` (vindos do antigo `src/app/globals.css`), com o contraste medido em comentário ao lado de cada token.
 
 | Token | Claro | Escuro |
 |---|---|---|
@@ -186,16 +179,18 @@ Definidos em `src/app/globals.css`, com o contraste medido em comentário ao lad
 |---|---|---|
 | Supabase | Banco, Auth, RLS | ✅ ativo (sa-east-1) |
 | GitHub | `pdfreitass/Velos-Wallet`, PRs para `main` | ✅ ativo |
-| Vercel | Deploy | ⬜ **A DEFINIR**: criar projeto e fixar a região das functions em `gru1` (São Paulo) para ficar perto do banco |
-| Google Cloud | OAuth client para login com Google | ⬜ Etapa 3 |
+| Host do app | API + SPA num processo só | ⬜ **A DEFINIR** antes do deploy: Azure *Brazil South* ou Fly.io `gru` |
+| Google Cloud | OAuth client para login com Google | ⬜ Etapa 3 (T20) |
 
-## Variáveis de ambiente
+## Configuração e segredos
 
-| Variável | Onde | Observação |
+O front **não tem variáveis de ambiente com chaves**: ele só fala com a API, na mesma origem.
+
+| Chave (API) | Onde | Observação |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | `.env.local` / Vercel | `https://khvottmyspapwsdeqqnm.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `.env.local` / Vercel | Chave **publicável** (`sb_publishable_…`). Pode ir para o browser. |
+| `Supabase:Url` | `appsettings.json` | `https://khvottmyspapwsdeqqnm.supabase.co` |
+| `Supabase:PublishableKey` | `appsettings.json` | Chave **publicável** (`sb_publishable_…`): não é secreta, mas também não vai para o navegador |
+| `App:SiteUrl` | `appsettings.Development.json` | `http://localhost:3000`; base dos links de email e do Google |
+| `ConnectionStrings:Velos` | **`dotnet user-secrets`** (dev) / variável de ambiente do host (prod) | Usuário `velos_api`, pooler de sessão. **Nunca** em arquivo versionado |
 
-A **secret key** (`sb_secret_…`) não é usada pelo app e **nunca** pode ter prefixo `NEXT_PUBLIC_` nem ser colada em chat/issue/commit.
-
-`lib/env.ts` valida de forma **preguiçosa** (getters): o `next build` não quebra numa máquina sem `.env.local`, e o erro só aparece na primeira chamada que precisa da chave.
+A **secret key** (`sb_secret_…`) e o `service_role` **não são usados** e nunca podem aparecer em código, commit, chat ou issue.
