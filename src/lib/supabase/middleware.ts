@@ -1,23 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-import { env, hasSupabaseEnv } from "@/lib/env";
+import { ROUTES, isGuestOnlyRoute, isPublicRoute } from "@/lib/auth/routes";
+import { env } from "@/lib/env";
 import type { Database } from "@/types/database.types";
 
 /**
- * Renova o token de sessao a cada request e propaga os cookies atualizados.
+ * Corre em toda a request: renova a sessao e decide o acesso (spec 001, RN8).
  *
- * A protecao de rotas entra na Etapa 3 (autenticacao); aqui so se garante
- * que a sessao nao expira enquanto o utilizador navega.
+ * O app e PRIVADO POR PADRAO (ADR 0014): sem sessao, so passam as rotas de
+ * `isPublicRoute`. Qualquer pagina nova ja nasce protegida.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-
-  // Antes de o projeto Supabase existir (Etapa 1), deixa passar em vez de
-  // rebentar em cada request. A partir da Etapa 3 as chaves sao obrigatorias.
-  if (!hasSupabaseEnv()) {
-    return response;
-  }
 
   const supabase = createServerClient<Database>(
     env.supabaseUrl,
@@ -40,8 +35,49 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Obrigatorio: e esta chamada que dispara a renovacao do token.
-  await supabase.auth.getUser();
+  // getUser() e nao getSession(): valida o token no servidor do Supabase em
+  // vez de confiar no cookie. E tambem esta chamada que renova o token.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
+  const { pathname, search } = request.nextUrl;
+
+  if (pathname === "/") {
+    return redirectKeepingCookies(request, response, user ? ROUTES.home : ROUTES.signIn);
+  }
+
+  if (isPublicRoute(pathname)) {
+    if (user && isGuestOnlyRoute(pathname)) {
+      return redirectKeepingCookies(request, response, ROUTES.home);
+    }
+    return response;
+  }
+
+  if (!user) {
+    const signIn = new URL(ROUTES.signIn, request.url);
+    signIn.searchParams.set("next", `${pathname}${search}`);
+    return redirectKeepingCookies(request, response, signIn);
+  }
+
+  // Pagina privada: o browser nao a guarda em cache. Sem isto, o botao
+  // "voltar" depois de sair mostraria a pagina antiga (spec 001, CA11).
+  response.headers.set("Cache-Control", "private, no-store");
   return response;
+}
+
+/**
+ * Redireciona levando os cookies que o Supabase acabou de renovar. Um
+ * NextResponse.redirect novo perderia-os e a sessao "cairia" sem motivo.
+ */
+function redirectKeepingCookies(
+  request: NextRequest,
+  from: NextResponse,
+  to: string | URL,
+) {
+  const redirect = NextResponse.redirect(new URL(to, request.url));
+  for (const cookie of from.cookies.getAll()) {
+    redirect.cookies.set(cookie);
+  }
+  return redirect;
 }

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Velos Wallet",
-  description: "Seu dinheiro na direcao certa.",
+  description: "Seu dinheiro na direção certa.",
 };
 
 export const viewport: Viewport = {

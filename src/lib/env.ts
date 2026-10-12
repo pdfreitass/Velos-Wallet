@@ -17,14 +17,6 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
-/** Ha chaves de Supabase configuradas? Usado para degradar sem explodir. */
-export function hasSupabaseEnv(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  );
-}
-
 export const env = {
   get supabaseUrl(): string {
     return required(
