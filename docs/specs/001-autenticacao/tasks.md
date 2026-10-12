@@ -30,7 +30,7 @@
 ## Fluxos
 - [x] **T8** — Server Actions (`server/actions/auth.ts`, `server/actions/password.ts`) + `server/queries/profile.ts`
   - Teste funcional junto com as telas (T10–T12): Server Actions dependem de cookies da request
-- [ ] **T9** — Route handlers `auth/confirm`, `auth/callback` + página `auth/erro`
+- [x] **T9** — Route handlers `auth/confirm`, `auth/callback` + página `auth/erro`
 - [ ] **T10** — Telas `/entrar` e `/cadastro` + componentes de formulário (`/cadastro/verifique-email` adiada — Revisão 1)
   - Verificação: CA1, CA3, CA4, CA12, CA13, CA17
 - [ ] **T11** — Telas `/recuperar-senha`, `/redefinir-senha`, `/painel` + "Sair"
@@ -61,4 +61,5 @@
 | T5 | `e447a12` | zod 4.6.6, react-hook-form 7.90.0, @hookform/resolvers 5.9.1; shadcn input + label. `input` do shadcn tem 32 px de altura: nos formulários usar `h-11` (44 px, alvo de toque) |
 | T6 | `a54c172` | 31 casos testados (senhas válidas/inválidas por motivo, normalização de email, senhas diferentes, 8 tentativas de open redirect, rotas públicas/privadas) |
 | T7 | `39911ff` | Sem sessão: `/` → `/entrar`; `/painel`, `/transacoes?mes=…`, `/qualquer-coisa`, `/redefinir-senha`, `/cadastros` → `/entrar?next=…` (query preservada); rotas públicas passam. Redirecionamentos levam os cookies renovados. `hasSupabaseEnv` removido (chaves obrigatórias) |
-| T8 | | Bloqueio com falha fechada (sem consultar o bloqueio, não tenta entrar). `/redefinir-senha` exige o cookie `velos_pw_reset` ligado ao usuário (gravado só pelo link de recuperação) — sem ele, uma sessão aberta trocaria a senha sem saber a atual |
+| T8 | `a8e15fc` | Bloqueio com falha fechada (sem consultar o bloqueio, não tenta entrar). `/redefinir-senha` exige o cookie `velos_pw_reset` ligado ao usuário (gravado só pelo link de recuperação) — sem ele, uma sessão aberta trocaria a senha sem saber a atual |
+| T9 | | `/auth/confirm` aceita `token_hash` (nossos modelos, funciona em outro dispositivo) e `code` (modelo padrão, PKCE; recuperação detectada por `redirectType`, que o tipo público não declara). Testado: sem parâmetros, token forjado, tipo inventado, code falso → `/auth/erro?motivo=link-invalido`; Google sem code, cancelado ou code falso (mesmo com `next` externo) → `motivo=google`; `motivo` desconhecido cai na mensagem padrão; cookie de reset não é gravado em link inválido |
