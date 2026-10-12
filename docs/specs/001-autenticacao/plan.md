@@ -7,6 +7,8 @@
 
 Autenticação 100% pelo **Supabase Auth** via `@supabase/ssr` (cookies), com o **middleware** decidindo o acesso a cada request no modelo **"tudo é privado, exceto uma lista de rotas públicas"**. Formulários com **React Hook Form + Zod** no client e **Server Actions** que revalidam com o **mesmo schema** no servidor. Links de email e Google voltam por **route handlers** em `src/app/auth/`. O **bloqueio de tentativas** vive no Postgres (tabela + funções), acionado pelas Server Actions.
 
+> **Revisão 1 da spec (2026-10-12):** *Confirm email* desligado (C1); sem `/cadastro/verifique-email` nem `resendConfirmation`; `signUp` já devolve sessão e redireciona para `/painel`; email já cadastrado → mensagem própria (CA17); o modelo de confirmação é escrito mas só o de redefinição vai para o painel (C3). O resto do plano vale como está.
+
 ## Configuração fora do código (guiada, feita pelo Pedro)
 
 | # | Onde | O quê |
