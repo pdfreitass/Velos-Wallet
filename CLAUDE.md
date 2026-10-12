@@ -13,6 +13,7 @@ Público: pessoas físicas no Brasil que querem controlar gastos, entender para 
   - O primitivo do shadcn hoje é **`@base-ui/react`**, não Radix. Componentes de terceiros (21st.dev) que assumam Radix podem precisar de ajuste.
   - O `cn` vem do pacote `cn`, reexportado em `src/lib/utils.ts`.
 - **Backend:** Supabase (Postgres, Auth, Row Level Security) via **`@supabase/ssr`** — nunca `@supabase/auth-helpers-nextjs`, que está descontinuado
+  - Projeto `veloswallet` (`khvottmyspapwsdeqqnm`) em **sa-east-1 (São Paulo)**, perto do público. A região não muda depois de criado.
 - **Validação:** Zod (schemas compartilhados entre form e servidor)
 - **Formulários:** React Hook Form + zodResolver
 - **Datas:** date-fns com locale `ptBR`
@@ -26,7 +27,8 @@ npm run dev        # servidor local em http://localhost:3000
 npm run build      # build de produção (rodar antes de considerar uma feature pronta)
 npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
-npm run types:db   # regenera src/types/database.types.ts a partir do Supabase
+npm run types:db   # regenera src/types/database.types.ts a partir do projeto vinculado
+npx supabase db push  # aplica as migrations pendentes (exige `npx supabase login` + `link` uma vez)
 ```
 
 ## Estrutura de pastas
@@ -71,7 +73,7 @@ supabase/
 ### Banco e segurança
 - Toda tabela tem `user_id uuid references auth.users` e **RLS ativado**. **Exceção:** `profiles`, cuja PK já é o id do usuário — lá a policy é `id = (select auth.uid())`.
 - Policies **por comando** (select/insert/update/delete) e sempre com `(select auth.uid())` em subquery: assim o planner avalia uma vez por statement em vez de uma vez por linha.
-- Toda mudança de schema vira um arquivo em `supabase/migrations/`. Nunca alterar o banco "na mão".
+- Toda mudança de schema vira um arquivo em `supabase/migrations/`, aplicado com `npx supabase db push`. Nunca alterar o banco "na mão" nem colar migrations no SQL Editor: o CLI não registra o que foi aplicado por lá.
 - Toda tabela tem `created_at` e `updated_at`, com trigger para o `updated_at`.
 - Depois de mudar o schema, rodar `npm run types:db`.
 - Nunca expor a `service_role` key no client. Variáveis públicas só com prefixo `NEXT_PUBLIC_`.
@@ -138,7 +140,7 @@ Transações recorrentes, compras parceladas, fatura de cartão de crédito e PW
 
 - [x] Setup do projeto (Next.js, Tailwind v4, shadcn, clients do Supabase, scripts)
 - [x] Identidade visual aplicada aos tokens (tema claro e escuro, contraste verificado)
-- [ ] Modelo de dados: migrations, RLS, triggers, seed de categorias, views
+- [x] Modelo de dados: migrations, RLS, triggers, seed de categorias, views (aplicadas em sa-east-1, tipos gerados)
 - [ ] Autenticação (email/senha com confirmação + Google)
 - [ ] Contas e categorias
 - [ ] Transações (CRUD + filtros por mês/categoria + transferências)
