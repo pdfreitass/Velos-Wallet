@@ -47,12 +47,11 @@ export const passwordSchema = z
     error: `A senha pode ter no máximo ${PASSWORD_MAX_LENGTH} caracteres`,
   })
   .superRefine((password, ctx) => {
-    const missing = PASSWORD_REQUIREMENTS.filter((r) => !r.test(password));
-    if (missing.length > 0) {
-      ctx.addIssue({
-        code: "custom",
-        message: `A senha precisa ter: ${missing.map((r) => r.label.toLowerCase()).join(", ")}`,
-      });
+    // Na tela, a senha nova sempre vem com o checklist (PasswordRequirements), que já diz item a
+    // item o que falta: a mensagem só aponta para ele. A API devolve a lista por extenso, porque
+    // quem a chama pode não ter checklist.
+    if (PASSWORD_REQUIREMENTS.some((r) => !r.test(password))) {
+      ctx.addIssue({ code: "custom", message: "A senha ainda não cumpre os requisitos abaixo" });
     }
   });
 
@@ -69,7 +68,8 @@ const emailSchema = z
 const nameSchema = z
   .string()
   .trim()
-  .min(2, { error: "Informe seu nome" })
+  .min(1, { error: "Informe seu nome" })
+  .min(2, { error: "O nome precisa ter pelo menos 2 letras" })
   .max(80, { error: "O nome pode ter no máximo 80 caracteres" });
 
 const confirmPasswordSchema = z.string().min(1, { error: "Confirme sua senha" });

@@ -2,7 +2,16 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* "dark:" vale onde o tema EFETIVO é escuro: dentro da página escura (fora de um .theme-inverse)
+   ou dentro de um .theme-inverse numa página clara. Ver o bloco de tokens abaixo. */
+@custom-variant dark {
+  &:where(.dark *):not(:where(.dark .theme-inverse, .dark .theme-inverse *)) {
+    @slot;
+  }
+  &:where(:root:not(.dark) .theme-inverse, :root:not(.dark) .theme-inverse *) {
+    @slot;
+  }
+}
 
 @theme inline {
   --color-income: var(--income);
@@ -51,7 +60,11 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
+/* .theme-inverse: área que usa SEMPRE o tema oposto ao da página (o painel da marca nas telas de
+   entrada): verde profundo com a página clara, off-white com a página escura, como as duas
+   versões do logo. Os pares texto/fundo são os mesmos já medidos em cada tema. */
+:root,
+.dark .theme-inverse {
   /* Identidade Velos Wallet — extraida de velos-perfil-claro/escuro.png
      #F4F7F2 off-white · #0A2E24 verde profundo · #2ED38C verde vivo
      Regra: o verde VIVO e dinheiro e acento; o verde PROFUNDO e a marca.
@@ -71,9 +84,12 @@
   --accent: #2ED38C;                  /* verde vivo: so como acento */
   --accent-foreground: #0A2E24;       /* 7.57:1 sobre o accent */
   --destructive: #CA3F44;             /* 4.51:1 sobre o fundo */
-  --border: #D3DBD5;
-  --input: #D3DBD5;
-  --ring: #2ED38C;
+  --border: #D3DBD5;                  /* divisores decorativos (sem exigência de contraste) */
+  /* Borda de campo identifica o controle: WCAG 1.4.11 pede >= 3:1.
+     O #D3DBD5 anterior dava 1.31:1 (medido na spec 001, T16). */
+  --input: #7D928A;                   /* 3.06:1 sobre o fundo, 3.31:1 sobre o card */
+  /* Foco visível. O verde vivo dava 1.80:1 sobre o fundo claro. */
+  --ring: #1C7F54;                    /* 4.61:1 sobre o fundo */
   /* Dinheiro. No tema claro o verde da marca reprova em contraste (1.80:1),
      por isso aqui usa-se a versao escurecida. Nunca usar so a cor: os
      componentes acrescentam sinal e icone. */
@@ -97,7 +113,8 @@
   --sidebar-ring: #2ED38C;
 }
 
-.dark {
+.dark,
+:root:not(.dark) .theme-inverse {
   /* Inversao exata da identidade, como nas duas imagens de perfil. */
   --background: #0A2E24;
   --foreground: #F4F7F2;              /* 13.60:1 sobre o fundo */
@@ -115,8 +132,8 @@
   --accent-foreground: #0A2E24;
   --destructive: #E96368;             /* 4.51:1 sobre o fundo */
   --border: #345249;
-  --input: #345249;
-  --ring: #2ED38C;
+  --input: #5C7A70;                   /* 3.13:1 sobre o fundo (antes #345249, 1.71:1) */
+  --ring: #2ED38C;                    /* 7.57:1 sobre o fundo */
   --income: #2ED38C;                  /* 7.57:1 sobre o fundo */
   --expense: #E96368;                 /* 4.51:1 sobre o fundo */
   --chart-1: #2ED38C;
@@ -143,5 +160,50 @@
   }
   html {
     @apply font-sans;
+    /* Barra de rolagem com a paleta, não o cinza do sistema. */
+    scrollbar-color: var(--border) transparent;
+  }
+  /* Partes que o navegador desenha também levam a identidade. */
+  ::selection {
+    background-color: color-mix(in oklch, var(--accent) 35%, transparent);
+    color: var(--foreground);
+  }
+  input,
+  textarea {
+    caret-color: var(--ring);
+  }
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+}
+
+/* Assinatura das telas de entrada (spec 001): as contas do exemplo "se somam" uma vez.
+   O conteúdo já é visível por padrão; a animação só existe com movimento permitido. */
+@media (prefers-reduced-motion: no-preference) {
+  .sum-row {
+    animation: sum-row-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(120ms * var(--sum-index, 0) + 250ms);
+  }
+  .sum-rule {
+    transform-origin: left;
+    animation: sum-rule-draw 600ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+  }
+  .sum-total {
+    animation: sum-row-in 700ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms both;
+  }
+}
+
+@keyframes sum-row-in {
+  from {
+    opacity: 0.25;
+    transform: translateY(6px);
+    filter: blur(2px);
+  }
+}
+
+@keyframes sum-rule-draw {
+  from {
+    transform: scaleX(0);
   }
 }
