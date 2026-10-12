@@ -17,7 +17,7 @@
 ## Revisão 2 — nova stack
 
 ### Base
-- [ ] **T10** — Front em `web/` (Vite + React + TS + Tailwind v4 + shadcn): copiar tokens, `button`/`card`/`input`/`label`, `ThemeToggle`, `currency.ts`, `date.ts`, Zod de auth; script de tema no `index.html`; remover o Next (`src/`, configs); `package.json` da raiz só com a CLI do Supabase
+- [x] **T10** — Front em `web/` (Vite + React + TS + Tailwind v4 + shadcn): copiar tokens, `button`/`card`/`input`/`label`, `ThemeToggle`, `currency.ts`, `date.ts`, Zod de auth; script de tema no `index.html`; remover o Next (`src/`, configs); `package.json` da raiz só com a CLI do Supabase
   - Verificação: `typecheck`, `lint` e `build` do `web`; página provisória mostra os tokens nos dois temas sem flash; `npx supabase migration list` continua funcionando
 - [ ] **T11** — Solution `api/` (Domain, Application, Infrastructure, Api + 2 projetos de teste), `Directory.Build.props`, `Program.cs` com `FallbackPolicy`, `ProblemDetails`, `no-store`, `/api/health` e servir o SPA; proxy do Vite
   - Verificação: `dotnet build api` sem warnings; `dotnet test api`; `http://localhost:3000/api/health` → 200; `/api/me` → 401
@@ -61,3 +61,4 @@
 | T0 | `927d33d` | spec + plan + tasks |
 | T1–T3 | `544a4e8` | Aplicadas em 2026-10-12. Teste anônimo: tabela negada; 5 falhas → bloqueio de 10 min; email normalizado (maiúsculas/espaços); `clear` e `login_email_hash` negados sem login; bucket `brand` existe |
 | T5–T9 | `e447a12`…`3520782` | Feitas no Next.js e substituídas pela Revisão 2. Lições que continuam valendo: o `input` do shadcn tem 32 px (usar `h-11`, 44 px); bloqueio com **falha fechada**; `/redefinir-senha` exige cookie de recuperação **ligado ao usuário** (senão uma sessão aberta troca a senha sem saber a atual) |
+| T10 | | Vite 8.3, React 19.3, TS 6.0 (o `typescript-eslint` ainda não suporta o TS 7), Tailwind 4.3, ESLint 10. Arquivos movidos com `git mv` (histórico preservado). `ThemeToggle` lê o tema no estado inicial (sem `useEffect`: num SPA não há render no servidor). Regex de símbolos simplificada e conferida: idêntica à anterior, reconhece os 31 símbolos e recusa `ç`. Verificado em 375 px nos dois temas, sem flash e sem erro no console. `npx supabase migration list`: 0001–0006 sincronizadas |

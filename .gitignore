@@ -1,5 +1,5 @@
-# Dependencias
-/node_modules
+# Dependências (raiz e web/)
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -8,11 +8,16 @@
 !.yarn/releases
 !.yarn/versions
 
-# Build
-/.next/
-/out/
-/build
-/dist
+# Build do front
+web/dist/
+
+# .NET (api/)
+bin/
+obj/
+*.user
+.vs/
+api/src/Velos.Api/wwwroot/
+TestResults/
 
 # Testes
 /coverage
@@ -30,10 +35,6 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
-next-env.d.ts
-
-# Deploy
-.vercel
 
 # Supabase (CLI local)
 supabase/.temp
@@ -46,3 +47,6 @@ supabase/.branches
 *.pem
 Thumbs.db
 desktop.ini
+
+# Playwright MCP (screenshots e saidas dos agentes)
+.playwright-mcp/

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Velos Wallet</title>
+    <meta name="description" content="Seu dinheiro na direção certa." />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <!-- A barra do navegador acompanha o tema do app. -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F7F2" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0A2E24" />
+    <!--
+      Aplica o tema antes do primeiro paint, para não haver flash de tema errado
+      (ADR 0009). Lê a escolha guardada e, na ausência dela, a preferência do
+      sistema. O ThemeToggle escreve na mesma chave.
+    -->
+    <script>
+      try {
+        var stored = localStorage.getItem("theme");
+        var dark = stored
+          ? stored === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.toggle("dark", dark);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

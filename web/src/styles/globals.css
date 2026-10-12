@@ -1,0 +1,147 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* Geist servida pelo @fontsource-variable/geist (antes vinha do next/font). */
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-heading: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Identidade Velos Wallet — extraida de velos-perfil-claro/escuro.png
+     #F4F7F2 off-white · #0A2E24 verde profundo · #2ED38C verde vivo
+     Regra: o verde VIVO e dinheiro e acento; o verde PROFUNDO e a marca.
+     Os contrastes em comentario foram medidos (WCAG 2.1, alvo 4.5:1). */
+  --background: #F4F7F2;
+  --foreground: #0A2E24;              /* 13.60:1 sobre o fundo */
+  --card: #FFFFFF;
+  --card-foreground: #0A2E24;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A2E24;
+  --primary: #0A2E24;                 /* marca: botoes e chrome */
+  --primary-foreground: #F4F7F2;      /* 13.60:1 sobre o primary */
+  --secondary: #E6EBE6;
+  --secondary-foreground: #0A2E24;
+  --muted: #E6EBE6;
+  --muted-foreground: #5E766E;        /* 4.53:1 sobre o fundo */
+  --accent: #2ED38C;                  /* verde vivo: so como acento */
+  --accent-foreground: #0A2E24;       /* 7.57:1 sobre o accent */
+  --destructive: #CA3F44;             /* 4.51:1 sobre o fundo */
+  --border: #D3DBD5;
+  --input: #D3DBD5;
+  --ring: #2ED38C;
+  /* Dinheiro. No tema claro o verde da marca reprova em contraste (1.80:1),
+     por isso aqui usa-se a versao escurecida. Nunca usar so a cor: os
+     componentes acrescentam sinal e icone. */
+  --income: #1C7F54;                  /* 4.61:1 sobre o fundo */
+  --expense: #CA3F44;                 /* 4.51:1 sobre o fundo */
+  /* Categorias do grafico: categoricas e distinguiveis, ancoradas no verde.
+     Podem ser afinadas na Etapa 6, quando o grafico existir. */
+  --chart-1: #1C7F54;
+  --chart-2: #0E7490;
+  --chart-3: #B45309;
+  --chart-4: #6D28D9;
+  --chart-5: #BE123C;
+  --radius: 0.625rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0A2E24;
+  --sidebar-primary: #0A2E24;
+  --sidebar-primary-foreground: #F4F7F2;
+  --sidebar-accent: #E6EBE6;
+  --sidebar-accent-foreground: #0A2E24;
+  --sidebar-border: #D3DBD5;
+  --sidebar-ring: #2ED38C;
+}
+
+.dark {
+  /* Inversao exata da identidade, como nas duas imagens de perfil. */
+  --background: #0A2E24;
+  --foreground: #F4F7F2;              /* 13.60:1 sobre o fundo */
+  --card: #1A3C32;
+  --card-foreground: #F4F7F2;
+  --popover: #1A3C32;
+  --popover-foreground: #F4F7F2;
+  --primary: #2ED38C;                 /* no escuro o verde vivo ja passa */
+  --primary-foreground: #0A2E24;      /* 7.57:1 sobre o primary */
+  --secondary: #26463D;
+  --secondary-foreground: #F4F7F2;
+  --muted: #26463D;
+  --muted-foreground: #A9B7B0;        /* 7.06:1 sobre o fundo */
+  --accent: #2ED38C;
+  --accent-foreground: #0A2E24;
+  --destructive: #E96368;             /* 4.51:1 sobre o fundo */
+  --border: #345249;
+  --input: #345249;
+  --ring: #2ED38C;
+  --income: #2ED38C;                  /* 7.57:1 sobre o fundo */
+  --expense: #E96368;                 /* 4.51:1 sobre o fundo */
+  --chart-1: #2ED38C;
+  --chart-2: #22D3EE;
+  --chart-3: #FBBF24;
+  --chart-4: #A78BFA;
+  --chart-5: #FB7185;
+  --sidebar: #1A3C32;
+  --sidebar-foreground: #F4F7F2;
+  --sidebar-primary: #2ED38C;
+  --sidebar-primary-foreground: #0A2E24;
+  --sidebar-accent: #26463D;
+  --sidebar-accent-foreground: #F4F7F2;
+  --sidebar-border: #345249;
+  --sidebar-ring: #2ED38C;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    @apply font-sans;
+  }
+}
