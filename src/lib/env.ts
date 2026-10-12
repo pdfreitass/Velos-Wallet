@@ -38,4 +38,16 @@ export const env = {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     );
   },
+  /**
+   * Endereco publico do app, sem barra final. Base dos links de email e do
+   * retorno do Google. Vem do ambiente, nunca do header `Host` da request:
+   * esse header e controlado por quem faz o pedido.
+   */
+  get siteUrl(): string {
+    const value = required(
+      "NEXT_PUBLIC_SITE_URL",
+      process.env.NEXT_PUBLIC_SITE_URL,
+    );
+    return new URL(value).origin;
+  },
 };

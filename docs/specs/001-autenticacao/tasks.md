@@ -19,9 +19,9 @@
 - [ ] **T4** — C1 (regras de senha, confirmar email) e C2 (Site URL, Redirect URLs) no painel do Supabase
 
 ## Base do código
-- [ ] **T5** — Instalar `zod`, `react-hook-form`, `@hookform/resolvers`; adicionar `input` e `label` pelo CLI do shadcn
+- [x] **T5** — Instalar `zod`, `react-hook-form`, `@hookform/resolvers`; adicionar `input` e `label` pelo CLI do shadcn
   - Verificação: `npm run typecheck`
-- [ ] **T6** — `lib/validations/auth.ts`, `lib/utils/redirect.ts`, `lib/auth/routes.ts`, `NEXT_PUBLIC_SITE_URL` em `env.ts`/`.env.example`
+- [x] **T6** — `lib/validations/auth.ts`, `lib/utils/redirect.ts`, `lib/auth/routes.ts`, `NEXT_PUBLIC_SITE_URL` em `env.ts`/`.env.example`
   - Verificação: senha `Pedro10@` válida; `pedro10@`, `Pedro10a`, `Pedro@ab`, `Pe10@` inválidas (cada uma por um motivo); `getSafeRedirect("//x.com")` → `/painel`
 - [ ] **T7** — Middleware (RN8, default-deny, T4 do ROADMAP, `no-store`), `(app)/layout.tsx`, `/` redirecionando, metadata com acento (T3 do ROADMAP)
   - Verificação: sem sessão, `/painel` e `/qualquer-coisa` → `/entrar?next=…`
@@ -55,4 +55,6 @@
 | Task | Commit | Observação |
 |---|---|---|
 | T0 | `927d33d` | spec + plan + tasks |
-| T1–T3 | | Aplicadas em 2026-10-12. Teste anônimo: tabela negada; 5 falhas → bloqueio de 10 min; email normalizado (maiúsculas/espaços); `clear` e `login_email_hash` negados sem login; bucket `brand` existe |
+| T1–T3 | `544a4e8` | Aplicadas em 2026-10-12. Teste anônimo: tabela negada; 5 falhas → bloqueio de 10 min; email normalizado (maiúsculas/espaços); `clear` e `login_email_hash` negados sem login; bucket `brand` existe |
+| T5 | `e447a12` | zod 4.6.6, react-hook-form 7.90.0, @hookform/resolvers 5.9.1; shadcn input + label. `input` do shadcn tem 32 px de altura: nos formulários usar `h-11` (44 px, alvo de toque) |
+| T6 | | 31 casos testados (senhas válidas/inválidas por motivo, normalização de email, senhas diferentes, 8 tentativas de open redirect, rotas públicas/privadas) |
