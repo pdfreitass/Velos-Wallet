@@ -10,6 +10,8 @@
 ## ✅ Pronto
 
 ### Etapa 1 — Setup do projeto
+> Feita em Next.js; a stack foi trocada na Etapa 3 ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)). Tokens, tema, componentes e helpers migraram para `web/`.
+
 - Next.js 15.5.27 + React 19.1 + TypeScript strict, App Router com Turbopack
 - Tailwind v4 + shadcn/ui sobre `@base-ui/react` (`button`, `card`)
 - Clients Supabase via `@supabase/ssr` (browser, server, middleware)
@@ -33,16 +35,16 @@
 
 | Etapa | Escopo | Depende de |
 |---|---|---|
-| **3 — Autenticação** | Email/senha com confirmação + Google, rotas `(auth)`, route handler em `app/auth/`, proteção de `(app)/*` no middleware, logout | 2 |
-| **4 — Contas e categorias** | CRUD de contas (4 tipos) e categorias (cor + ícone), `MoneyInput`, `CategoryBadge`; instalar Zod + React Hook Form | 3 |
+| **3 — Autenticação** | Solution .NET + front Vite (T10–T13), depois email/senha (confirmação adiada), Google, recuperação de senha, bloqueio de tentativas, rotas privadas por padrão, logout | 2 |
+| **4 — Contas e categorias** | CRUD de contas (4 tipos) e categorias (cor + ícone), `MoneyInput`, `CategoryBadge` | 3 |
 | **5 — Transações** | CRUD, filtro por mês/categoria, transferências entre contas | 4 |
-| **6 — Dashboard** | Saldo total (sem cartão), card de dívida do cartão, receitas × despesas do mês, gráfico por categoria (Recharts); substitui a `page.tsx` temporária | 5 |
+| **6 — Dashboard** | Saldo total (sem cartão), card de dívida do cartão, receitas × despesas do mês, gráfico por categoria (Recharts); conteúdo real do `/painel` e layout para desktop | 5 |
 | **7 — Metas** | CRUD de metas, aportes manuais, barra de progresso via `goal_progress` | 3 |
 | **8 — PWA** | `manifest.webmanifest`, ícones, instalável no celular e no PC (sem offline-first) | 6 |
 
 **Antes do deploy em produção** (sem etapa própria ainda — **A DEFINIR** quando entra):
-- Configurar projeto na Vercel (região `gru1`) e as variáveis de ambiente
-- Rever a decisão de ficar no Next 15 (aviso do `postcss` no `npm audit`, corrigido só no 16) — [ADR 0001](adr/0001-nextjs-15-app-router.md)
+- Escolher o host do app (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md); HTTPS/HSTS e connection string como variável de ambiente
+- Resend + domínio próprio e **religar a confirmação de email** (Revisão 1 da spec 001)
 - URLs de redirect do Supabase Auth para o domínio final
 
 ## Pendências técnicas
@@ -51,9 +53,9 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 
 | # | Pendência | Onde | Quando |
 |---|---|---|---|
-| T1 | `goal_contributions` não tem `updated_at` nem trigger, o que viola a regra "toda tabela tem `updated_at`" | migration `0005` | antes da Etapa 7 |
+| T1 | `goal_contributions` não tem `updated_at` nem trigger, o que viola a regra "toda tabela tem `updated_at`" | migration nova (a próxima livre; `0005`–`0007` já foram usadas) | antes da Etapa 7 |
 | T2 | `supabase/migrations/.gitkeep` gera o aviso "Skipping migration .gitkeep" em todo comando do CLI | apagar o arquivo (a pasta já tem conteúdo) | qualquer `chore` |
-| T3 | Textos de UI sem acento: `"Seu dinheiro na direcao certa."` (metadata e `page.tsx`), `"Acao principal"`, `"Secundaria"` | `layout.tsx`, `page.tsx` | Etapa 3 (o metadata é real; a `page.tsx` some na Etapa 6) |
-| T4 | Comentário do `middleware.ts` diz "A partir da Etapa 3 as chaves são obrigatórias", mas o `hasSupabaseEnv()` ainda deixa passar sem chaves | `lib/supabase/middleware.ts` | Etapa 3 |
-| T5 | Imagens padrão do create-next-app sem uso (`file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`) | `public/` | qualquer `chore` |
-| T6 | Logos originais duplicados na raiz (`velos-perfil-*.png`) e em `public/brand/` (`velos-*.png`) | raiz | **A DEFINIR**: manter na raiz como fonte? |
+| ~~T3~~ | ~~Textos de UI sem acento~~ | ✅ resolvida na T10 da spec 001 (`web/index.html` e página provisória com acento) | — |
+| ~~T4~~ | ~~`hasSupabaseEnv()` do middleware~~ | ✅ obsoleta: o middleware do Next saiu na troca de stack (ADR 0013) | — |
+| ~~T5~~ | ~~Imagens padrão do create-next-app sem uso~~ | ✅ removidas na T10 da spec 001 (`e4da686`) | — |
+| T6 | Logos originais duplicados na raiz (`velos-perfil-*.png`) e em `web/public/brand/` (`velos-*.png`) | raiz | **A DEFINIR**: manter na raiz como fonte? |
