@@ -3,7 +3,7 @@
 > Leia no **início de cada sessão** para saber onde paramos.
 > Atualize **ao terminar cada feature** (junto com [CHANGELOG.md](CHANGELOG.md) e [LICOES.md](LICOES.md)).
 
-**Progresso do MVP: 2 de 8 etapas (25%)** — atualizado em 2026-10-12.
+**Progresso do MVP: 2 de 8 etapas (25%)** — atualizado em 2026-10-13.
 
 > **Numeração:** são 8 etapas, a mesma que os comentários do código já usam ("Etapa 2" = banco, "Etapa 3" = autenticação, "Etapa 6" = dashboard). A identidade visual faz parte da Etapa 1. O checklist antigo do `CLAUDE.md` tinha 9 itens porque contava a identidade visual à parte.
 
@@ -35,13 +35,13 @@
 
 ## 🟡 Em andamento
 
-**Etapa 3 — Autenticação** ([spec 001](specs/001-autenticacao/tasks.md)). Em 2026-10-12 a stack mudou para **API ASP.NET + React/Vite** ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)): o banco e a configuração do Supabase continuam; o código Next da etapa foi substituído pela **Revisão 2 do plano**, que recomeça na T10 (front em `web/`).
+**Etapa 3 — Autenticação** ([spec 001](specs/001-autenticacao/tasks.md)). Em 2026-10-12 a stack mudou para **API ASP.NET + React/Vite** ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)). Feito até 2026-10-13: T10–T17 (front e API, banco pela API com o role `velos_api`, cadastro/entrar/sair reais, bloqueio de tentativas com aviso e contagem na tela). **Próxima: T18** (modelos de email + C3/C6 no painel do Supabase), depois T19 (recuperação de senha: hoje "Esqueci minha senha" e "Redefinir minha senha" levam a uma rota que ainda não existe) e T20 (Google). **Não fazer merge na `main` antes da T19 e da T20.**
 
 ## ⬜ Pendente
 
 | Etapa | Escopo | Depende de |
 |---|---|---|
-| **3 — Autenticação** | Solution .NET + front Vite (T10–T13), depois email/senha (confirmação adiada), Google, recuperação de senha, bloqueio de tentativas, rotas privadas por padrão, logout | 2 |
+| **3 — Autenticação** | Falta: emails (T18), recuperação de senha (T19), Google (T20), ADRs 0014/0015, critérios de aceite e agentes `security`/`qa` (T21–T24), docs e PR (T25–T26) | 2 |
 | **4 — Contas e categorias** | CRUD de contas (4 tipos) e categorias (cor + ícone), `MoneyInput`, `CategoryBadge` | 3 |
 | **5 — Transações** | CRUD, filtro por mês/categoria, transferências entre contas | 4 |
 | **6 — Dashboard** | Saldo total (sem cartão), card de dívida do cartão, receitas × despesas do mês, gráfico por categoria (Recharts); conteúdo real do `/painel` e layout para desktop | 5 |
