@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+  Velos Wallet - Confirmacao de cadastro. GUARDADO, NAO ATIVAR (spec 001, RN13 / CA16).
+  A confirmacao de email esta desligada (Revisao 1, passo C1) e volta com o Resend +
+  dominio proprio, antes do deploy. Painel, quando voltar: "Confirm signup".
+  Assunto: Confirme seu cadastro no Velos Wallet
+  Gemeo do recovery.html: so mudam o texto e o type=signup. Detalhes no README.md.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title>Confirme seu cadastro no Velos Wallet</title>
+  <!--[if mso]>
+  <xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office">
+    <o:PixelsPerInch>96</o:PixelsPerInch>
+  </o:OfficeDocumentSettings></xml>
+  <![endif]-->
+</head>
+
+<body style="margin:0; padding:0; width:100%; background-color:#ECF1EA;">
+
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#ECF1EA;">
+    Falta um passo para ativar a sua conta: confirme o seu email.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ECF1EA" style="background-color:#ECF1EA;">
+    <tr>
+      <td align="center" style="padding:24px 12px 32px 12px;">
+
+        <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; margin:0 auto;">
+
+          <tr>
+            <td bgcolor="#F5F8F3" style="background-color:#F5F8F3; border:1px solid #CDD6CF; border-radius:10px; padding:32px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+
+                <tr>
+                  <td align="center" style="padding:0 0 8px 0;">
+                    <img src="https://khvottmyspapwsdeqqnm.supabase.co/storage/v1/object/public/brand/velos-claro.png"
+                         width="96" height="96" alt=""
+                         style="display:block; width:96px; height:96px; border:0; outline:none; text-decoration:none;" />
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding:0 0 24px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:18px; line-height:24px; mso-line-height-rule:exactly; font-weight:bold; color:#0A2E24; letter-spacing:0.2px;">
+                    Velos Wallet
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0 0 16px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:22px; line-height:30px; mso-line-height-rule:exactly; font-weight:bold; color:#0A2E24;">
+                    Confirme seu cadastro
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0 0 16px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:16px; line-height:24px; mso-line-height-rule:exactly; color:#0A2E24;">
+                    Boas-vindas ao Velos Wallet. Falta apenas confirmar que este endereço de email
+                    é seu para a sua conta ficar ativa.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td align="center" style="padding:8px 0 16px 0;">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+                                 href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup"
+                                 style="height:48px; v-text-anchor:middle; width:260px;" arcsize="21%" stroke="f" fillcolor="#0A2E24">
+                      <w:anchorlock/>
+                      <center style="color:#F4F7F2; font-family:Arial, sans-serif; font-size:16px; font-weight:bold;">Confirmar meu email</center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-- -->
+                    <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup"
+                       style="display:inline-block; width:260px; background-color:#0A2E24; color:#F4F7F2; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:16px; line-height:48px; mso-line-height-rule:exactly; font-weight:bold; text-align:center; text-decoration:none; border-radius:10px;">
+                      Confirmar meu email
+                    </a>
+                    <!--<![endif]-->
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0 0 24px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:22px; mso-line-height-rule:exactly; color:#576E66;">
+                    O link vale por tempo limitado e pode ser usado uma única vez.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:0 0 8px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:22px; mso-line-height-rule:exactly; color:#576E66;">
+                    Se o botão não funcionar, copie e cole este endereço no seu navegador:
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0 0 24px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:22px; mso-line-height-rule:exactly; word-break:break-all;">
+                    <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup"
+                       style="color:#197A50; text-decoration:underline;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup</a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="font-size:0; line-height:0; border-top:1px solid #CDD6CF;">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td style="padding:16px 0 0 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:22px; mso-line-height-rule:exactly; color:#576E66;">
+                    Se você não solicitou este email, pode ignorá-lo com segurança. Nenhuma conta será ativada.
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:24px 16px 0 16px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:13px; line-height:20px; mso-line-height-rule:exactly; color:#576E66;">
+              <strong style="color:#0A2E24;">Velos Wallet</strong> — Seu dinheiro na direção certa.<br />
+              Esta é uma mensagem automática. Por favor, não responda a este email.
+            </td>
+          </tr>
+
+        </table>
+        <!--[if mso]></td></tr></table><![endif]-->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

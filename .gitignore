@@ -74,3 +74,6 @@ desktop.ini
 **/.impeccable/live/deferred-svelte-component-accepts.json
 **/.impeccable/live/*.png
 # impeccable-ignore-end
+
+# Pré-visualização dos modelos de email (npm run preview:emails)
+web/.preview-emails/
