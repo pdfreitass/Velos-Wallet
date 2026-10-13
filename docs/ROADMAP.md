@@ -50,7 +50,7 @@
 
 **Antes do deploy em produção** (sem etapa própria ainda — **A DEFINIR** quando entra):
 - Escolher o host do app (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md); HTTPS/HSTS e connection string como variável de ambiente
-- Resend + domínio próprio e **religar a confirmação de email** (Revisão 1 da spec 001)
+- Resend + domínio próprio e **religar a confirmação de email** (Revisão 1 da spec 001). Junto com o Resend vão **os modelos de email** de `supabase/templates/` (passo C3): desde 2026-10-13 o Supabase exige SMTP próprio para editar modelo, então até lá o email de recuperação sai no padrão dele, em inglês e sem logo
 - URLs de redirect do Supabase Auth para o domínio final
 
 ## Pendências técnicas
