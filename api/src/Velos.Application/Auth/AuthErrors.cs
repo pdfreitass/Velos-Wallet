@@ -15,15 +15,19 @@ public static class AuthErrors
         InvalidCredentialsCode,
         ErrorKind.InvalidCredentials,
         attemptsLeft is int left
-            ? $"Email ou senha incorretos. Mais {left} tentativa(s) incorreta(s) e o acesso será bloqueado por {(int)LoginLockoutPolicy.LockDuration.TotalMinutes} minutos."
+            ? $"Email ou senha incorretos. Mais {Plural(left, "tentativa incorreta", "tentativas incorretas")} e o acesso será bloqueado por {Plural((int)LoginLockoutPolicy.LockDuration.TotalMinutes, "minuto", "minutos")}."
             : "Email ou senha incorretos.",
         attemptsLeft is int value ? new Dictionary<string, object?> { ["attemptsLeft"] = value } : null);
 
     public static AppError Locked(int minutesLeft) => new(
         "locked",
         ErrorKind.TooManyRequests,
-        $"Muitas tentativas incorretas. Tente novamente em {minutesLeft} minuto(s) ou redefina sua senha.",
+        $"Muitas tentativas incorretas. Tente novamente em {Plural(minutesLeft, "minuto", "minutos")} ou redefina sua senha.",
         new Dictionary<string, object?> { ["minutesLeft"] = minutesLeft });
+
+    /// <summary>"1 minuto" / "10 minutos": nada de "minuto(s)" na tela.</summary>
+    private static string Plural(int count, string singular, string plural) =>
+        $"{count} {(count == 1 ? singular : plural)}";
 
     public static readonly AppError EmailTaken = new(
         "email_taken", ErrorKind.Conflict, "Este email já está cadastrado.");
