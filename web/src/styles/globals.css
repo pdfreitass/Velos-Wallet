@@ -61,60 +61,68 @@
 }
 
 /* .theme-inverse: área que usa SEMPRE o tema oposto ao da página (o painel da marca nas telas de
-   entrada): verde profundo com a página clara, off-white com a página escura, como as duas
-   versões do logo. Os pares texto/fundo são os mesmos já medidos em cada tema. */
+   entrada, a tela do iPhone da página inicial): verde profundo com a página clara, off-white
+   com a página escura, como as duas versões do logo. .theme-base, dentro de uma área invertida,
+   volta ao tema da página (a tela do iPhone no painel invertido). Os pares texto/fundo são os
+   mesmos já medidos em cada tema. */
 :root,
-.dark .theme-inverse {
+.dark .theme-inverse,
+:root:not(.dark) .theme-inverse .theme-base {
   /* Identidade Velos Wallet — extraida de velos-perfil-claro/escuro.png
      #F4F7F2 off-white · #0A2E24 verde profundo · #2ED38C verde vivo
      Regra: o verde VIVO e dinheiro e acento; o verde PROFUNDO e a marca.
-     Os contrastes em comentario foram medidos (WCAG 2.1, alvo 4.5:1). */
-  --background: #F4F7F2;
-  --foreground: #0A2E24;              /* 13.60:1 sobre o fundo */
-  --card: #FFFFFF;
+     Os contrastes em comentario foram medidos (WCAG 2.1, alvo 4.5:1).
+     Revisão do Pedro (spec 003): o fundo do tema claro ficou "branco demais" perto do verde e
+     desceu de #F4F7F2 para #ECF1EA; os tons de texto abaixo escureceram para seguir >= 4.5:1. */
+  --background: #ECF1EA;
+  --foreground: #0A2E24;              /* 12.83:1 sobre o fundo */
+  /* Cartões um passo mais claros que o fundo (nunca #FFFFFF, que "estoura" perto do verde).
+     Sobre o card: texto 13.72:1, muted 5.12:1, despesa 5.00:1, receita 4.97:1, campo 3.52:1. */
+  --card: #F5F8F3;
   --card-foreground: #0A2E24;
-  --popover: #FFFFFF;
+  --popover: #F5F8F3;
   --popover-foreground: #0A2E24;
   --primary: #0A2E24;                 /* marca: botoes e chrome */
   --primary-foreground: #F4F7F2;      /* 13.60:1 sobre o primary */
-  --secondary: #E6EBE6;
-  --secondary-foreground: #0A2E24;
-  --muted: #E6EBE6;
-  --muted-foreground: #5E766E;        /* 4.53:1 sobre o fundo */
+  --secondary: #E1E8E1;
+  --secondary-foreground: #0A2E24;    /* 11.78:1 sobre o secondary */
+  --muted: #E1E8E1;
+  --muted-foreground: #576E66;        /* 4.79:1 sobre o fundo (o #5E766E daria 4.27:1) */
   --accent: #2ED38C;                  /* verde vivo: so como acento */
   --accent-foreground: #0A2E24;       /* 7.57:1 sobre o accent */
-  --destructive: #CA3F44;             /* 4.51:1 sobre o fundo */
-  --border: #D3DBD5;                  /* divisores decorativos (sem exigência de contraste) */
+  --destructive: #C1393E;             /* 4.68:1 sobre o fundo */
+  --border: #CDD6CF;                  /* divisores decorativos (sem exigência de contraste) */
   /* Borda de campo identifica o controle: WCAG 1.4.11 pede >= 3:1.
      O #D3DBD5 anterior dava 1.31:1 (medido na spec 001, T16). */
-  --input: #7D928A;                   /* 3.06:1 sobre o fundo, 3.31:1 sobre o card */
+  --input: #738880;                   /* 3.30:1 sobre o fundo, 3.52:1 sobre o card */
   /* Foco visível. O verde vivo dava 1.80:1 sobre o fundo claro. */
-  --ring: #1C7F54;                    /* 4.61:1 sobre o fundo */
+  --ring: #197A50;                    /* 4.65:1 sobre o fundo */
   /* Dinheiro. No tema claro o verde da marca reprova em contraste (1.80:1),
      por isso aqui usa-se a versao escurecida. Nunca usar so a cor: os
      componentes acrescentam sinal e icone. */
-  --income: #1C7F54;                  /* 4.61:1 sobre o fundo */
-  --expense: #CA3F44;                 /* 4.51:1 sobre o fundo */
+  --income: #197A50;                  /* 4.65:1 sobre o fundo */
+  --expense: #C1393E;                 /* 4.68:1 sobre o fundo */
   /* Categorias do grafico: categoricas e distinguiveis, ancoradas no verde.
      Podem ser afinadas na Etapa 6, quando o grafico existir. */
-  --chart-1: #1C7F54;
+  --chart-1: #197A50;
   --chart-2: #0E7490;
   --chart-3: #B45309;
   --chart-4: #6D28D9;
   --chart-5: #BE123C;
   --radius: 0.625rem;
-  --sidebar: #FFFFFF;
+  --sidebar: #F5F8F3;
   --sidebar-foreground: #0A2E24;
   --sidebar-primary: #0A2E24;
   --sidebar-primary-foreground: #F4F7F2;
-  --sidebar-accent: #E6EBE6;
+  --sidebar-accent: #E1E8E1;
   --sidebar-accent-foreground: #0A2E24;
-  --sidebar-border: #D3DBD5;
-  --sidebar-ring: #2ED38C;
+  --sidebar-border: #CDD6CF;
+  --sidebar-ring: #197A50;            /* o verde vivo dava 1.80:1 (anel de foco) */
 }
 
 .dark,
-:root:not(.dark) .theme-inverse {
+:root:not(.dark) .theme-inverse,
+.dark .theme-inverse .theme-base {
   /* Inversao exata da identidade, como nas duas imagens de perfil. */
   --background: #0A2E24;
   --foreground: #F4F7F2;              /* 13.60:1 sobre o fundo */

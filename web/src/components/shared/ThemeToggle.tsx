@@ -15,6 +15,7 @@ export function ThemeToggle({ iconOnly = false, className }: { iconOnly?: boolea
   function toggle() {
     const next = !isDark;
     document.documentElement.classList.toggle("dark", next);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next ? "#0A2E24" : "#ECF1EA");
     try {
       localStorage.setItem("theme", next ? "dark" : "light");
     } catch {

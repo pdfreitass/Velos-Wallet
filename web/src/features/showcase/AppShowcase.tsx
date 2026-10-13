@@ -28,6 +28,7 @@ type AppShowcaseProps = {
   introDelayMs?: number;
   className?: string;
   phoneRef?: Ref<HTMLDivElement>;
+  screenTheme?: "inverse" | "page";
 };
 
 /**
@@ -43,6 +44,7 @@ export function AppShowcase({
   introDelayMs,
   className,
   phoneRef,
+  screenTheme,
 }: AppShowcaseProps) {
   const baseId = useId();
   // Direção da troca (para a tela deslizar do lado certo) e se o visitante já trocou de tela.
@@ -66,7 +68,7 @@ export function AppShowcase({
       className={cn("relative", className)}
       style={introDelayMs === undefined ? undefined : ({ "--sum-base": `${introDelayMs}ms` } as CSSProperties)}
     >
-      <PhoneMockup size={size} ref={phoneRef}>
+      <PhoneMockup size={size} ref={phoneRef} screenTheme={screenTheme}>
         <div
           id={panelId}
           role={onScreenChange ? "tabpanel" : undefined}

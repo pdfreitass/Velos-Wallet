@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { MonitorSmartphone, ShieldCheck } from "lucide-react";
 import { Link } from "react-router";
 
 import { VelosMark } from "@/components/brand/VelosMark";
-import { AppShowcase } from "@/features/showcase/AppShowcase";
-import type { ScreenId } from "@/features/showcase/showcase-data";
+import { PanelStage } from "@/features/auth/components/PanelStage";
 
 const promises = [
   { icon: ShieldCheck, title: "Privado por padrão", text: "Só você vê seus dados." },
@@ -20,14 +18,12 @@ const promises = [
  * (.theme-inverse em globals.css): verde profundo com a página clara, off-white com a página
  * escura, como as duas versões do logo. Assim as duas metades nunca viram um fundo só.
  *
- * O iPhone é o mesmo da página inicial, compacto (spec 003, decisão 4): abre nas contas "se
- * somando" e dá para trocar de tela pelas abas.
+ * Marca, frase e promessas no alto; embaixo, o palco com o mesmo iPhone da página inicial,
+ * compacto (spec 003, decisão 4), e cartões do app flutuando em volta dele.
  */
 export function BrandPanel() {
-  const [screen, setScreen] = useState<ScreenId>("accounts");
-
   return (
-    <aside className="theme-inverse sticky top-0 hidden h-dvh flex-col gap-8 overflow-y-auto border-r border-border bg-background px-12 py-10 text-foreground lg:flex xl:px-16">
+    <aside className="theme-inverse sticky top-0 hidden h-dvh flex-col gap-8 overflow-x-hidden overflow-y-auto border-r border-border bg-background px-12 py-10 text-foreground lg:flex xl:px-16">
       <Link
         to="/"
         className="flex w-fit items-center gap-3 rounded-md focus-visible:ring-3 focus-visible:ring-ring/60 focus-visible:outline-none"
@@ -36,14 +32,11 @@ export function BrandPanel() {
         <span className="text-lg font-semibold tracking-tight">Velos Wallet</span>
       </Link>
 
-      <p className="max-w-md text-[clamp(2.25rem,3.2vw,3.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance">
-        Seu dinheiro na direção certa.
-      </p>
-
-      <div className="mt-auto flex flex-col gap-8 xl:flex-row xl:items-end">
-        <AppShowcase size="compact" screen={screen} onScreenChange={setScreen} intro />
-
-        <ul className="grid gap-5 text-sm sm:grid-cols-2 xl:max-w-[13rem] xl:grid-cols-1 xl:pb-6">
+      <div className="space-y-6">
+        <p className="max-w-md text-[clamp(2.25rem,3.2vw,3.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance">
+          Seu dinheiro na direção certa.
+        </p>
+        <ul className="grid max-w-md gap-4 text-sm xl:grid-cols-2">
           {promises.map((promise) => (
             <li key={promise.title} className="flex gap-3">
               {/* Verde vivo é só da marca e de dinheiro (CLAUDE.md): ícones no tom do texto. */}
@@ -55,6 +48,10 @@ export function BrandPanel() {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="mt-auto">
+        <PanelStage />
       </div>
     </aside>
   );
