@@ -1,0 +1,41 @@
+# Chamadas de teste da API (VS Code: extensão REST Client · Visual Studio: nativo).
+# A sessão vive em cookies httpOnly: rode na ordem e o cliente reaproveita os cookies.
+# Mutações exigem o header X-Velos-Csrf: 1 (proteção CSRF).
+#
+# ⚠️ Cadastro gasta a cota do Supabase: rode o "sign-up" UMA vez e depois use o "sign-in".
+@api = http://localhost:5080
+@email = seu-email@exemplo.com.br
+@password = Pedro10@
+
+### API de pé (pública)
+GET {{api}}/api/health
+
+### Sem sessão → 401 code=unauthenticated (toda rota é privada por padrão)
+GET {{api}}/api/me
+
+### Mutação sem o header CSRF → 400 code=csrf_header_missing
+POST {{api}}/api/auth/sign-in
+Content-Type: application/json
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Cadastro (UMA vez) → 201 + cookies velos_at / velos_rt
+POST {{api}}/api/auth/sign-up
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Pedro", "email": "{{email}}", "password": "{{password}}", "confirmPassword": "{{password}}" }
+
+### Entrar → 204 + cookies · senha errada → 400 invalid_credentials (attemptsLeft da 3ª em diante) · 5ª → 429 locked
+POST {{api}}/api/auth/sign-in
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Usuário logado → 200 { name, email }
+GET {{api}}/api/me
+
+### Sair → 204, cookies apagados e sessão revogada no Supabase
+POST {{api}}/api/auth/sign-out
+X-Velos-Csrf: 1

@@ -1,0 +1,71 @@
+# Tasks — Spec 001: Autenticação
+
+> Passos pequenos e verificáveis, derivados do [plan.md](plan.md). Cada bloco termina num commit **proposto e aprovado pelo Pedro**.
+> Ao terminar cada task: parar, mostrar e esperar aprovação.
+
+**Branch:** `devpedro`
+
+## Feito antes da troca de stack
+
+- [x] **T0** — Spec e plano aprovados (2026-10-12)
+- [x] **T1** — Migration `0005_login_attempts.sql` (tabela sem acesso direto + 3 funções + grants)
+- [x] **T2** — Migration `0006_storage_brand.sql` (bucket público `brand`)
+- [x] **T3** — Aplicar (`db push`) e gerar os tipos
+- [x] **T4** — C1 e C2 no painel do Supabase (2026-10-12)
+- [x] ~~**T5–T9**~~ — Dependências, validações, middleware, Server Actions e route handlers **no Next.js**. **Substituídas** pela Revisão 2 do plano ([ADR 0013](../../adr/0013-api-aspnet-e-front-react-vite.md)); o que dá para reaproveitar (Zod, casos de teste, componentes) migra na T10
+
+## Revisão 2 — nova stack
+
+### Base
+- [x] **T10** — Front em `web/` (Vite + React + TS + Tailwind v4 + shadcn): copiar tokens, `button`/`card`/`input`/`label`, `ThemeToggle`, `currency.ts`, `date.ts`, Zod de auth; script de tema no `index.html`; remover o Next (`src/`, configs); `package.json` da raiz só com a CLI do Supabase
+  - Verificação: `typecheck`, `lint` e `build` do `web`; página provisória mostra os tokens nos dois temas sem flash; `npx supabase migration list` continua funcionando
+- [x] **T11** — Solution `api/` (Domain, Application, Infrastructure, Api + 2 projetos de teste), `Directory.Build.props`, `Program.cs` com `FallbackPolicy`, `ProblemDetails`, `no-store`, `/api/health` e servir o SPA; proxy do Vite
+  - Verificação: `dotnet build api` sem warnings; `dotnet test api`; `http://localhost:3000/api/health` → 200; `/api/me` → 401
+- [x] **T12** — Atualizar os subagentes `designer`, `qa` e `security` (`.claude/agents/`) para a nova stack
+  - Verificação: nenhuma menção a Server Actions, `@supabase/ssr` ou `npm run build` na raiz
+
+### Banco pela API
+- [x] **T13** — Migration `0007_api_role.sql` → `db push` (**com aprovação**) → C7 (senha pelo Pedro + `dotnet user-secrets`) → `VelosDbContext` + `UserDbSession`
+  - Verificação: conectado como `velos_api` sem `set role` → erro de permissão; como `anon` → `profiles` vazio; com os claims do Pedro → só o perfil dele
+
+### Autenticação
+- [x] **T14** — Domain + Application: `PasswordPolicy`, `SafeRedirect`, validators, interfaces e handlers de auth + testes xUnit (os 31 casos da T6 e as 8 tentativas de open redirect)
+  - Verificação: `dotnet test api`
+- [x] **T15** — Infrastructure + Api: `SupabaseAuthClient`, `LoginLockoutStore`, `ProfileReader`; `AuthController` (sign-up, sign-in, sign-out), `MeController`, cookies, renovação do token e header CSRF; `Velos.Api.http`
+  - Verificação: pelo `.http`: cadastro real **uma única vez** (cota de emails), login, `/api/me`, sair; POST sem `X-Velos-Csrf` → 400
+- [x] **T16** — Telas `/entrar`, `/cadastro`, `/painel` (provisório) + "Sair", `RequireAuth`, `GuestOnly`, cliente `fetch`
+  - Verificação: CA1, CA3, CA4, CA8, CA10, CA11, CA12, CA13, CA17
+- [x] **T17** — Bloqueio de tentativas na tela (avisos e tela de bloqueado)
+  - Verificação: CA14, CA15
+
+### Emails, recuperação e Google
+- [ ] **T18** — Modelos `supabase/templates/*.html` + C3 (só o de redefinição) + C6 (logo no bucket)
+  - Verificação: CA16 (Gmail web/celular e Outlook)
+- [ ] **T19** — Recuperação: `/api/auth/password-reset`, `/auth/confirm`, `PUT /api/auth/password`, telas `/recuperar-senha` e `/redefinir-senha`
+  - Verificação: CA7 (o mesmo link não funciona duas vezes; sem o cookie de recuperação, `PUT /api/auth/password` → 403)
+- [ ] **T20** — Google: `/api/auth/google`, `/auth/callback`, tela `/auth/erro` + C4/C5 com guia
+  - Verificação: CA6, CA9
+
+### Fechamento
+- [ ] **T21** — ADRs 0014 (bloqueio de tentativas) e 0015 (rotas privadas por padrão)
+- [ ] **T22** — Rodar todos os critérios de aceite em 375 e 1440 px, temas claro e escuro
+- [ ] **T23** — Agentes `security` (CA-seg) e `qa` (CA-a11y, CA-build)
+- [ ] **T24** — `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web`
+- [ ] **T25** — Atualizar ROADMAP (Etapa 3 ✅; pré-requisitos do deploy: host em São Paulo, Resend + domínio **e religar a confirmação de email**; spec 002 como próxima), CHANGELOG, LICOES (inclui as lições guardadas da sessão anterior), ARQUITETURA
+- [ ] **T26** — Commits finais + PR para `main`
+
+## Registro
+
+| Task | Commit | Observação |
+|---|---|---|
+| T0 | `927d33d` | spec + plan + tasks |
+| T1–T3 | `544a4e8` | Aplicadas em 2026-10-12. Teste anônimo: tabela negada; 5 falhas → bloqueio de 10 min; email normalizado (maiúsculas/espaços); `clear` e `login_email_hash` negados sem login; bucket `brand` existe |
+| T5–T9 | `e447a12`…`3520782` | Feitas no Next.js e substituídas pela Revisão 2. Lições que continuam valendo: o `input` do shadcn tem 32 px (usar `h-11`, 44 px); bloqueio com **falha fechada**; `/redefinir-senha` exige cookie de recuperação **ligado ao usuário** (senão uma sessão aberta troca a senha sem saber a atual) |
+| T10 | | Vite 8.3, React 19.3, TS 6.0 (o `typescript-eslint` ainda não suporta o TS 7), Tailwind 4.3, ESLint 10. Arquivos movidos com `git mv` (histórico preservado). `ThemeToggle` lê o tema no estado inicial (sem `useEffect`: num SPA não há render no servidor). Regex de símbolos simplificada e conferida: idêntica à anterior, reconhece os 31 símbolos e recusa `ç`. Verificado em 375 px nos dois temas, sem flash e sem erro no console. `npx supabase migration list`: 0001–0006 sincronizadas |
+| T11 | | .NET SDK 10.0.300, `Velos.slnx`, Controllers, JwtBearer 10.0.12, xUnit 2.9.3 (template do SDK). `TreatWarningsAsErrors` + `AnalysisLevel latest-recommended`; CA1707 desligada só em `tests/` (nomes com sublinhado). 3 testes de arquitetura (Domain sem referências; Application sem Infrastructure/Api). Verificado: `/api/health` 200; `/api/me` e `/api/nao-existe` sem sessão → 401 ProblemDetails (não revela quais rotas existem); token forjado → 401 `invalid_token` (chave pública buscada no Discovery); `no-store` em `/api` e `/auth`; pelo proxy do Vite idem. Modo produção com o build em `wwwroot`: `/`, `/entrar`, `/painel/...` → `index.html`; estáticos servidos; `/api/*` nunca cai no SPA |
+| T12 | | `designer` só em `web/`, dados via `web/src/lib/api`, verificação com `--prefix web`. `qa` roda `dotnet build/test` + `web`, revisa C# (camadas, controller fino, FluentValidation, `long`/`DateOnly`) e TS; avisa para parar a API antes do `dotnet build` (DLL travada no Windows) e para nunca testar senha pelo cadastro real. `security` ganhou o checklist da API (FallbackPolicy e lista de `[AllowAnonymous]`, JwtBearer, cookies, CSRF, CORS, `UserDbSession` com `set_config(..., true)`, role `velos_api`, SQL parametrizado) e do front (sem chave do Supabase, sem token em `localStorage`). Busca por termos do Next nos 3 arquivos: nenhum. ROADMAP: lista "antes do deploy" e pendências T1/T3/T4/T5/T6 atualizadas |
+| T13 | | Código pronto: `0007_api_role.sql` (dry-run ok), `VelosDbContext`, `UserDbSession` (transação + `set_config(..., true)`), `IUserContext`, script `scripts/set-api-db-password.ps1` (senha aleatória; o banco recebe só o hash SCRAM-SHA-256, conferido contra implementação de referência) e 7 testes de integração (6 pulam sem connection string). No caminho: Smart App Control do Windows bloqueava DLLs do `dotnet build`; desligado pelo Pedro. **Concluída em 2026-10-12:** Pedro aplicou a `0007` (`db push`), rodou o script de senha e o SQL Editor. Testes de integração: 6 passam (`velos_api` sem sessão → negado; como anon → nenhum perfil; papel e claims acabam com a transação; erro desfaz e reseta o papel), 1 pulado (precisa de `Tests:UserId`) |
+| T14 | | Domain: `PasswordPolicy` (símbolos idênticos ao Supabase), `LoginLockoutPolicy` (espelho da 0005: 5 falhas, 10 min, aviso da 3ª), `EmailAddress`. Application: `Result`/`AppError` com `code` estável, `SafeRedirect`, validadores FluentValidation com as mesmas mensagens do Zod, handlers de cadastro, login (falha fechada), saída e perfil; `AuthSession.ToString()` esconde os tokens. 75 testes (senhas caso a caso, 11 tentativas de open redirect, bloqueio com dublês) |
+| T15 | | `SupabaseAuthClient` (REST do GoTrue, header `X-Supabase-Api-Version: 2024-01-01`, lê `code`/`error_code`/`error`, nunca loga email/senha/token), `LoginLockoutStore` (anon/usuário), `ProfileReader`, cookies `velos_at`/`velos_rt` (httpOnly, Secure, Lax; refresh só em `/api`), renovação automática, CSRF, `ProblemDetails` com `code` em todo erro (inclusive 401/404 e JSON malformado, sem repassar mensagem interna). Verificado com banco inacessível de propósito: CSRF → 400; validação por campo em português; **falha fechada** (503 `lockout_unavailable` sem chamar o Supabase); `/api/me` → 401 `unauthenticated`; sair apaga os cookies com os mesmos atributos. **Fluxo real em 2026-10-12** (conta `teste.velos@example.com`, cadastro uma vez): `/api/me` sem sessão 401 → cadastro 201 com `velos_at`/`velos_rt` httpOnly → `/api/me` 200 → sair 204 → `/api/me` 401 → entrar 204 → `/api/me` 200. Bloqueio: 3ª e 4ª falha com `attemptsLeft` 2 e 1, 5ª → 429 `locked` (`minutesLeft`, `Retry-After: 600`); senha certa durante o bloqueio → 429. Observação para a T17: o `detail` diz "10 minuto(s)" |
+| T16 | | Feita com a skill Impeccable (code-led, mundo herdado): `PRODUCT.md` confirmado pelo Pedro; voz próxima e direta; desktop com painel da marca, celular só formulário. Marca redesenhada em SVG; painel verde profundo com o exemplo de contas que "se somam" (assinatura, desligada com reduced-motion); formulários com RHF + Zod, erros por campo vindos da API, aviso geral com saída (bloqueado → "Redefinir minha senha"; email já cadastrado → Entrar/Esqueci). Tokens corrigidos por contraste: foco claro `#1C7F54` (antes 1.80:1), borda de campo `#7D928A`/`#5C7A70` (antes 1.31:1/1.71:1), painel escuro `--panel-deep`. Detector Impeccable: 0 achados. Revisor de acabamento: `fix` (7 itens) → corrigidos em um lote. Paridade das regras de senha C# × Zod: 54 casos iguais (`npm run check:password`). Bundle 164 KB gzip (otimizar na Etapa 8). **Pendente:** CA1, CA3, CA4, CA8, CA10, CA11 com sessão real dependem da T13; Google (T20) e "Esqueci minha senha" (T19) ainda sem destino: **não fazer merge na main antes delas** |
+| T17 | | Tela de entrar: da 3ª senha errada, "Mais N tentativas erradas e o acesso fica bloqueado por 10 minutos" (singular/plural no front, a partir de `attemptsLeft`); no bloqueio, bloco próprio (`LockedNotice`) com cadeado, contagem regressiva a partir de `minutesLeft`, "Redefinir minha senha" e "Usar outro email"; "Entrar" desativado enquanto o relógio corre para o MESMO email (outro email libera; quem decide é a API). Leitor de tela ouve os minutos uma vez, não o relógio. Texto do aviso na cor do texto (o muted dava 4,28:1 sobre o fundo rosado). API: mensagens sem "(s)" (`AuthErrors.Plural`) + 4 testes. Testado no navegador com email sem conta (CA15): 2 erros simples → aviso com 2 e 1 → bloqueio com relógio. **"Redefinir minha senha" ainda leva a `/recuperar-senha`, que chega na T19** |

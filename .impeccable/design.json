@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-12T00:00:00Z",
+  "title": "Design System: Velos Wallet",
+  "extensions": {
+    "colorMeta": {
+      "off-white": { "role": "neutral", "displayName": "Off-White", "canonical": "#F4F7F2", "tonalRamp": ["#1F2620", "#3A443C", "#56635A", "#738279", "#93A198", "#B5C0B8", "#D7DED8", "#F4F7F2"] },
+      "deep-green": { "role": "primary", "displayName": "Verde Profundo", "canonical": "#0A2E24", "tonalRamp": ["#0A2E24", "#13463A", "#1E5F4F", "#2E7A67", "#4C9682", "#78B4A3", "#ABD2C6", "#DDEEE8"] },
+      "vivid-green": { "role": "secondary", "displayName": "Verde Vivo", "canonical": "#2ED38C", "tonalRamp": ["#063A23", "#0C5A37", "#147C4D", "#197A50", "#24A86D", "#2ED38C", "#8BE8BE", "#DDF8EB"] },
+      "card-white": { "role": "neutral", "displayName": "Branco Cartão", "canonical": "#F5F8F3", "tonalRamp": ["#262626", "#474747", "#6B6B6B", "#919191", "#B5B5B5", "#D6D6D6", "#EDEDED", "#FFFFFF"] },
+      "sage-mist": { "role": "neutral", "displayName": "Névoa Sálvia", "canonical": "#E1E8E1" },
+      "sage-ink": { "role": "neutral", "displayName": "Tinta Sálvia", "canonical": "#576E66" },
+      "border-sage": { "role": "neutral", "displayName": "Borda Sálvia", "canonical": "#CDD6CF" },
+      "field-sage": { "role": "neutral", "displayName": "Sálvia de Campo", "canonical": "#738880" },
+      "money-green": { "role": "tertiary", "displayName": "Verde Dinheiro", "canonical": "#197A50" },
+      "expense-red": { "role": "tertiary", "displayName": "Vermelho Despesa", "canonical": "#C1393E", "tonalRamp": ["#3B1012", "#5E1A1D", "#842529", "#A93136", "#C1393E", "#E96368", "#F3A4A7", "#FBE3E4"] },
+      "dark-card": { "role": "neutral", "displayName": "Cartão Escuro", "canonical": "#1A3C32" },
+      "dark-muted": { "role": "neutral", "displayName": "Névoa Escura", "canonical": "#26463D" },
+      "dark-ink": { "role": "neutral", "displayName": "Tinta Clara", "canonical": "#A9B7B0" },
+      "dark-border": { "role": "neutral", "displayName": "Borda Escura", "canonical": "#345249" },
+      "dark-field": { "role": "neutral", "displayName": "Campo Escuro", "canonical": "#5C7A70" },
+      "dark-expense-red": { "role": "tertiary", "displayName": "Vermelho Despesa (escuro)", "canonical": "#E96368" },
+      "phone-graphite": { "role": "neutral", "displayName": "Grafite do Aparelho", "canonical": "#1b2220" },
+      "phone-edge": { "role": "neutral", "displayName": "Borda do Aparelho", "canonical": "#3a4643" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "A frase da primeira dobra." },
+      "headline": { "displayName": "Headline", "purpose": "Títulos de seção de peso e a frase do painel da marca." },
+      "headline-step": { "displayName": "Headline Step", "purpose": "Títulos das seções da história." },
+      "title": { "displayName": "Title", "purpose": "Título das telas de formulário." },
+      "lead": { "displayName": "Lead", "purpose": "Subtítulos em muted-foreground, 28 a 34rem de largura." },
+      "body": { "displayName": "Body", "purpose": "Texto corrido; 0,875rem em cartões e listas." },
+      "label": { "displayName": "Label", "purpose": "Rótulos de campo, botões e abas." },
+      "money": { "displayName": "Money", "purpose": "Todo valor em reais: tabular, 600, sempre com sinal ou ícone quando colorido." }
+    },
+    "themes": {
+      "light": { "background": "#ECF1EA", "foreground": "#0A2E24", "card": "#F5F8F3", "primary": "#0A2E24", "primary-foreground": "#F4F7F2", "muted": "#E1E8E1", "muted-foreground": "#576E66", "accent": "#2ED38C", "accent-foreground": "#0A2E24", "border": "#CDD6CF", "input": "#738880", "ring": "#197A50", "income": "#197A50", "expense": "#C1393E", "destructive": "#C1393E" },
+      "dark": { "background": "#0A2E24", "foreground": "#F4F7F2", "card": "#1A3C32", "primary": "#2ED38C", "primary-foreground": "#0A2E24", "muted": "#26463D", "muted-foreground": "#A9B7B0", "accent": "#2ED38C", "accent-foreground": "#0A2E24", "border": "#345249", "input": "#5C7A70", "ring": "#2ED38C", "income": "#2ED38C", "expense": "#E96368", "destructive": "#E96368" },
+      "inverseScope": ".theme-inverse aplica sempre o tema oposto ao da página, com os mesmos pares medidos."
+    },
+    "shadows": [
+      { "name": "card-float", "value": "0 14px 30px -14px rgb(4 20 15 / 0.35)", "purpose": "Repouso dos cartões de conta e ilustrativos (0,45 no cartão invertido)." },
+      { "name": "card-active", "value": "0 20px 40px -16px rgb(4 20 15 / 0.45)", "purpose": "Conta com mouse ou foco, junto com borda em accent." },
+      { "name": "device", "value": "inset 0 0 0 calc(var(--phone-w) * 0.006) #3a4643, 0 2px 6px rgb(4 20 15 / 0.2), 0 32px 64px -20px rgb(4 20 15 / 0.45)", "purpose": "O iPhone em CSS." },
+      { "name": "window", "value": "0 30px 60px -24px rgb(4 20 15 / 0.4)", "purpose": "Janela de navegador do fechamento." },
+      { "name": "bottom-bar", "value": "0 -10px 30px -18px rgb(4 20 15 / 0.35)", "purpose": "Barra fixa de CTA no celular." },
+      { "name": "row-active", "value": "0 0 0 1.5px var(--accent), 0 4px 12px -6px rgb(4 20 15 / 0.3)", "purpose": "Conta destacada dentro do aparelho; o fundo não muda." }
+    ],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Curva única de entrada (soma do saldo, ticker, troca de tela, fio ativo)." },
+      { "name": "wire-pulse-ease", "value": "cubic-bezier(0.55, 0, 0.25, 1)", "purpose": "Pulso que percorre cada fio uma vez na abertura." },
+      { "name": "sum-row", "value": "700ms, 120ms entre linhas", "purpose": "As contas se somam no saldo." },
+      { "name": "ticker", "value": "560ms, 22ms entre dígitos", "purpose": "Dígitos do valor rolam ao trocar." },
+      { "name": "screen-in", "value": "480ms", "purpose": "Troca de tela no aparelho, deslize de 8% com desfoque." },
+      { "name": "reduced-motion", "value": "prefers-reduced-motion: no-preference", "purpose": "Toda animação fica sob esta guarda; conteúdo visível por padrão." }
+    ],
+    "breakpoints": [
+      { "name": "base", "value": "375px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Chamada principal: verde profundo no claro, verde vivo no escuro (via --primary).",
+      "html": "<button class=\"ds-btn-primary\">Criar conta grátis</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 52px; padding: 0 28px; border: 1px solid transparent; border-radius: 10px; background: var(--primary, #0A2E24); color: var(--primary-foreground, #F4F7F2); font: 500 1rem/1 'Geist Variable', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: all 150ms; outline: none; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary, #0A2E24) 80%, transparent); } .ds-btn-primary:focus-visible { border-color: var(--ring, #197A50); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #197A50) 50%, transparent); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Botão outline",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Ação secundária (Entrar), borda em --input para passar 3:1.",
+      "html": "<button class=\"ds-btn-outline\">Entrar</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; height: 52px; padding: 0 28px; border: 1px solid var(--input, #738880); border-radius: 10px; background: var(--background, #F4F7F2); color: var(--foreground, #0A2E24); font: 500 1rem/1 'Geist Variable', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: all 150ms; outline: none; } .ds-btn-outline:hover { background: var(--muted, #E1E8E1); } .ds-btn-outline:focus-visible { border-color: var(--ring, #197A50); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #197A50) 50%, transparent); } .ds-btn-outline:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Campo de formulário com rótulo; 44 px de altura.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"voce@exemplo.com\" /></label>",
+      "css": ".ds-field { display: grid; gap: 8px; max-width: 24rem; } .ds-field-label { font: 500 0.875rem/1 'Geist Variable', ui-sans-serif, system-ui, sans-serif; color: var(--foreground, #0A2E24); } .ds-input { height: 44px; padding: 4px 10px; border: 1px solid var(--input, #738880); border-radius: 10px; background: transparent; color: var(--foreground, #0A2E24); caret-color: var(--ring, #197A50); font: 400 1rem 'Geist Variable', ui-sans-serif, system-ui, sans-serif; outline: none; transition: border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color: var(--muted-foreground, #576E66); } .ds-input:focus-visible { border-color: var(--ring, #197A50); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #197A50) 50%, transparent); } .ds-input[aria-invalid='true'] { border-color: var(--destructive, #C1393E); box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive, #C1393E) 20%, transparent); }"
+    },
+    {
+      "name": "Cabeçalho",
+      "kind": "nav",
+      "refersTo": "button-primary",
+      "description": "Marca à esquerda; Entrar e Criar conta à direita; borda inferior só depois de rolar.",
+      "html": "<header class=\"ds-header\"><a class=\"ds-brand\" href=\"#\"><svg viewBox=\"318 245 442 608\" width=\"23\" height=\"32\" aria-hidden=\"true\"><polygon points=\"323,390 409,390 510,641 510,848\" fill=\"currentColor\"/><polygon points=\"669,250 755,250 514,848 514,641\" fill=\"#2ED38C\"/></svg>Velos Wallet</a><nav class=\"ds-nav\"><a class=\"ds-nav-outline\" href=\"#\">Entrar</a><a class=\"ds-nav-primary\" href=\"#\">Criar conta</a></nav></header>",
+      "css": ".ds-header { display: flex; align-items: center; justify-content: space-between; height: 72px; padding: 0 32px; background: var(--background, #F4F7F2); border-bottom: 1px solid var(--border, #CDD6CF); color: var(--foreground, #0A2E24); font-family: 'Geist Variable', ui-sans-serif, system-ui, sans-serif; } .ds-brand { display: flex; align-items: center; gap: 10px; font-size: 1.125rem; font-weight: 600; letter-spacing: -0.025em; color: inherit; text-decoration: none; border-radius: 6px; } .ds-brand:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #197A50) 60%, transparent); } .ds-nav { display: flex; gap: 8px; } .ds-nav a { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 10px; font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: all 150ms; } .ds-nav-outline { border: 1px solid var(--input, #738880); color: var(--foreground, #0A2E24); } .ds-nav-outline:hover { background: var(--muted, #E1E8E1); } .ds-nav-primary { background: var(--primary, #0A2E24); color: var(--primary-foreground, #F4F7F2); } .ds-nav-primary:hover { background: color-mix(in oklch, var(--primary, #0A2E24) 80%, transparent); }"
+    },
+    {
+      "name": "Selo Exemplo",
+      "kind": "chip",
+      "refersTo": "chip-example",
+      "description": "Marca valores ilustrativos dentro do aparelho.",
+      "html": "<span class=\"ds-chip\">Exemplo</span>",
+      "css": ".ds-chip { display: inline-block; padding: 2px 8px; border-radius: 8px; background: var(--muted, #E1E8E1); color: var(--foreground, #0A2E24); font: 500 0.75rem/1.4 'Geist Variable', ui-sans-serif, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Cartão de conta",
+      "kind": "card",
+      "refersTo": "account-card",
+      "description": "Conta flutuante do palco: branco, borda fina, sombra suave, inclinação leve; destaque com borda em accent.",
+      "html": "<button class=\"ds-account\"><span class=\"ds-account-name\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 21h18\"/><path d=\"M5 21V10\"/><path d=\"M19 21V10\"/><path d=\"M12 3 3 8h18z\"/><path d=\"M9 21v-7\"/><path d=\"M15 21v-7\"/></svg>Conta corrente</span><span class=\"ds-account-value\">R$ 4.820,30</span></button>",
+      "css": ".ds-account { display: flex; flex-direction: column; gap: 6px; width: 14rem; padding: 20px; border: 1px solid var(--border, #CDD6CF); border-radius: 18px; background: var(--card, #F5F8F3); color: var(--card-foreground, #0A2E24); text-align: left; font-family: 'Geist Variable', ui-sans-serif, system-ui, sans-serif; rotate: -2deg; box-shadow: 0 14px 30px -14px rgb(4 20 15 / 0.35); transition: box-shadow 250ms, border-color 250ms; cursor: pointer; outline: none; } .ds-account:hover { border-color: var(--accent, #2ED38C); box-shadow: 0 20px 40px -16px rgb(4 20 15 / 0.45); } .ds-account:focus-visible { border-color: var(--accent, #2ED38C); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #197A50) 60%, transparent), 0 20px 40px -16px rgb(4 20 15 / 0.45); } .ds-account-name { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--muted-foreground, #576E66); } .ds-account-value { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Cartão de dívida (tema invertido)",
+      "kind": "card",
+      "refersTo": "account-card-debt",
+      "description": "O cartão de crédito em .theme-inverse: verde profundo na página clara, dívida em expense com sinal.",
+      "html": "<div class=\"ds-debt\"><span class=\"ds-debt-name\">Cartão de crédito</span><span class=\"ds-debt-value\">- R$ 1.240,00</span><span class=\"ds-debt-name\">Fora do saldo total</span></div>",
+      "css": ".ds-debt { display: flex; flex-direction: column; gap: 6px; width: 16rem; padding: 20px; border-radius: 18px; background: #0A2E24; color: #F4F7F2; font-family: 'Geist Variable', ui-sans-serif, system-ui, sans-serif; rotate: -3deg; box-shadow: 0 14px 30px -14px rgb(4 20 15 / 0.45); } .ds-debt-name { font-size: 0.875rem; color: #A9B7B0; } .ds-debt-value { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.025em; color: #E96368; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Fio de convergência",
+      "kind": "custom",
+      "refersTo": "account-card",
+      "description": "Fio tracejado neutro que se acende em verde vivo quando a conta é destacada.",
+      "html": "<div class=\"ds-wires\"><svg width=\"220\" height=\"12\" aria-hidden=\"true\"><line x1=\"0\" y1=\"6\" x2=\"208\" y2=\"6\" class=\"ds-wire\"/><circle cx=\"212\" cy=\"6\" r=\"4.5\" class=\"ds-port\"/></svg><svg width=\"220\" height=\"12\" aria-hidden=\"true\" class=\"ds-lit\"><line x1=\"0\" y1=\"6\" x2=\"208\" y2=\"6\" class=\"ds-wire\"/><circle cx=\"212\" cy=\"6\" r=\"4.5\" class=\"ds-port\"/></svg></div>",
+      "css": ".ds-wires { display: grid; gap: 16px; padding: 16px; background: var(--background, #F4F7F2); } .ds-wire { fill: none; stroke: var(--input, #738880); stroke-width: 1.5; stroke-dasharray: 4 6; transition: stroke 200ms; } .ds-port { fill: var(--background, #F4F7F2); stroke: var(--input, #738880); stroke-width: 1.5; transition: fill 200ms, stroke 200ms; } .ds-lit .ds-wire, .ds-wires svg:hover .ds-wire { stroke: var(--accent, #2ED38C); stroke-width: 2; stroke-dasharray: none; } .ds-lit .ds-port, .ds-wires svg:hover .ds-port { fill: var(--accent, #2ED38C); stroke: var(--accent, #2ED38C); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Tudo converge",
+    "overview": "O Velos é um mundo de dois verdes e um papel claro. O verde profundo é a marca e a tinta; o off-white é o papel; o verde vivo aparece em poucos pontos, sempre como sinal de dinheiro ou de \"isto está ligado agora\". O motivo visual que o build carrega é a convergência: pedaços de dinheiro espalhados (cartões de conta brancos, levemente inclinados) ligados por fios tracejados a um único iPhone desenhado em CSS, onde viram um saldo só. A interface é direta, de densidade média, com títulos grandes e apertados em Geist e números sempre tabulares.\n\nClaro e escuro são inversões exatas da mesma identidade, como as duas versões do logo. Uma área marcada como `.theme-inverse` usa sempre o tema oposto ao da página: o painel da marca nas telas de entrada, a faixa \"Privado por padrão\" e o cartão de crédito. É assim que o sistema cria ritmo de cor sem inventar cores novas. Profundidade vem de sombras suaves tingidas de verde, nunca de sombras duras ou gradientes decorativos.\n\nA acessibilidade é parte da identidade, não um acabamento: todo par texto/fundo é medido (≥ 4,5:1, registrado em comentário no `globals.css`), borda de campo ≥ 3:1, e dinheiro nunca depende só da cor.",
+    "keyCharacteristics": [
+      "Dois temas que são a mesma paleta invertida, mais o escopo `.theme-inverse`.",
+      "Verde vivo raro e com função (marca, fio ativo, dinheiro no escuro, primário no escuro).",
+      "Títulos Geist 600 com tracking negativo forte; números tabulares em todo valor.",
+      "Cartões brancos de borda fina e sombra suave tingida de verde; o cartão de dívida em tema invertido.",
+      "Fios tracejados neutros que se acendem em verde vivo; iPhone grafite em CSS como vitrine do app.",
+      "Movimento com uma única curva (ease-out exponencial), visível por padrão e desligado com \"reduzir movimento\"."
+    ],
+    "rules": [
+      { "name": "The Two Greens Rule", "body": "O verde profundo é a marca; o verde vivo é dinheiro e acento. No tema claro o verde vivo nunca é botão principal, texto nem anel de foco: ali ele só aparece como haste da marca, contorno, fio, porta ou preenchimento de progresso no escuro.", "section": "colors" },
+      { "name": "The Money Token Rule", "body": "Cor de dinheiro só pelos tokens `income` e `expense`, e nunca sozinha: todo valor leva sinal `+`/`-`, seta ou ícone. Paletas soltas (emerald, red) não existem neste sistema.", "section": "colors" },
+      { "name": "The Measured Pair Rule", "body": "Todo token de texto vem com o contraste medido em comentário no `globals.css`. Mexeu num token, remediu. Destaque de estado muda contorno e sombra, nunca o fundo, para os pares medidos continuarem válidos.", "section": "colors" },
+      { "name": "The Inverse Scope Rule", "body": "Para mudar o ritmo de cor, use `.theme-inverse` (o tema oposto, com os mesmos pares já medidos) em vez de criar uma cor de faixa nova.", "section": "colors" },
+      { "name": "The Tabular Rule", "body": "Todo valor em reais e toda porcentagem usa números tabulares, para dígitos não dançarem quando o valor troca.", "section": "typography" },
+      { "name": "The Sentence Case Rule", "body": "Nada em caixa alta nem com tracking positivo: rótulos e títulos em caixa de frase, como no build.", "section": "typography" },
+      { "name": "The Floating Objects Rule", "body": "Só o que está \"no palco\" ganha sombra. Controles e superfícies de leitura ficam planos; o cartão da shadcn usa um anel de 1 px (foreground a 10%) em vez de sombra.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use verde profundo como botão principal e texto no claro, e deixe o tema escuro inverter para verde vivo com texto em verde profundo.",
+      "Do mostre dinheiro com `text-income` / `text-expense`, número tabular e sinal `+`/`-` ou seta, sempre.",
+      "Do meça e registre no `globals.css` o contraste de todo par novo (≥ 4,5:1 para texto, ≥ 3:1 para borda de controle).",
+      "Do use `.theme-inverse` para faixas e painéis de contraste em vez de cores novas.",
+      "Do destaque estado com contorno em `accent` e sombra, mantendo o fundo original.",
+      "Do dê a toda lista estados de carregamento (skeleton), vazio e erro, e alvos de toque de 44 px.",
+      "Do use ícones lucide de traço único, no tom do texto."
+    ],
+    "donts": [
+      "Don't use verde vivo como botão principal, texto ou anel de foco no tema claro (1,80:1 sobre o off-white).",
+      "Don't use paletas soltas do Tailwind (`emerald`, `red`, `green`) para dinheiro ou estado.",
+      "Don't dependa só da cor para receita, despesa, dívida ou validação.",
+      "Don't use caixa alta, tracking positivo ou rótulos-kicker acima dos títulos.",
+      "Don't dê sombra a botões, campos ou linhas; sombra é só para objetos flutuantes no palco.",
+      "Don't anime sem a guarda de \"reduzir movimento\" nem esconda conteúdo até a animação rodar."
+    ]
+  }
+}

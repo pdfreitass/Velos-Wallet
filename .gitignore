@@ -1,5 +1,5 @@
-# Dependencias
-/node_modules
+# Dependências (raiz e web/)
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -8,11 +8,16 @@
 !.yarn/releases
 !.yarn/versions
 
-# Build
-/.next/
-/out/
-/build
-/dist
+# Build do front
+web/dist/
+
+# .NET (api/)
+bin/
+obj/
+*.user
+.vs/
+api/src/Velos.Api/wwwroot/
+TestResults/
 
 # Testes
 /coverage
@@ -30,10 +35,6 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
-next-env.d.ts
-
-# Deploy
-.vercel
 
 # Supabase (CLI local)
 supabase/.temp
@@ -46,3 +47,30 @@ supabase/.branches
 *.pem
 Thumbs.db
 desktop.ini
+
+# Playwright MCP (screenshots e saidas dos agentes)
+.playwright-mcp/
+
+# impeccable-ignore-start
+# Ephemeral output, runtime state, and per-dev overrides.
+# The **/ prefix covers .impeccable at the repo root or in a nested workspace.
+# Shared artifacts stay tracked: config.json, live/config.json,
+# design.json, surfaces/*.md, critique/*.md.
+**/.impeccable/config.local.json
+**/.impeccable/hook.cache.json
+**/.impeccable/hook.pending.json
+**/.impeccable/*.png
+**/.impeccable/review/
+**/.impeccable/questions/
+**/.impeccable/live/server.json
+**/.impeccable/live/sessions/
+**/.impeccable/live/previews/
+**/.impeccable/live/annotations/
+**/.impeccable/live/cache/
+**/.impeccable/live/manual-edit-apply-transaction.json
+**/.impeccable/live/manual-edit-events.jsonl
+**/.impeccable/live/manual-edit-evidence/
+**/.impeccable/live/pending-manual-edits.json
+**/.impeccable/live/deferred-svelte-component-accepts.json
+**/.impeccable/live/*.png
+# impeccable-ignore-end

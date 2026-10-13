@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Saldo em manchete · Velos Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1440px; height: 900px; overflow: hidden; position: relative;
+    font-family: Geist, system-ui, sans-serif; background: #0A2E24; color: #F4F7F2; }
+  header { position: absolute; top: 28px; left: 80px; right: 80px; display: flex;
+    align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+  .mark { width: 22px; height: 30px; }
+  .nav { display: flex; gap: 12px; }
+  .btn { height: 44px; padding: 0 22px; border-radius: 10px; display: inline-flex; align-items: center;
+    font-size: 16px; font-weight: 500; }
+  .ghost { border: 1px solid rgba(244,247,242,.35); color: #F4F7F2; }
+  .solid { background: #2ED38C; color: #0A2E24; }
+  h1 { position: absolute; left: 76px; top: 128px; width: 1290px; font-size: 118px; line-height: .98;
+    letter-spacing: -0.045em; font-weight: 600; }
+  .rule { position: absolute; left: 80px; right: 80px; top: 400px; height: 1px; background: rgba(244,247,242,.2); }
+  .figure { position: absolute; left: 80px; top: 432px; }
+  .figure .label { font-size: 16px; color: #A9B7B0; display: flex; gap: 12px; align-items: center; }
+  .chip { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(244,247,242,.35); color: #F4F7F2; }
+  .figure .num { font-size: 132px; font-weight: 600; letter-spacing: -0.05em; line-height: 1; margin-top: 10px;
+    color: #2ED38C; font-variant-numeric: tabular-nums; }
+  .figure .delta { margin-top: 18px; font-size: 20px; color: #F4F7F2; }
+  .figure .delta b { color: #2ED38C; font-weight: 600; }
+  .ctas { position: absolute; left: 80px; top: 790px; display: flex; gap: 12px; align-items: center; }
+  .ctas .big { height: 54px; padding: 0 30px; font-size: 17px; }
+  .ctas p { margin-left: 18px; font-size: 15px; color: #A9B7B0; }
+  .phone { position: absolute; left: 1050px; top: 420px; width: 270px; height: 560px; border-radius: 48px;
+    background: #F4F7F2; padding: 10px; transform: rotate(8deg); box-shadow: 0 40px 80px rgba(0,0,0,.45); }
+  .screen { height: 100%; border-radius: 39px; background: #FFFFFF; padding: 50px 18px 18px; color: #0A2E24; position: relative; overflow: hidden; }
+  .island { position: absolute; top: 11px; left: 50%; width: 84px; height: 24px; margin-left: -42px; border-radius: 16px; background: #0A2E24; }
+  .m { font-size: 12px; color: #5E766E; }
+  .month { font-size: 20px; font-weight: 600; margin-top: 2px; }
+  .bars { display: flex; gap: 14px; align-items: flex-end; height: 120px; margin-top: 18px; }
+  .bars div { flex: 1; border-radius: 8px 8px 0 0; }
+  .b-in { height: 100%; background: #1C7F54; }
+  .b-out { height: 58%; background: #CA3F44; }
+  .legend { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; }
+  .tx { margin-top: 16px; border-top: 1px solid #D3DBD5; }
+  .tx div { display: flex; justify-content: space-between; font-size: 13px; padding: 10px 0; border-bottom: 1px solid #D3DBD5; }
+  .in { color: #1C7F54; font-weight: 600; }
+  .out { color: #CA3F44; font-weight: 600; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="318 245 442 608"><polygon points="323,390 409,390 510,641 510,848" fill="#F4F7F2"/><polygon points="669,250 755,250 514,848 514,641" fill="#2ED38C"/></svg>
+      Velos Wallet
+    </div>
+    <nav class="nav"><span class="btn ghost">Entrar</span><span class="btn solid">Criar conta</span></nav>
+  </header>
+
+  <h1>Seu dinheiro na direção certa.</h1>
+  <div class="rule"></div>
+
+  <section class="figure">
+    <p class="label">Saldo total de hoje <span class="chip">Exemplo</span></p>
+    <p class="num">R$ 10.650,45</p>
+    <p class="delta"><b>+R$ 4.200,00</b> de salário entrou hoje · todas as contas somadas num número só</p>
+  </section>
+
+  <div class="ctas">
+    <span class="btn solid big">Criar conta grátis</span>
+    <span class="btn ghost big">Entrar</span>
+    <p>Sem loja de apps: abre no navegador.</p>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="island"></div>
+      <p class="m">Outubro de 2026</p>
+      <p class="month">Entradas × saídas</p>
+      <div class="bars"><div class="b-in"></div><div class="b-out"></div></div>
+      <div class="legend"><span class="in">+R$ 6.420,00</span><span class="out">-R$ 3.712,38</span></div>
+      <div class="tx">
+        <div><span>Salário</span><span class="in">+R$ 4.200,00</span></div>
+        <div><span>Mercado</span><span class="out">-R$ 89,90</span></div>
+        <div><span>Transporte</span><span class="out">-R$ 32,40</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

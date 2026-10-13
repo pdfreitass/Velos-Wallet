@@ -1,0 +1,505 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* "dark:" vale onde o tema EFETIVO é escuro: dentro da página escura (fora de um .theme-inverse)
+   ou dentro de um .theme-inverse numa página clara. Ver o bloco de tokens abaixo. */
+@custom-variant dark {
+  &:where(.dark *):not(:where(.dark .theme-inverse, .dark .theme-inverse *)) {
+    @slot;
+  }
+  &:where(:root:not(.dark) .theme-inverse, :root:not(.dark) .theme-inverse *) {
+    @slot;
+  }
+}
+
+@theme inline {
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* Geist servida pelo @fontsource-variable/geist (antes vinha do next/font). */
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-heading: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* .theme-inverse: área que usa SEMPRE o tema oposto ao da página (o painel da marca nas telas de
+   entrada, a tela do iPhone da página inicial): verde profundo com a página clara, off-white
+   com a página escura, como as duas versões do logo. .theme-base, dentro de uma área invertida,
+   volta ao tema da página (a tela do iPhone no painel invertido). Os pares texto/fundo são os
+   mesmos já medidos em cada tema. */
+:root,
+.dark .theme-inverse,
+:root:not(.dark) .theme-inverse .theme-base {
+  /* Identidade Velos Wallet — extraida de velos-perfil-claro/escuro.png
+     #F4F7F2 off-white · #0A2E24 verde profundo · #2ED38C verde vivo
+     Regra: o verde VIVO e dinheiro e acento; o verde PROFUNDO e a marca.
+     Os contrastes em comentario foram medidos (WCAG 2.1, alvo 4.5:1).
+     Revisão do Pedro (spec 003): o fundo do tema claro ficou "branco demais" perto do verde e
+     desceu de #F4F7F2 para #ECF1EA; os tons de texto abaixo escureceram para seguir >= 4.5:1. */
+  --background: #ECF1EA;
+  --foreground: #0A2E24;              /* 12.83:1 sobre o fundo */
+  /* Cartões um passo mais claros que o fundo (nunca #FFFFFF, que "estoura" perto do verde).
+     Sobre o card: texto 13.72:1, muted 5.12:1, despesa 5.00:1, receita 4.97:1, campo 3.52:1. */
+  --card: #F5F8F3;
+  --card-foreground: #0A2E24;
+  --popover: #F5F8F3;
+  --popover-foreground: #0A2E24;
+  --primary: #0A2E24;                 /* marca: botoes e chrome */
+  --primary-foreground: #F4F7F2;      /* 13.60:1 sobre o primary */
+  --secondary: #E1E8E1;
+  --secondary-foreground: #0A2E24;    /* 11.78:1 sobre o secondary */
+  --muted: #E1E8E1;
+  --muted-foreground: #576E66;        /* 4.79:1 sobre o fundo (o #5E766E daria 4.27:1) */
+  --accent: #2ED38C;                  /* verde vivo: so como acento */
+  --accent-foreground: #0A2E24;       /* 7.57:1 sobre o accent */
+  --destructive: #C1393E;             /* 4.68:1 sobre o fundo */
+  --border: #CDD6CF;                  /* divisores decorativos (sem exigência de contraste) */
+  /* Borda de campo identifica o controle: WCAG 1.4.11 pede >= 3:1.
+     O #D3DBD5 anterior dava 1.31:1 (medido na spec 001, T16). */
+  --input: #738880;                   /* 3.30:1 sobre o fundo, 3.52:1 sobre o card */
+  /* Foco visível. O verde vivo dava 1.80:1 sobre o fundo claro. */
+  --ring: #197A50;                    /* 4.65:1 sobre o fundo */
+  /* Dinheiro. No tema claro o verde da marca reprova em contraste (1.80:1),
+     por isso aqui usa-se a versao escurecida. Nunca usar so a cor: os
+     componentes acrescentam sinal e icone. */
+  --income: #197A50;                  /* 4.65:1 sobre o fundo */
+  --expense: #C1393E;                 /* 4.68:1 sobre o fundo */
+  /* Categorias do grafico: categoricas e distinguiveis, ancoradas no verde.
+     Podem ser afinadas na Etapa 6, quando o grafico existir. */
+  --chart-1: #197A50;
+  --chart-2: #0E7490;
+  --chart-3: #B45309;
+  --chart-4: #6D28D9;
+  --chart-5: #BE123C;
+  --radius: 0.625rem;
+  --sidebar: #F5F8F3;
+  --sidebar-foreground: #0A2E24;
+  --sidebar-primary: #0A2E24;
+  --sidebar-primary-foreground: #F4F7F2;
+  --sidebar-accent: #E1E8E1;
+  --sidebar-accent-foreground: #0A2E24;
+  --sidebar-border: #CDD6CF;
+  --sidebar-ring: #197A50;            /* o verde vivo dava 1.80:1 (anel de foco) */
+}
+
+.dark,
+:root:not(.dark) .theme-inverse,
+.dark .theme-inverse .theme-base {
+  /* Inversao exata da identidade, como nas duas imagens de perfil. */
+  --background: #0A2E24;
+  --foreground: #F4F7F2;              /* 13.60:1 sobre o fundo */
+  --card: #1A3C32;
+  --card-foreground: #F4F7F2;
+  --popover: #1A3C32;
+  --popover-foreground: #F4F7F2;
+  --primary: #2ED38C;                 /* no escuro o verde vivo ja passa */
+  --primary-foreground: #0A2E24;      /* 7.57:1 sobre o primary */
+  --secondary: #26463D;
+  --secondary-foreground: #F4F7F2;
+  --muted: #26463D;
+  --muted-foreground: #A9B7B0;        /* 7.06:1 sobre o fundo */
+  --accent: #2ED38C;
+  --accent-foreground: #0A2E24;
+  --destructive: #E96368;             /* 4.51:1 sobre o fundo */
+  --border: #345249;
+  --input: #5C7A70;                   /* 3.13:1 sobre o fundo (antes #345249, 1.71:1) */
+  --ring: #2ED38C;                    /* 7.57:1 sobre o fundo */
+  --income: #2ED38C;                  /* 7.57:1 sobre o fundo */
+  --expense: #E96368;                 /* 4.51:1 sobre o fundo */
+  --chart-1: #2ED38C;
+  --chart-2: #22D3EE;
+  --chart-3: #FBBF24;
+  --chart-4: #A78BFA;
+  --chart-5: #FB7185;
+  --sidebar: #1A3C32;
+  --sidebar-foreground: #F4F7F2;
+  --sidebar-primary: #2ED38C;
+  --sidebar-primary-foreground: #0A2E24;
+  --sidebar-accent: #26463D;
+  --sidebar-accent-foreground: #F4F7F2;
+  --sidebar-border: #345249;
+  --sidebar-ring: #2ED38C;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    @apply font-sans;
+    /* A barra fixa "Criar conta" da página inicial (celular) não cobre o elemento com foco. */
+    scroll-padding-bottom: 6rem;
+    /* Barra de rolagem com a paleta, não o cinza do sistema. */
+    scrollbar-color: var(--border) transparent;
+  }
+  /* Partes que o navegador desenha também levam a identidade. */
+  ::selection {
+    background-color: color-mix(in oklch, var(--accent) 35%, transparent);
+    color: var(--foreground);
+  }
+  input,
+  textarea {
+    caret-color: var(--ring);
+  }
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+}
+
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Vitrine do app (spec 003): o iPhone desenhado em CSS, usado na página inicial e no painel das
+   telas de entrada. Componentes em web/src/features/showcase/.
+   --------------------------------------------------------------------------------------------- */
+
+.phone {
+  --phone-w: 300px;
+  /* Grafite com um toque do verde da marca; a borda clara separa o aparelho do fundo escuro. */
+  --phone-frame: #1b2220;
+  --phone-edge: #3a4643;
+  position: relative;
+  flex-shrink: 0;
+  width: var(--phone-w);
+  aspect-ratio: 1 / 2.05;
+  border-radius: calc(var(--phone-w) * 0.165);
+  background: var(--phone-frame);
+  box-shadow:
+    inset 0 0 0 calc(var(--phone-w) * 0.006) var(--phone-edge),
+    0 2px 6px rgb(4 20 15 / 0.2),
+    0 32px 64px -20px rgb(4 20 15 / 0.45);
+}
+
+/* Botões laterais: volume (dois, com a sombra repetindo o primeiro) e liga/desliga. */
+.phone::before,
+.phone::after {
+  content: "";
+  position: absolute;
+  width: calc(var(--phone-w) * 0.011);
+  background: var(--phone-edge);
+}
+.phone::before {
+  left: calc(var(--phone-w) * -0.009);
+  top: 20%;
+  height: 6.5%;
+  border-radius: 2px 0 0 2px;
+  box-shadow: 0 calc(var(--phone-w) * 0.17) 0 var(--phone-edge);
+}
+.phone::after {
+  right: calc(var(--phone-w) * -0.009);
+  top: 26%;
+  height: 10%;
+  border-radius: 0 2px 2px 0;
+}
+
+.phone-screen {
+  position: absolute;
+  inset: calc(var(--phone-w) * 0.036);
+  overflow: hidden;
+  border-radius: calc(var(--phone-w) * 0.13);
+}
+
+.phone-island {
+  position: absolute;
+  top: calc(var(--phone-w) * 0.03);
+  left: 50%;
+  z-index: 1;
+  width: calc(var(--phone-w) * 0.3);
+  height: calc(var(--phone-w) * 0.088);
+  translate: -50% 0;
+  border-radius: 999px;
+  background: #050807;
+}
+
+/* Dentro da tela, os tokens do Tailwind ficam proporcionais ao aparelho: 1 unidade = 4 px num
+   iPhone de 320 px. Assim p-4, text-sm e size-4 escalam juntos em qualquer tamanho. */
+.device-screen {
+  --device-unit: calc(var(--device-w, var(--phone-w)) / 80);
+  --spacing: var(--device-unit);
+  --radius: calc(var(--device-unit) * 2.5);
+  --text-xs: calc(var(--device-unit) * 3);
+  --text-sm: calc(var(--device-unit) * 3.5);
+  --text-base: calc(var(--device-unit) * 4);
+  --text-lg: calc(var(--device-unit) * 4.5);
+  --text-xl: calc(var(--device-unit) * 5);
+  --text-2xl: calc(var(--device-unit) * 6);
+  --text-3xl: calc(var(--device-unit) * 7.5);
+}
+
+/* Tamanhos. hero: página inicial (no desktop, limitado pela altura da tela). compact: painel
+   das telas de entrada. peek: só a parte de cima, nas seções da página no celular. */
+.phone--hero {
+  --phone-w: min(300px, calc(100vw - 4.5rem));
+}
+@media (width >= 64rem) {
+  .phone--hero {
+    --phone-w: clamp(264px, calc((100svh - 8rem) / 2.05), 320px);
+  }
+}
+.phone--compact {
+  --phone-w: clamp(212px, calc((100dvh - 24rem) / 2.05), 264px);
+}
+.phone--peek {
+  --phone-w: min(280px, calc(100vw - 6rem));
+  aspect-ratio: auto;
+  height: calc(var(--phone-w) * 1.22);
+  overflow: hidden;
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+.phone--peek::before,
+.phone--peek::after {
+  display: none;
+}
+.phone--peek .phone-screen {
+  bottom: auto;
+  height: calc(var(--phone-w) * (2.05 - 0.072));
+}
+
+/* "No celular e no computador" (fechamento da página): janela de navegador com o app em duas
+   colunas, escalada pela largura da janela, e um iPhone menor por cima. */
+.devices {
+  --browser-w: min(40rem, calc(100vw - 4rem));
+  width: var(--browser-w);
+  justify-self: center;
+}
+@media (width >= 64rem) {
+  .devices {
+    --browser-w: clamp(26rem, 40vw, 40rem);
+  }
+}
+.browser-screen {
+  --device-w: calc(var(--browser-w) * 0.5);
+}
+.phone--mini {
+  --phone-w: calc(var(--browser-w) * 0.3);
+}
+
+/* Na primeira dobra os fios chegam pela esquerda do aparelho: sem os botões de volume ali. */
+.stage-phone .phone::before {
+  display: none;
+}
+
+/* Conta destacada na tela de contas: o cartão de mesmo nome na página está com o mouse em cima,
+   ou a seção fala dela. Só contorno no verde vivo (o fio que chega nela) e sombra: o fundo não
+   muda, para os pares de texto continuarem os medidos sobre --background (o vermelho da dívida
+   sobre o card escuro dava 3.71:1, medido pelo Lighthouse na T8). */
+.account-row {
+  transition: box-shadow 200ms;
+}
+.account-row[data-active] {
+  box-shadow:
+    0 0 0 1.5px var(--accent),
+    0 4px 12px -6px rgb(4 20 15 / 0.3);
+}
+
+/* Rosca de gastos: o buraco é uma máscara, não uma camada por cima. */
+.donut {
+  mask-image: radial-gradient(farthest-side, transparent 63%, #000 64%);
+}
+
+/* Fios que ligam as contas ao iPhone (página inicial). Tracejado neutro em repouso; o fio da
+   conta destacada se desenha em verde vivo. pathLength=1 nos traços animados. */
+.wire {
+  fill: none;
+  stroke: var(--input);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+}
+.wire-lit {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.wire-active {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-active] > .wire-active {
+  stroke-dashoffset: 0;
+}
+.wire-pulse {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 0.12 2;
+  stroke-dashoffset: 0.12;
+  opacity: 0;
+}
+.wire-port {
+  fill: var(--background);
+  stroke: var(--input);
+  stroke-width: 1.5;
+}
+[data-active] > .wire-port {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+/* Cartões de conta da primeira dobra: inclinação própria + profundidade com o mouse (--tilt-*,
+   escritas pela página só com ponteiro fino e sem "reduzir movimento"). */
+.stage-card {
+  rotate: var(--card-rotate, 0deg);
+  translate: calc(var(--tilt-x, 0) * var(--depth, 1) * -7px) calc(var(--tilt-y, 0) * var(--depth, 1) * -5px);
+}
+@media (width >= 64rem) {
+  .stage-card {
+    rotate: var(--card-rotate-lg, var(--card-rotate, 0deg));
+  }
+}
+.stage-phone {
+  transform: perspective(1600px) rotateY(calc(var(--tilt-x, 0) * -3.5deg))
+    rotateX(calc(var(--tilt-y, 0) * 2.5deg));
+}
+
+/* No desktop o iPhone acompanha as seções: fica centrado na altura útil (abaixo do cabeçalho de
+   4.5rem) e começa já nessa posição, para não "pular" quando a rolagem começa. A altura repete
+   a fórmula de .phone--hero. */
+@media (width >= 64rem) {
+  .phone-sticky {
+    --phone-h: calc(clamp(264px, calc((100svh - 8rem) / 2.05), 320px) * 2.05);
+    --phone-top: max(5.5rem, calc(4.5rem + (100svh - 4.5rem - var(--phone-h)) / 2));
+    position: sticky;
+    top: var(--phone-top);
+    margin-top: calc(var(--phone-top) - 4.5rem);
+  }
+}
+
+/* Movimento: o conteúdo é visível por padrão e só se mexe com movimento permitido (RN5). */
+@media (prefers-reduced-motion: no-preference) {
+  /* Assinatura: as contas "se somam" uma vez, depois o número do saldo assenta. */
+  .sum-row {
+    animation: sum-row-in 700ms var(--ease-out-expo) both;
+    animation-delay: calc(120ms * var(--sum-index, 0) + var(--sum-base, 250ms));
+  }
+  .ticker-char {
+    animation: ticker-in 560ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--ticker-index, 0) * 22ms);
+  }
+  .ticker-intro .ticker-char {
+    animation-delay: calc(var(--sum-base, 250ms) + 620ms + var(--ticker-index, 0) * 22ms);
+  }
+  .screen-in {
+    animation: screen-in 480ms var(--ease-out-expo) both;
+  }
+  .grow-x {
+    transform-origin: left;
+    animation: grow-x 800ms var(--ease-out-expo) 120ms both;
+  }
+  .grow-turn {
+    animation: grow-turn 900ms var(--ease-out-expo) 80ms both;
+  }
+  .wire-active {
+    transition: stroke-dashoffset 650ms var(--ease-out-expo);
+  }
+  .wire-pulse {
+    animation: wire-pulse 950ms cubic-bezier(0.55, 0, 0.25, 1) both;
+    animation-delay: calc(250ms + var(--wire-index, 0) * 140ms);
+  }
+  .wire-port {
+    transition: fill 200ms, stroke 200ms;
+  }
+  .stage-card {
+    transition: box-shadow 250ms, border-color 250ms;
+  }
+}
+
+@keyframes sum-row-in {
+  from {
+    opacity: 0.25;
+    transform: translateY(6px);
+    filter: blur(2px);
+  }
+}
+
+@keyframes ticker-in {
+  from {
+    opacity: 0.15;
+    transform: translateY(70%);
+    filter: blur(3px);
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0.2;
+    transform: translateX(calc(var(--screen-dir, 1) * 8%));
+    filter: blur(4px);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0.04);
+  }
+}
+
+@keyframes grow-turn {
+  from {
+    opacity: 0.3;
+    transform: rotate(-40deg) scale(0.9);
+  }
+}
+
+@keyframes wire-pulse {
+  0% {
+    stroke-dashoffset: 0.12;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
+}

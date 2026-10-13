@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Vitrine dividida · Velos Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1440px; height: 900px; overflow: hidden; position: relative;
+    font-family: Geist, system-ui, sans-serif; background: #F4F7F2; color: #0A2E24; }
+  .field { position: absolute; top: 0; right: 0; width: 600px; height: 900px; background: #0A2E24; }
+  header { position: absolute; top: 28px; left: 80px; right: 72px; display: flex;
+    align-items: center; justify-content: space-between; z-index: 3; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+  .mark { width: 22px; height: 30px; }
+  .nav { display: flex; gap: 12px; }
+  .btn { height: 44px; padding: 0 22px; border-radius: 10px; display: inline-flex; align-items: center;
+    font-size: 16px; font-weight: 500; }
+  .on-green { color: #F4F7F2; border: 1px solid rgba(244,247,242,.35); }
+  .primary-light { background: #2ED38C; color: #0A2E24; }
+  .copy { position: absolute; left: 80px; top: 230px; width: 640px; z-index: 2; }
+  h1 { font-size: 76px; line-height: 1.02; letter-spacing: -0.035em; font-weight: 600; }
+  .sub { margin-top: 26px; font-size: 21px; line-height: 1.45; color: #5E766E; max-width: 520px; }
+  .ctas { margin-top: 40px; display: flex; gap: 12px; }
+  .primary { background: #0A2E24; color: #F4F7F2; height: 52px; padding: 0 28px; font-size: 17px; }
+  .outline { border: 1px solid #7D928A; height: 52px; padding: 0 28px; font-size: 17px; }
+  .note { margin-top: 28px; font-size: 14px; color: #5E766E; }
+  .phone { position: absolute; left: 800px; top: 120px; width: 316px; height: 650px; border-radius: 54px;
+    background: #102620; padding: 11px; transform: rotate(-7deg);
+    box-shadow: 0 50px 90px rgba(4,20,15,.45), 0 0 0 1px rgba(255,255,255,.08) inset; z-index: 2; }
+  .screen { height: 100%; border-radius: 44px; background: #F4F7F2; padding: 54px 22px 20px; position: relative; overflow: hidden; }
+  .island { position: absolute; top: 12px; left: 50%; width: 96px; height: 28px; margin-left: -48px; border-radius: 20px; background: #102620; }
+  .small { font-size: 13px; color: #5E766E; }
+  .balance { font-size: 34px; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
+  .tag { display: inline-block; margin-top: 8px; font-size: 11px; padding: 3px 8px; border-radius: 6px; background: #E6EBE6; color: #5E766E; }
+  .rows { margin-top: 22px; border-top: 1px solid #D3DBD5; }
+  .row { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #D3DBD5; font-size: 14px; }
+  .row b { font-weight: 600; }
+  .debt { color: #CA3F44; }
+  .tabs { position: absolute; left: 18px; right: 18px; bottom: 18px; display: flex; gap: 4px; padding: 4px;
+    border-radius: 14px; background: #E6EBE6; }
+  .tab { flex: 1; text-align: center; font-size: 12px; padding: 8px 0; border-radius: 10px; color: #5E766E; }
+  .tab.on { background: #0A2E24; color: #F4F7F2; }
+  .card { position: absolute; background: #FFFFFF; border-radius: 16px; padding: 14px 18px; z-index: 3;
+    box-shadow: 0 18px 40px rgba(4,20,15,.22); font-size: 14px; }
+  .card .t { color: #5E766E; font-size: 12px; }
+  .card .v { font-weight: 600; font-size: 18px; margin-top: 2px; }
+  .in { color: #1C7F54; }
+  .c1 { left: 1120px; top: 190px; }
+  .c2 { left: 690px; top: 560px; }
+  .c3 { left: 1150px; top: 610px; width: 220px; }
+  .bar { height: 8px; border-radius: 4px; background: #E6EBE6; margin-top: 10px; }
+  .bar i { display: block; height: 8px; width: 62%; border-radius: 4px; background: #1C7F54; }
+</style>
+</head>
+<body>
+  <div class="field"></div>
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="318 245 442 608"><polygon points="323,390 409,390 510,641 510,848" fill="#0A2E24"/><polygon points="669,250 755,250 514,848 514,641" fill="#2ED38C"/></svg>
+      Velos Wallet
+    </div>
+    <nav class="nav">
+      <span class="btn on-green">Entrar</span>
+      <span class="btn primary-light">Criar conta</span>
+    </nav>
+  </header>
+
+  <section class="copy">
+    <h1>Seu dinheiro na direção certa.</h1>
+    <p class="sub">Contas, gastos e metas num lugar só. Simples de usar, privado por padrão e sem loja de apps.</p>
+    <div class="ctas">
+      <span class="btn primary">Criar conta grátis</span>
+      <span class="btn outline">Entrar</span>
+    </div>
+    <p class="note">Funciona no navegador do celular e do computador.</p>
+  </section>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="island"></div>
+      <p class="small">Saldo total</p>
+      <p class="balance">R$ 10.650,45</p>
+      <span class="tag">Exemplo</span>
+      <div class="rows">
+        <div class="row"><span>Conta corrente</span><b>R$ 2.350,00</b></div>
+        <div class="row"><span>Poupança</span><b>R$ 8.120,45</b></div>
+        <div class="row"><span>Dinheiro</span><b>R$ 180,00</b></div>
+        <div class="row"><span>Cartão de crédito</span><b class="debt">-R$ 640,90</b></div>
+      </div>
+      <div class="tabs"><span class="tab on">Contas</span><span class="tab">Mês</span><span class="tab">Gastos</span><span class="tab">Metas</span></div>
+    </div>
+  </div>
+
+  <div class="card c1"><p class="t">Salário · hoje</p><p class="v in">+R$ 4.200,00</p></div>
+  <div class="card c2"><p class="t">Mercado · ontem</p><p class="v debt">-R$ 89,90</p></div>
+  <div class="card c3"><p class="t">Meta: reserva de emergência</p><p class="v">62%</p><div class="bar"><i></i></div></div>
+</body>
+</html>
