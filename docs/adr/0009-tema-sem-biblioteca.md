@@ -1,6 +1,6 @@
 # ADR 0009 — Tema claro/escuro por script inline, sem biblioteca
 
-- **Status:** Aceita
+- **Status:** Aceita (o padrão sem preferência salva foi alterado pelo [ADR 0016](0016-verde-escuro-como-tema-padrao.md))
 - **Data:** 2026-10-11
 - **Etapa:** 1 — Setup
 

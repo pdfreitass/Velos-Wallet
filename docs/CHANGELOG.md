@@ -6,6 +6,13 @@
 
 ## [Não lançado]
 
+### 2026-10-12 — Cores revisadas pelo Pedro (spec 003)
+#### Alterado
+- Verde escuro passa a ser o tema padrão de quem ainda não escolheu ([ADR 0016](adr/0016-verde-escuro-como-tema-padrao.md)); a barra do navegador acompanha o tema aplicado.
+- Tela do iPhone da vitrine sempre no tema oposto ao da página, para o aparelho nunca se misturar com o fundo.
+- Tema claro menos branco: fundo `#ECF1EA` (antes `#F4F7F2`) e cartões `#F5F8F3` (antes `#FFFFFF`). Para manter tudo ≥ 4,5:1, escureceram muted `#576E66`, despesa `#C1393E`, receita e foco `#197A50` e borda de campo `#738880` (3,30:1).
+- Painel das telas de entrada: promessas logo abaixo da frase e, a partir de 1280 px, três cartões do app (salário, mercado, meta) flutuando na moldura do iPhone.
+
 ### 2026-10-12 — Página inicial (spec 003)
 #### Adicionado
 - Página pública em `/`: composição "Tudo converge" (quatro contas ligadas por fios ao iPhone desenhado em CSS), abas acessíveis Contas · Mês · Gastos · Metas, número que rola como contador, seções com o iPhone fixo no desktop, faixa "Privado por padrão" em tema invertido, fechamento "Sem loja de apps.", barra fixa "Criar conta" no celular, rodapé com @veloswallet.

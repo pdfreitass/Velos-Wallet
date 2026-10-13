@@ -3,15 +3,16 @@ name: Velos Wallet
 description: Seu dinheiro na direção certa.
 colors:
   off-white: "#F4F7F2"
+  page-light: "#ECF1EA"
   deep-green: "#0A2E24"
   vivid-green: "#2ED38C"
-  card-white: "#FFFFFF"
-  sage-mist: "#E6EBE6"
-  sage-ink: "#5E766E"
-  border-sage: "#D3DBD5"
-  field-sage: "#7D928A"
-  money-green: "#1C7F54"
-  expense-red: "#CA3F44"
+  card-white: "#F5F8F3"
+  sage-mist: "#E1E8E1"
+  sage-ink: "#576E66"
+  border-sage: "#CDD6CF"
+  field-sage: "#738880"
+  money-green: "#197A50"
+  expense-red: "#C1393E"
   dark-card: "#1A3C32"
   dark-muted: "#26463D"
   dark-ink: "#A9B7B0"
@@ -155,6 +156,8 @@ A acessibilidade é parte da identidade, não um acabamento: todo par texto/fund
 - Títulos Geist 600 com tracking negativo forte; números tabulares em todo valor.
 - Cartões brancos de borda fina e sombra suave tingida de verde; o cartão de dívida em tema invertido.
 - Fios tracejados neutros que se acendem em verde vivo; iPhone grafite em CSS como vitrine do app.
+- A tela do iPhone usa sempre o tema oposto ao da página (`.theme-inverse`): verde profundo na página clara, off-white na escura. Dentro de uma área já invertida, volta ao tema da página (`.theme-base`).
+- Tema padrão: verde escuro para quem ainda não escolheu (ADR 0016). No tema claro o fundo da página é `#ECF1EA` (page-light), um passo abaixo do off-white da marca, e os cartões `#F5F8F3`: nunca branco puro. O off-white `#F4F7F2` segue como texto sobre o verde e nas peças da marca.
 - Movimento com uma única curva (ease-out exponencial), visível por padrão e desligado com "reduzir movimento".
 
 ## Colors
