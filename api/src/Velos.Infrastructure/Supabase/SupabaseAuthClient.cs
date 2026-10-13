@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Velos.Application.Abstractions;
 using Velos.Application.Auth;
 using Velos.Application.Common;
+using Velos.Domain.Auth;
 
 namespace Velos.Infrastructure.Supabase;
 
@@ -40,6 +41,67 @@ internal sealed partial class SupabaseAuthClient(HttpClient http, ILogger<Supaba
         catch (Exception exception) when (IsTransient(exception, cancellationToken))
         {
             LogUnavailable(logger, "logout", exception);
+        }
+    }
+
+    public Uri BuildGoogleAuthorizeUrl(string codeChallenge, string redirectTo)
+    {
+        var query = $"authorize?provider=google&redirect_to={Uri.EscapeDataString(redirectTo)}"
+            + $"&code_challenge={Uri.EscapeDataString(codeChallenge)}&code_challenge_method={PkcePair.Method}";
+
+        // BaseAddress é a URL do Supabase com /auth/v1/ (ver DependencyInjection).
+        return new Uri(http.BaseAddress!, query);
+    }
+
+    public async Task<Result<Unit>> SendPasswordResetAsync(
+        string email, string codeChallenge, string redirectTo, CancellationToken cancellationToken)
+    {
+        // redirect_to vai na QUERY (é assim que o GoTrue lê) e precisa estar nas Redirect URLs (C2).
+        var path = $"recover?redirect_to={Uri.EscapeDataString(redirectTo)}";
+        var body = new { email, code_challenge = codeChallenge, code_challenge_method = PkcePair.Method };
+        return await PostAsync("recover", path, body, cancellationToken);
+    }
+
+    public Task<Result<AuthSession>> ExchangeCodeAsync(string code, string codeVerifier, CancellationToken cancellationToken) =>
+        RequestSessionAsync(
+            "token?grant_type=pkce", new { auth_code = code, code_verifier = codeVerifier }, isSignUp: false, cancellationToken);
+
+    public async Task<Result<Unit>> UpdatePasswordAsync(string accessToken, string newPassword, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, "user")
+        {
+            Content = JsonContent.Create(new { password = newPassword }),
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        return await SendAsync("user", request, cancellationToken);
+    }
+
+    private async Task<Result<Unit>> PostAsync(
+        string endpoint, string path, object body, CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(body) };
+        return await SendAsync(endpoint, request, cancellationToken);
+    }
+
+    private async Task<Result<Unit>> SendAsync(
+        string endpoint, HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await http.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                return Result.Ok();
+            }
+
+            var code = await ReadErrorCodeAsync(response, cancellationToken) ?? "?";
+            LogRejected(logger, endpoint, (int)response.StatusCode, code);
+            return Result.Failure<Unit>(MapError(code, response.StatusCode));
+        }
+        catch (Exception exception) when (IsTransient(exception, cancellationToken))
+        {
+            LogUnavailable(logger, endpoint, exception);
+            return Result.Failure<Unit>(AuthErrors.Unavailable);
         }
     }
 

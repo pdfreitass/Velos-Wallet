@@ -1,6 +1,8 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Velos.Application.Auth.Google;
+using Velos.Application.Auth.PasswordReset;
 using Velos.Application.Auth.SignIn;
 using Velos.Application.Auth.SignOut;
 using Velos.Application.Auth.SignUp;
@@ -19,6 +21,11 @@ public static class DependencyInjection
         services.AddScoped<SignUpHandler>();
         services.AddScoped<SignOutHandler>();
         services.AddScoped<GetCurrentProfileHandler>();
+        services.AddScoped<RequestPasswordResetHandler>();
+        services.AddScoped<ConfirmPasswordResetHandler>();
+        services.AddScoped<ChangePasswordHandler>();
+        services.AddScoped<StartGoogleSignInHandler>();
+        services.AddScoped<CompleteGoogleSignInHandler>();
 
         return services;
     }

@@ -2,6 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Velos.Api.Auth;
 using Velos.Api.Http;
+using Velos.Application.Abstractions;
+using Velos.Application.Auth;
+using Velos.Application.Common;
+using Velos.Application.Auth.Google;
+using Velos.Application.Auth.PasswordReset;
 using Velos.Application.Auth.SignIn;
 using Velos.Application.Auth.SignOut;
 using Velos.Application.Auth.SignUp;
@@ -11,6 +16,10 @@ namespace Velos.Api.Controllers;
 public sealed record SignUpRequest(string? Name, string? Email, string? Password, string? ConfirmPassword);
 
 public sealed record SignInRequest(string? Email, string? Password);
+
+public sealed record PasswordResetRequest(string? Email);
+
+public sealed record ChangePasswordRequest(string? Password, string? ConfirmPassword);
 
 /// <summary>
 /// Entrada e saída (spec 001). Públicas por natureza ([AllowAnonymous] explícito); a sessão vai só
@@ -68,6 +77,99 @@ public sealed class AuthController : ControllerBase
     {
         await handler.HandleAsync(SessionCookies.ReadAccessToken(HttpContext), cancellationToken);
         SessionCookies.Clear(HttpContext);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Começa o login com Google (H4). Não é chamada por JavaScript: é o navegador seguindo um link,
+    /// e por isso responde 302 para o Supabase, que leva ao Google.
+    ///
+    /// O <c>next</c> é validado AQUI (vai dentro do endereço de volta) e DE NOVO no callback: o que
+    /// volta do Google passou por fora do app e não é confiável (RN7, CA9).
+    /// </summary>
+    [HttpGet("google")]
+    [AllowAnonymous]
+    public IActionResult SignInWithGoogle(
+        [FromQuery] string? next,
+        [FromServices] StartGoogleSignInHandler handler,
+        [FromServices] AuthFlowCookies cookies)
+    {
+        var callback = $"{Request.Scheme}://{Request.Host}/auth/callback"
+            + $"?next={Uri.EscapeDataString(SafeRedirect.Resolve(next))}";
+
+        var started = handler.Handle(callback);
+        cookies.WriteOAuthVerifier(HttpContext, started.CodeVerifier);
+        return Redirect(started.AuthorizeUrl.AbsoluteUri);
+    }
+
+    /// <summary>
+    /// "Esqueci minha senha" (H5, RN6). Resposta NEUTRA: 202 tanto para email com conta quanto sem
+    /// (RN4). O verifier do PKCE fica só no cookie httpOnly, nunca no corpo.
+    /// </summary>
+    [HttpPost("password-reset")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RequestPasswordReset(
+        PasswordResetRequest request,
+        [FromServices] RequestPasswordResetHandler handler,
+        [FromServices] AuthFlowCookies cookies,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Endereço de volta montado a partir desta request. Um Host forjado não vira open redirect:
+        // o Supabase só aceita o que estiver nas Redirect URLs do projeto (passo C2).
+        var redirectTo = $"{Request.Scheme}://{Request.Host}/auth/confirm";
+
+        var result = await handler.HandleAsync(
+            new RequestPasswordResetCommand(request.Email ?? ""), redirectTo, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return this.ToProblem(result.Error!);
+        }
+
+        cookies.WriteResetVerifier(HttpContext, result.Value.CodeVerifier);
+        return Accepted();
+    }
+
+    /// <summary>
+    /// Grava a senha nova. Privada (sem <c>[AllowAnonymous]</c>) E exige o cookie de recuperação do
+    /// MESMO usuário da sessão: sessão aberta, sozinha, não troca a senha (CA7).
+    /// </summary>
+    [HttpPut("password")]
+    public async Task<IActionResult> ChangePassword(
+        ChangePasswordRequest request,
+        [FromServices] ChangePasswordHandler handler,
+        [FromServices] AuthFlowCookies cookies,
+        [FromServices] IUserContext user,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (cookies.ReadTicket(HttpContext) != user.UserId)
+        {
+            return this.ToProblem(PasswordResetErrors.NotInRecovery);
+        }
+
+        if (SessionCookies.ReadAccessToken(HttpContext) is not { Length: > 0 } accessToken)
+        {
+            return this.ToProblem(AuthErrors.SessionExpired);
+        }
+
+        var result = await handler.HandleAsync(
+            new ChangePasswordCommand(request.Password ?? "", request.ConfirmPassword ?? ""),
+            accessToken,
+            new UserIdentity(user.UserId, user.Email),
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return this.ToProblem(result.Error!);
+        }
+
+        // Uso único: o ticket morre com a troca, e o verifier não serve mais para nada.
+        cookies.ClearTicket(HttpContext);
+        cookies.ClearResetVerifier(HttpContext);
         return NoContent();
     }
 }

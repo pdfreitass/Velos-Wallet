@@ -27,6 +27,8 @@ builder.Services.AddVelosAuthentication(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, HttpUserContext>();
+// Protege os cookies da recuperação de senha (httpOnly não impede o dono do navegador de forjar).
+builder.Services.AddSingleton<AuthFlowCookies>();
 builder.Services.AddApplication();
 
 // Dev: dotnet user-secrets (passo C7 do plano da spec 001). Produção: variável de ambiente
