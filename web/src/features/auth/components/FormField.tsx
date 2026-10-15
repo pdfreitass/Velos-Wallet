@@ -33,7 +33,8 @@ export function FormField({ id, label, error, describedBy, labelAside, children,
       </div>
       {children({ id, "aria-invalid": Boolean(error), "aria-describedby": descriptions || undefined })}
       {error ? (
-        <p id={errorId} className="text-sm text-destructive">
+        // role="alert": o erro que aparece ao sair do campo (mode onTouched) também é anunciado.
+        <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}
         </p>
       ) : null}

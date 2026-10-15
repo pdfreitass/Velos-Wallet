@@ -61,7 +61,10 @@ export function ForgotPasswordForm() {
       <div className="space-y-6">
         <div className="space-y-2">
           <MailCheck className="size-8 text-primary" aria-hidden="true" />
-          <h1 className="text-3xl font-semibold tracking-tight">Confira seu email</h1>
+          {/* Foco no título: o botão enviado some, e sem isto o leitor de tela não anuncia a troca. */}
+          <h1 ref={(heading) => heading?.focus()} tabIndex={-1} className="text-3xl font-semibold tracking-tight outline-none">
+            Confira seu email
+          </h1>
         </div>
 
         <div className="space-y-4 text-muted-foreground">
