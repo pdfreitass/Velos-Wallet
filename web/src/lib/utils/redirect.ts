@@ -16,15 +16,20 @@ export function getSafeRedirect(
   next: string | null | undefined,
   fallback: string = ROUTES.home,
 ): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) {
-    return fallback;
-  }
+  if (!next || !next.startsWith("/") || looksExternal(next)) return fallback;
 
   try {
     const url = new URL(next, INTERNAL_ORIGIN);
     if (url.origin !== INTERNAL_ORIGIN) return fallback;
-    return `${url.pathname}${url.search}${url.hash}`;
+    // Confere de novo DEPOIS de normalizar: "/..//x.com" passa na checagem acima,
+    // mas o parser remove o ".." e sobra "//x.com" (idem "/.//x.com", "/%2e%2e//x.com").
+    const resolved = `${url.pathname}${url.search}${url.hash}`;
+    return looksExternal(resolved) ? fallback : resolved;
   } catch {
     return fallback;
   }
+}
+
+function looksExternal(path: string): boolean {
+  return path.startsWith("//") || path.startsWith("/\\");
 }
