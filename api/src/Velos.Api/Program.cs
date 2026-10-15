@@ -24,6 +24,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
     context.ProblemDetails.Extensions.TryAdd("code", ApiProblems.DefaultCode(context.ProblemDetails.Status)));
 builder.Services.AddVelosAuthentication(builder.Configuration);
+builder.Services.AddVelosRateLimiting();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, HttpUserContext>();
@@ -60,6 +61,7 @@ app.UseMiddleware<CsrfHeaderMiddleware>();
 app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 

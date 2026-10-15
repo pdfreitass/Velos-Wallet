@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Velos.Api.Auth;
 using Velos.Api.Configuration;
 using Velos.Api.Http;
 using Velos.Application.Abstractions;
 using Velos.Application.Auth;
-using Velos.Application.Common;
 using Velos.Application.Auth.Google;
 using Velos.Application.Auth.PasswordReset;
 using Velos.Application.Auth.SignIn;
 using Velos.Application.Auth.SignOut;
 using Velos.Application.Auth.SignUp;
+using Velos.Application.Common;
 
 namespace Velos.Api.Controllers;
 
@@ -32,6 +33,7 @@ public sealed class AuthController : ControllerBase
 {
     [HttpPost("sign-up")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
     public async Task<IActionResult> SignUp(
         SignUpRequest request, [FromServices] SignUpHandler handler, CancellationToken cancellationToken)
     {
@@ -51,6 +53,7 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("sign-in")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
     public async Task<IActionResult> SignIn(
         SignInRequest request, [FromServices] SignInHandler handler, CancellationToken cancellationToken)
     {
@@ -90,6 +93,7 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [HttpGet("google")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
     public IActionResult SignInWithGoogle(
         [FromQuery] string? next,
         [FromServices] StartGoogleSignInHandler handler,
@@ -109,6 +113,7 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [HttpPost("password-reset")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.PasswordReset)]
     public async Task<IActionResult> RequestPasswordReset(
         PasswordResetRequest request,
         [FromServices] RequestPasswordResetHandler handler,
@@ -138,6 +143,7 @@ public sealed class AuthController : ControllerBase
     /// MESMO usuário da sessão: sessão aberta, sozinha, não troca a senha (CA7).
     /// </summary>
     [HttpPut("password")]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
     public async Task<IActionResult> ChangePassword(
         ChangePasswordRequest request,
         [FromServices] ChangePasswordHandler handler,

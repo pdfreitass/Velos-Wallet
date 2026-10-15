@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Velos.Api.Auth;
+using Velos.Api.Configuration;
 using Velos.Application.Auth.Google;
 using Velos.Application.Auth.PasswordReset;
 using Velos.Application.Common;
@@ -26,6 +28,7 @@ public sealed class AuthCallbackController : ControllerBase
 
     [HttpGet("confirm")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
     public async Task<IActionResult> Confirm(
         [FromQuery] string? code,
         [FromServices] ConfirmPasswordResetHandler handler,
@@ -54,6 +57,7 @@ public sealed class AuthCallbackController : ControllerBase
     /// </summary>
     [HttpGet("callback")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
     public async Task<IActionResult> GoogleCallback(
         [FromQuery] string? code,
         [FromQuery] string? next,

@@ -26,7 +26,7 @@ O bloqueio mora **no banco**, e quem o aplica é **a API, antes de chamar o Supa
 | Alternativa | Por que não |
 |---|---|
 | Contar as tentativas no navegador (`localStorage`) | Basta limpar o navegador ou usar outro para zerar. Não protege nada. |
-| Bloquear por IP | Quem tenta senhas troca de IP com facilidade, e um IP compartilhado (rede da empresa, 4G) bloquearia pessoas que não erraram nada. O limite por IP do Supabase continua valendo, por cima. |
+| Bloquear por IP | Quem tenta senhas troca de IP com facilidade, e um IP compartilhado (rede da empresa, 4G) bloquearia pessoas que não erraram nada. Como **complemento** (não substituto), a API limita por IP as rotas de autenticação (`RateLimitingSetup`: 10/min; recuperação 3/15 min). O limite por IP do Supabase **não** serve para isso: ele vê só o IP da API (correção de 2026-10-15, achado S2 da T23). |
 | Bloquear só emails que têm conta | Revelaria quais emails estão cadastrados (viola a RN4). |
 | Guardar o email em texto | Não precisamos dele para contar; o hash basta e reduz o que vaza se a tabela for exposta. |
 | Falha aberta (deixar logar se o bloqueio estiver indisponível) | Quem ataca só precisaria provocar instabilidade para ter tentativas ilimitadas. |
@@ -36,7 +36,7 @@ O bloqueio mora **no banco**, e quem o aplica é **a API, antes de chamar o Supa
 
 - **Positivas:** o formulário não consegue contornar o bloqueio (CA-seg). Ele vale para qualquer email (CA15). Nenhum email é guardado. A regra está em um lugar só no C#, com testes, e o banco é a fonte da contagem.
 - **Negativas / riscos aceitos:**
-  - **O endpoint de login do Supabase continua público.** Quem descobrir a chave publicável pode chamar `/auth/v1/token` direto e passar por fora do bloqueio, sujeito só ao limite por IP do Supabase. Isso já é melhor que o plano original, porque o navegador nem recebe a chave. Mas a chave publicável **não é secreta por natureza**, então o bloqueio dificulta, não impede.
+  - **O endpoint de login do Supabase continua público.** Quem descobrir a chave publicável pode chamar `/auth/v1/token` direto e passar por fora do bloqueio, sujeito só ao limite por IP do Supabase (que, nesse caminho direto, enxerga o IP de quem ataca). Isso já é melhor que o plano original, porque o navegador nem recebe a chave. Mas a chave publicável **não é secreta por natureza**, então o bloqueio dificulta, não impede.
   - **Bloquear o email de outra pessoa é possível**: basta errar a senha dela 5 vezes. É inerente a todo bloqueio por email. O dano é limitado: 10 minutos, e a pessoa ainda pode redefinir a senha.
   - **Banco fora do ar = ninguém entra.** É o preço da falha fechada.
 - **O que passa a ser regra:** nenhum login por senha sem passar pelo `SignInHandler`. Se surgir outro caminho de login por senha, ele aplica o mesmo bloqueio.
@@ -45,4 +45,4 @@ O bloqueio mora **no banco**, e quem o aplica é **a API, antes de chamar o Supa
 
 - Se o Supabase passar a oferecer bloqueio por email ou CAPTCHA no endpoint de senha (aí o bloqueio pode ir para lá e fechar o desvio pela chave publicável).
 - Se aparecerem bloqueios de má-fé em volume (alguém travando emails de terceiros), considerar CAPTCHA a partir da 3ª tentativa.
-- Antes do deploy: conferir os limites por IP do Supabase Auth no painel.
+- Antes do deploy: `ForwardedHeaders` restrito ao proxy, para o limite da API ver o IP do cliente e não o do proxy.
