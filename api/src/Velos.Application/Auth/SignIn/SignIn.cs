@@ -21,8 +21,11 @@ public sealed class SignInValidator : AbstractValidator<SignInCommand>
 }
 
 /// <summary>
-/// Login com bloqueio de tentativas (RN5). Falha FECHADA: sem conseguir consultar ou registrar
-/// o bloqueio, o login não acontece. A contagem vale para qualquer email, exista a conta ou não.
+/// Login com bloqueio de tentativas (RN5). Falha FECHADA: sem conseguir reservar a tentativa, o
+/// login não acontece. A contagem vale para qualquer email, exista a conta ou não.
+///
+/// A tentativa é reservada ANTES de chamar o Supabase (migration 0008): conferir e registrar em
+/// passos separados deixava tentativas em paralelo passarem do limite (achado S3 da T23).
 /// </summary>
 public sealed class SignInHandler(
     IValidator<SignInCommand> validator,
@@ -41,15 +44,17 @@ public sealed class SignInHandler(
             return Result.Failure<AuthSession>(ValidationErrors.From(validation));
         }
 
-        var state = await lockout.GetStateAsync(input.Email, cancellationToken);
-        if (!state.IsSuccess)
+        var reservation = await lockout.ReserveAttemptAsync(input.Email, cancellationToken);
+        if (!reservation.IsSuccess)
         {
-            return Result.Failure<AuthSession>(state.Error!);
+            return Result.Failure<AuthSession>(reservation.Error!);
         }
 
-        if (LockedError(state.Value) is { } locked)
+        var state = reservation.Value.State;
+        if (!reservation.Value.Allowed)
         {
-            return Result.Failure<AuthSession>(locked);
+            return Result.Failure<AuthSession>(
+                LockedError(state) ?? AuthErrors.Locked((int)LoginLockoutPolicy.LockDuration.TotalMinutes));
         }
 
         var signIn = await identity.SignInWithPasswordAsync(input.Email, input.Password, cancellationToken);
@@ -60,20 +65,16 @@ public sealed class SignInHandler(
             return signIn;
         }
 
+        // Outro erro (Supabase fora do ar, limite): passa adiante. A tentativa reservada continua
+        // contando de propósito (ver migration 0008).
         if (signIn.Error!.Code != AuthErrors.InvalidCredentialsCode)
         {
             return signIn;
         }
 
-        var after = await lockout.RegisterFailureAsync(input.Email, cancellationToken);
-        if (!after.IsSuccess)
-        {
-            return Result.Failure<AuthSession>(after.Error!);
-        }
-
         return Result.Failure<AuthSession>(
-            LockedError(after.Value)
-            ?? AuthErrors.InvalidCredentials(LoginLockoutPolicy.AttemptsLeftToWarn(after.Value.FailedCount)));
+            LockedError(state)
+            ?? AuthErrors.InvalidCredentials(LoginLockoutPolicy.AttemptsLeftToWarn(state.FailedCount)));
     }
 
     private AppError? LockedError(LockoutState state)

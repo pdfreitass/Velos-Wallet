@@ -22,7 +22,7 @@ public class SignInHandlerTests
 
         Assert.True(result.IsSuccess);
         Assert.Equal(["sign-in:pedro@example.com"], _identity.Calls);
-        Assert.Equal(["state:pedro@example.com", "clear:pedro@example.com"], _lockout.Calls);
+        Assert.Equal(["reserve:pedro@example.com", "clear:pedro@example.com"], _lockout.Calls);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class SignInHandlerTests
     [Fact]
     public async Task Lockout_unavailable_fails_closed()
     {
-        _lockout.State = Result.Failure<LockoutState>(AuthErrors.LockoutUnavailable);
+        _lockout.Reservation = Result.Failure<LockoutReservation>(AuthErrors.LockoutUnavailable);
 
         var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "Pedro10@"), default);
 
@@ -52,7 +52,7 @@ public class SignInHandlerTests
     [Fact]
     public async Task Locked_email_is_refused_even_with_the_right_password()
     {
-        _lockout.State = Result.Success(new LockoutState(5, Now.AddMinutes(7).AddSeconds(30)));
+        _lockout.Reservation = Refused(new LockoutState(5, Now.AddMinutes(7).AddSeconds(30)));
 
         var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "Pedro10@"), default);
 
@@ -62,13 +62,15 @@ public class SignInHandlerTests
     }
 
     [Fact]
-    public async Task Expired_lock_does_not_block()
+    public async Task Refusal_without_an_end_time_still_locks_for_the_full_duration()
     {
-        _lockout.State = Result.Success(new LockoutState(0, Now.AddSeconds(-1)));
+        _lockout.Reservation = Refused(new LockoutState(5, null));
 
         var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "Pedro10@"), default);
 
-        Assert.True(result.IsSuccess);
+        Assert.Equal("locked", result.Error!.Code);
+        Assert.Equal(10, result.Error.Details!["minutesLeft"]);
+        Assert.Empty(_identity.Calls);
     }
 
     [Theory]
@@ -76,23 +78,23 @@ public class SignInHandlerTests
     [InlineData(2, null)]
     [InlineData(3, 2)]
     [InlineData(4, 1)]
-    public async Task Wrong_password_registers_the_failure_and_warns_from_the_third(int failedCount, int? attemptsLeft)
+    public async Task Wrong_password_warns_from_the_third_attempt(int failedCount, int? attemptsLeft)
     {
         _identity.NextResult = Result.Failure<AuthSession>(AuthErrors.InvalidCredentials(null));
-        _lockout.AfterFailure = Result.Success(new LockoutState(failedCount, null));
+        _lockout.Reservation = Allowed(new LockoutState(failedCount, null));
 
         var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "errada"), default);
 
         Assert.Equal("invalid_credentials", result.Error!.Code);
         Assert.Equal(attemptsLeft, result.Error.Details?["attemptsLeft"] as int?);
-        Assert.Contains("failure:pedro@example.com", _lockout.Calls);
+        Assert.Equal(["reserve:pedro@example.com"], _lockout.Calls);
     }
 
     [Fact]
     public async Task Fifth_wrong_password_locks_for_ten_minutes()
     {
         _identity.NextResult = Result.Failure<AuthSession>(AuthErrors.InvalidCredentials(null));
-        _lockout.AfterFailure = Result.Success(new LockoutState(5, Now.AddMinutes(10)));
+        _lockout.Reservation = Allowed(new LockoutState(5, Now.AddMinutes(10)));
 
         var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "errada"), default);
 
@@ -101,26 +103,31 @@ public class SignInHandlerTests
     }
 
     [Fact]
-    public async Task Failure_to_register_the_attempt_fails_closed()
+    public async Task Fifth_attempt_with_the_right_password_still_signs_in()
     {
-        _identity.NextResult = Result.Failure<AuthSession>(AuthErrors.InvalidCredentials(null));
-        _lockout.AfterFailure = Result.Failure<LockoutState>(AuthErrors.LockoutUnavailable);
+        // A reserva da 5ª já liga o bloqueio, mas ESTA tentativa foi liberada: senha certa entra e zera.
+        _lockout.Reservation = Allowed(new LockoutState(5, Now.AddMinutes(10)));
 
-        var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "errada"), default);
+        var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "Pedro10@"), default);
 
-        Assert.Equal("lockout_unavailable", result.Error!.Code);
+        Assert.True(result.IsSuccess);
+        Assert.Contains("clear:pedro@example.com", _lockout.Calls);
     }
 
     [Fact]
-    public async Task Other_identity_errors_pass_through_without_counting_as_failure()
+    public async Task Other_identity_errors_pass_through_and_the_reserved_attempt_still_counts()
     {
         _identity.NextResult = Result.Failure<AuthSession>(AuthErrors.Unavailable);
 
         var result = await Handler.HandleAsync(new SignInCommand("pedro@example.com", "Pedro10@"), default);
 
         Assert.Equal("auth_unavailable", result.Error!.Code);
-        Assert.DoesNotContain(_lockout.Calls, call => call.StartsWith("failure:", StringComparison.Ordinal));
+        Assert.Equal(["reserve:pedro@example.com"], _lockout.Calls);
     }
+
+    private static Result<LockoutReservation> Allowed(LockoutState state) => Result.Success(new LockoutReservation(true, state));
+
+    private static Result<LockoutReservation> Refused(LockoutState state) => Result.Success(new LockoutReservation(false, state));
 
     [Fact]
     public void Session_never_prints_its_tokens()

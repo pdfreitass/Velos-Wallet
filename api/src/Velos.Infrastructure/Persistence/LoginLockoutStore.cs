@@ -8,26 +8,31 @@ using Velos.Application.Common;
 namespace Velos.Infrastructure.Persistence;
 
 /// <summary>
-/// Bloqueio de tentativas pelas funções da migration 0005. A tabela não é acessível direto:
+/// Bloqueio de tentativas pelas funções das migrations 0005 e 0008. A tabela não é acessível direto:
 /// antes do login roda como <c>anon</c>; zerar exige o usuário que acabou de provar a senha.
 /// </summary>
 internal sealed partial class LoginLockoutStore(UserDbSession session, ILogger<LoginLockoutStore> logger) : ILoginLockout
 {
-    public Task<Result<LockoutState>> GetStateAsync(string email, CancellationToken cancellationToken) =>
-        QueryAsync((db, ct) => db.Database
-            .SqlQuery<LockoutRow>($"""
-                select failed_count as "FailedCount", locked_until as "LockedUntil"
-                from public.login_lock_status({email})
-                """)
-            .SingleAsync(ct), cancellationToken);
-
-    public Task<Result<LockoutState>> RegisterFailureAsync(string email, CancellationToken cancellationToken) =>
-        QueryAsync((db, ct) => db.Database
-            .SqlQuery<LockoutRow>($"""
-                select failed_count as "FailedCount", locked_until as "LockedUntil"
-                from public.register_login_failure({email})
-                """)
-            .SingleAsync(ct), cancellationToken);
+    public async Task<Result<LockoutReservation>> ReserveAttemptAsync(string email, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var row = await session.AsAnonAsync(
+                (db, ct) => db.Database
+                    .SqlQuery<ReservationRow>($"""
+                        select failed_count as "FailedCount", locked_until as "LockedUntil", allowed as "Allowed"
+                        from public.reserve_login_attempt({email})
+                        """)
+                    .SingleAsync(ct),
+                cancellationToken);
+            return Result.Success(new LockoutReservation(row.Allowed, new LockoutState(row.FailedCount, row.LockedUntil)));
+        }
+        catch (Exception exception) when (exception is DbException or TimeoutException)
+        {
+            LogUnavailable(logger, exception);
+            return Result.Failure<LockoutReservation>(AuthErrors.LockoutUnavailable);
+        }
+    }
 
     public async Task<Result<Unit>> ClearAsync(UserIdentity user, CancellationToken cancellationToken)
     {
@@ -46,31 +51,18 @@ internal sealed partial class LoginLockoutStore(UserDbSession session, ILogger<L
         }
     }
 
-    private async Task<Result<LockoutState>> QueryAsync(
-        Func<VelosDbContext, CancellationToken, Task<LockoutRow>> query, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var row = await session.AsAnonAsync(query, cancellationToken);
-            return Result.Success(new LockoutState(row.FailedCount, row.LockedUntil));
-        }
-        catch (Exception exception) when (exception is DbException or TimeoutException)
-        {
-            LogUnavailable(logger, exception);
-            return Result.Failure<LockoutState>(AuthErrors.LockoutUnavailable);
-        }
-    }
-
     [LoggerMessage(Level = LogLevel.Error, Message = "Bloqueio de tentativas indisponível: login recusado (falha fechada)")]
     private static partial void LogUnavailable(ILogger logger, Exception exception);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Não foi possível zerar as falhas de login após entrar")]
     private static partial void LogClearFailed(ILogger logger, Exception exception);
 
-    private sealed class LockoutRow
+    private sealed class ReservationRow
     {
         public int FailedCount { get; set; }
 
         public DateTimeOffset? LockedUntil { get; set; }
+
+        public bool Allowed { get; set; }
     }
 }

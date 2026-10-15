@@ -70,22 +70,16 @@ internal sealed class FakeIdentityProvider : IIdentityProvider
 
 internal sealed class FakeLoginLockout : ILoginLockout
 {
-    public Result<LockoutState> State { get; set; } = Result.Success(new LockoutState(0, null));
-
-    public Result<LockoutState> AfterFailure { get; set; } = Result.Success(new LockoutState(1, null));
+    /// <summary>Padrão: tentativa liberada, primeira falha da sequência.</summary>
+    public Result<LockoutReservation> Reservation { get; set; } =
+        Result.Success(new LockoutReservation(true, new LockoutState(1, null)));
 
     public List<string> Calls { get; } = [];
 
-    public Task<Result<LockoutState>> GetStateAsync(string email, CancellationToken cancellationToken)
+    public Task<Result<LockoutReservation>> ReserveAttemptAsync(string email, CancellationToken cancellationToken)
     {
-        Calls.Add($"state:{email}");
-        return Task.FromResult(State);
-    }
-
-    public Task<Result<LockoutState>> RegisterFailureAsync(string email, CancellationToken cancellationToken)
-    {
-        Calls.Add($"failure:{email}");
-        return Task.FromResult(AfterFailure);
+        Calls.Add($"reserve:{email}");
+        return Task.FromResult(Reservation);
     }
 
     public Task<Result<Unit>> ClearAsync(UserIdentity user, CancellationToken cancellationToken)
