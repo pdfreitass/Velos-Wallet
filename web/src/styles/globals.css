@@ -68,7 +68,7 @@
 :root,
 .dark .theme-inverse,
 :root:not(.dark) .theme-inverse .theme-base {
-  /* Identidade Velos Wallet — extraida de velos-perfil-claro/escuro.png
+  /* Identidade Velos Wallet — extraida de media/brand/velos-perfil-claro/escuro.png
      #F4F7F2 off-white · #0A2E24 verde profundo · #2ED38C verde vivo
      Regra: o verde VIVO e dinheiro e acento; o verde PROFUNDO e a marca.
      Os contrastes em comentario foram medidos (WCAG 2.1, alvo 4.5:1).

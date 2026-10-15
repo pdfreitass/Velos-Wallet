@@ -66,4 +66,4 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | ~~T5~~ | ~~Imagens padrão do create-next-app sem uso~~ | ✅ removidas na T10 da spec 001 (`e4da686`) | — |
 | T7 | Fios das seções da página inicial apontam para o iPhone fixo, mas não chegam à linha exata da tela (revisor de acabamento: "parcial") | `web/src/features/landing/StepArtifacts.tsx` | **A DEFINIR** pelo Pedro |
 | T8 | Botões de 32–40 px abaixo do alvo de 44 px do PRODUCT.md (Button padrão, "Entrar" do cabeçalho); `--sidebar-ring` claro em #2ED38C (1,80:1, ainda sem uso) | `web/src/components/ui/button.tsx`, `globals.css` | Etapa 4 |
-| T6 | Logos originais duplicados na raiz (`velos-perfil-*.png`) e em `web/public/brand/` (`velos-*.png`) | raiz | **A DEFINIR**: manter na raiz como fonte? |
+| ~~T6~~ | ~~Logos originais duplicados na raiz~~ | ✅ movidos para `media/brand/` na limpeza de 2026-10-15 (`web/public/brand/` segue sendo o que o app usa) | — |
