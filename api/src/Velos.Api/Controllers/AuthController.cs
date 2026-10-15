@@ -77,10 +77,16 @@ public sealed class AuthController : ControllerBase
     [HttpPost("sign-out")]
     [AllowAnonymous]
     public async Task<IActionResult> SignOut(
-        [FromServices] SignOutHandler handler, CancellationToken cancellationToken)
+        [FromServices] SignOutHandler handler,
+        [FromServices] AuthFlowCookies cookies,
+        CancellationToken cancellationToken)
     {
         await handler.HandleAsync(SessionCookies.ReadAccessToken(HttpContext), cancellationToken);
         SessionCookies.Clear(HttpContext);
+        // Sair zera TUDO: também o ticket de troca de senha e os verifiers dos fluxos em andamento.
+        cookies.ClearTicket(HttpContext);
+        cookies.ClearResetVerifier(HttpContext);
+        cookies.ClearOAuthVerifier(HttpContext);
         return NoContent();
     }
 
