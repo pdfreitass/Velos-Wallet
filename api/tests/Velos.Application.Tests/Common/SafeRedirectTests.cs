@@ -27,6 +27,10 @@ public class SafeRedirectTests
     [InlineData("javascript:alert(1)")]
     [InlineData("site-malicioso.com")]
     [InlineData(" /painel")]
+    [InlineData("/..//site-malicioso.com")]       // vira "//site-malicioso.com" depois de normalizar
+    [InlineData("/.//site-malicioso.com")]
+    [InlineData("/%2e%2e//site-malicioso.com")]
+    [InlineData("/painel/../..//site-malicioso.com")]
     public void Anything_that_could_leave_the_app_falls_back_to_the_panel(string? next)
     {
         Assert.Equal(SafeRedirect.DefaultPath, SafeRedirect.Resolve(next));

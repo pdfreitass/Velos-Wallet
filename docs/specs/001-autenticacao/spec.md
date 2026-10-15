@@ -96,7 +96,7 @@ A stack passou a ser API ASP.NET + React/Vite ([ADR 0013](../../adr/0013-api-asp
 - **RN11 — Mesmo email, dois jeitos:** quem se cadastrou com email/senha e depois entra com o Google usando o mesmo email continua na **mesma conta**.
   - ⚠️ **Risco enquanto a confirmação estiver desligada (Revisão 1):** o Supabase considera "verificado" todo email cadastrado sem confirmação. Alguém poderia criar uma conta com o email de outra pessoa e uma senha que conhece; quando a dona do email entrasse com o Google, cairia nessa conta (*pre-account takeover*). **Aceitável só enquanto não há usuários reais**: religar a confirmação é pré-requisito do deploy justamente por isso.
 - **RN12 — Sair encerra a sessão no servidor**, não só apaga cookies no navegador.
-- **RN13 — Emails:**
+- **RN13 — Emails:** *(adiada em 2026-10-13: exige SMTP próprio — ver P3. Os modelos estão escritos em `supabase/templates/`; até o Resend entrar, o email de recuperação sai no padrão do Supabase, em inglês e sem logo.)*
   - enviados pelo servidor padrão do Supabase, que **só entrega para membros do projeto** (ou seja, para os testes do Pedro) e com limite baixo por hora; o remetente é o do Supabase até haver Resend + domínio próprio;
   - **tom formal**, em português do Brasil, com **logo**, cores da marca (verde profundo `#0A2E24`, fundo `#F4F7F2`) e rodapé institucional;
   - botão de ação principal + o link escrito por extenso (para clientes de email que bloqueiam botões);
@@ -155,7 +155,7 @@ Identidade visual: logo Velos no topo das telas de entrada, botão principal em 
 |---|---|
 | P1 | Rotas em **português** (`/entrar`, `/cadastro`, `/painel`, `/recuperar-senha`, `/redefinir-senha`). Código em inglês. |
 | P2 | **Google OAuth entra.** O Client ID/Secret vai direto no painel do Supabase; o usuário será guiado passo a passo. |
-| P3 | **Resend** escolhido como servidor de email, mas só junto com o domínio próprio (ver P7). |
+| P3 | **Resend** escolhido como servidor de email, mas só junto com o domínio próprio (ver P7). **Revisão de 2026-10-13:** o Supabase passou a exigir **SMTP próprio para editar os modelos** ("Set up custom SMTP to edit templates"). Com o servidor embutido, assunto e corpo ficam travados nos padrões. Logo, a RN13 só é alcançável junto com o Resend, e a publicação dos modelos (C3) virou pré-requisito do deploy, não da Etapa 3. |
 | P4 | Emails **formais, com logo e identidade Velos**. |
 | P5 | **Sem** termos de uso no cadastro por enquanto. |
 | P6 | Senha forte (RN1), **senha digitada duas vezes** (RN2), **bloqueio de 10 min após 5 erros** (RN5), "Esqueci minha senha" envia email de redefinição (RN6). |

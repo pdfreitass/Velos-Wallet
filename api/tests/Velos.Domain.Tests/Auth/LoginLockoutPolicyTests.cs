@@ -22,6 +22,7 @@ public class LoginLockoutPolicyTests
     [InlineData(540, 9)]
     [InlineData(30, 1)]
     [InlineData(0, 1)]     // nunca "0 minutos"
+    [InlineData(605, 10)]  // relógio do banco à frente do da API: nunca "11 minutos"
     public void Minutes_left_round_up_and_never_reach_zero(int secondsLeft, int expected)
     {
         var now = new DateTimeOffset(2026, 10, 12, 12, 0, 0, TimeSpan.Zero);

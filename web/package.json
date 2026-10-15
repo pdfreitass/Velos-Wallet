@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
-    "check:password": "node scripts/password-parity.ts"
+    "check:password": "node scripts/password-parity.ts",
+    "preview:emails": "node scripts/preview-emails.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

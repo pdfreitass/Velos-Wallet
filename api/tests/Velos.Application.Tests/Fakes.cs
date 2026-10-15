@@ -35,26 +35,51 @@ internal sealed class FakeIdentityProvider : IIdentityProvider
         Calls.Add("sign-out");
         return Task.CompletedTask;
     }
+
+    /// <summary>Resultado dos métodos que só dizem sim ou não (envio do email, troca de senha).</summary>
+    public Result<Unit> NextUnitResult { get; set; } = Result.Ok();
+
+    public Task<Result<Unit>> SendPasswordResetAsync(
+        string email, string codeChallenge, string redirectTo, CancellationToken cancellationToken)
+    {
+        Calls.Add($"recover:{email}|{codeChallenge}|{redirectTo}");
+        return Task.FromResult(NextUnitResult);
+    }
+
+    public Task<Result<AuthSession>> ExchangeCodeAsync(string code, string codeVerifier, CancellationToken cancellationToken)
+    {
+        Calls.Add($"exchange:{code}|{codeVerifier}");
+        return Task.FromResult(NextResult);
+    }
+
+    public Task<Result<Unit>> UpdatePasswordAsync(string accessToken, string newPassword, CancellationToken cancellationToken)
+    {
+        // A senha NÃO entra no registro: nem num dublê de teste ela deve ficar guardada.
+        Calls.Add("update-password");
+        return Task.FromResult(NextUnitResult);
+    }
+
+    public Uri BuildGoogleAuthorizeUrl(string codeChallenge, string redirectTo)
+    {
+        Calls.Add($"authorize:{codeChallenge}|{redirectTo}");
+        return new Uri(
+            $"https://projeto.supabase.co/auth/v1/authorize?provider=google"
+            + $"&redirect_to={Uri.EscapeDataString(redirectTo)}&code_challenge={codeChallenge}");
+    }
 }
 
 internal sealed class FakeLoginLockout : ILoginLockout
 {
-    public Result<LockoutState> State { get; set; } = Result.Success(new LockoutState(0, null));
-
-    public Result<LockoutState> AfterFailure { get; set; } = Result.Success(new LockoutState(1, null));
+    /// <summary>Padrão: tentativa liberada, primeira falha da sequência.</summary>
+    public Result<LockoutReservation> Reservation { get; set; } =
+        Result.Success(new LockoutReservation(true, new LockoutState(1, null)));
 
     public List<string> Calls { get; } = [];
 
-    public Task<Result<LockoutState>> GetStateAsync(string email, CancellationToken cancellationToken)
+    public Task<Result<LockoutReservation>> ReserveAttemptAsync(string email, CancellationToken cancellationToken)
     {
-        Calls.Add($"state:{email}");
-        return Task.FromResult(State);
-    }
-
-    public Task<Result<LockoutState>> RegisterFailureAsync(string email, CancellationToken cancellationToken)
-    {
-        Calls.Add($"failure:{email}");
-        return Task.FromResult(AfterFailure);
+        Calls.Add($"reserve:{email}");
+        return Task.FromResult(Reservation);
     }
 
     public Task<Result<Unit>> ClearAsync(UserIdentity user, CancellationToken cancellationToken)

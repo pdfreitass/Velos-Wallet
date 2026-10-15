@@ -1,0 +1,11 @@
+# Dependências do projeto de vídeo (710 MB): reinstaláveis com `npm install --prefix remotion`.
+remotion/node_modules/
+
+# Saída temporária do Remotion.
+remotion/out/
+
+# Binários pesados e regeráveis: ficam só no disco.
+# O MP4 sai do `npm run render`; as capturas usadas no vídeo estão copiadas em remotion/public/shots/.
+*.mp4
+/*.png
+_validacao/

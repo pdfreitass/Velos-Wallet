@@ -17,9 +17,9 @@ O navegador **só conversa com a API**. A API chama o **Supabase Auth pela REST*
 |---|---|---|---|
 | C1 | Supabase → Authentication → **Email** | *Confirm email* **desligado** (Revisão 1); mínimo 8; "Lowercase, uppercase letters, digits and symbols" | ✅ feito |
 | C2 | Supabase → Authentication → **URL Configuration** | *Site URL* = `http://localhost:3000`; *Redirect URLs* += `http://localhost:3000/**`. **Não muda**: o Vite roda na porta 3000 | ✅ feito |
-| C3 | Supabase → Authentication → **Email Templates** | Colar **só** o modelo de redefinição | ⬜ |
-| C4 | **Google Cloud Console** | OAuth client (Web) com *Authorized redirect URI* = `https://khvottmyspapwsdeqqnm.supabase.co/auth/v1/callback` | ⬜ |
-| C5 | Supabase → Providers → **Google** | Client ID e Client Secret direto no painel, nunca no chat/código | ⬜ |
+| C3 | Supabase → Authentication → **Email Templates** | Colar **só** o modelo de redefinição | ⛔ **adiado** (2026-10-13): o painel exige SMTP próprio para editar modelo. Vai junto com o Resend, antes do deploy |
+| C4 | **Google Cloud Console** | OAuth client (Web) com *Authorized redirect URI* = `https://khvottmyspapwsdeqqnm.supabase.co/auth/v1/callback` | ⬜ passo a passo em [guia-google.md](guia-google.md) |
+| C5 | Supabase → Providers → **Google** | Client ID e Client Secret direto no painel, nunca no chat/código | ⬜ passo a passo em [guia-google.md](guia-google.md) |
 | C6 | Supabase → Storage → bucket `brand` | Enviar `velos-claro.png` | ⬜ |
 | **C7** | Supabase → **SQL Editor** (uma vez) + `dotnet user-secrets` | Definir a **senha do role `velos_api`** e gravar a connection string só nos user-secrets. **Exceção única à regra "nunca SQL no Editor"**: senha não pode ir para arquivo versionado | ⬜ **novo** |
 

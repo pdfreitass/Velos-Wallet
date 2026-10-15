@@ -41,7 +41,7 @@ Uso rápido no celular: lançar uma despesa logo depois de gastar e consultar o 
 ## Brand Commitments
 
 - Nome **Velos Wallet**; frase *"Seu dinheiro na direção certa."*
-- Logo em `web/public/brand/velos-claro.png` e `velos-escuro.png` (originais na raiz: `velos-perfil-*.png`).
+- Logo em `web/public/brand/velos-claro.png` e `velos-escuro.png` (originais em `media/brand/velos-perfil-*.png`).
 - Regras de identidade obrigatórias (CLAUDE.md): o verde profundo é a marca e o verde vivo é dinheiro; o verde vivo nunca é botão principal no tema claro; cor de dinheiro só pelos tokens de receita e despesa; nunca depender só da cor (sempre sinal `+`/`-` e/ou ícone); tema claro e escuro.
 - Voz nas telas: **próxima e direta** ("você", frases curtas, sem jargão de banco nem gíria). Emails transacionais em tom formal.
 

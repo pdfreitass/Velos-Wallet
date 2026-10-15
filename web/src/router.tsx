@@ -26,6 +26,15 @@ export const router = createBrowserRouter([
             children: [
               { path: "/entrar", lazy: () => import("@/pages/SignInPage").then((m) => ({ Component: m.SignInPage })) },
               { path: "/cadastro", lazy: () => import("@/pages/SignUpPage").then((m) => ({ Component: m.SignUpPage })) },
+              {
+                path: "/recuperar-senha",
+                lazy: () => import("@/pages/ForgotPasswordPage").then((m) => ({ Component: m.ForgotPasswordPage })),
+              },
+              {
+                // Para onde a API manda (302) quando o Google falha ou é cancelado.
+                path: "/auth/erro",
+                lazy: () => import("@/pages/AuthErrorPage").then((m) => ({ Component: m.AuthErrorPage })),
+              },
             ],
           },
         ],
@@ -33,6 +42,17 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
+          {
+            // Privada: a volta do link de email (/auth/confirm) já deixou a sessão criada. Quem abre
+            // esta rota direto, sem link, cai no login — e sem o cookie de recuperação a API recusa.
+            lazy: () => import("@/features/auth/components/AuthLayout").then((m) => ({ Component: m.AuthLayout })),
+            children: [
+              {
+                path: "/redefinir-senha",
+                lazy: () => import("@/pages/ResetPasswordPage").then((m) => ({ Component: m.ResetPasswordPage })),
+              },
+            ],
+          },
           { path: "/painel", lazy: () => import("@/pages/PanelPage").then((m) => ({ Component: m.PanelPage })) },
           { path: "*", lazy: () => import("@/pages/NotFoundPage").then((m) => ({ Component: m.NotFoundPage })) },
         ],

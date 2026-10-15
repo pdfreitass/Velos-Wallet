@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
-import type { SignInInput, SignUpInput } from "@/lib/validations/auth";
+import type {
+  ForgotPasswordInput,
+  ResetPasswordInput,
+  SignInInput,
+  SignUpInput,
+} from "@/lib/validations/auth";
 
 export type CurrentUser = {
   name: string;
@@ -32,6 +37,26 @@ export function useSignUp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: SignUpInput) => api("/api/auth/sign-up", { method: "POST", body: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: meKey }),
+  });
+}
+
+/**
+ * "Esqueci minha senha" (RN6). A API responde 202 tanto para email com conta quanto sem (RN4),
+ * então a tela mostra o mesmo texto nos dois casos — não há o que o front possa distinguir.
+ */
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: (input: ForgotPasswordInput) =>
+      api("/api/auth/password-reset", { method: "POST", body: input }),
+  });
+}
+
+/** Senha nova. Só passa com o cookie de recuperação que a volta do email deixou (CA7). */
+export function useChangePassword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ResetPasswordInput) => api("/api/auth/password", { method: "PUT", body: input }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: meKey }),
   });
 }

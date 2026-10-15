@@ -24,9 +24,16 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
     context.ProblemDetails.Extensions.TryAdd("code", ApiProblems.DefaultCode(context.ProblemDetails.Status)));
 builder.Services.AddVelosAuthentication(builder.Configuration);
+builder.Services.AddVelosRateLimiting();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, HttpUserContext>();
+// Protege os cookies da recuperação de senha (httpOnly não impede o dono do navegador de forjar).
+builder.Services.AddSingleton<AuthFlowCookies>();
+// Endereço público dos links de volta (Google e email). Dev: appsettings.Development.json.
+// Produção: variável App__PublicOrigin com o domínio final.
+builder.Services.AddSingleton(new PublicOrigin(new Uri(
+    builder.Configuration["App:PublicOrigin"] ?? throw new InvalidOperationException("Configuração 'App:PublicOrigin' ausente."))));
 builder.Services.AddApplication();
 
 // Dev: dotnet user-secrets (passo C7 do plano da spec 001). Produção: variável de ambiente
@@ -43,6 +50,12 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseSecurityHeaders();
+if (!app.Environment.IsDevelopment())
+{
+    // Só em produção: em localhost o HSTS grudaria no navegador e quebraria o http://localhost.
+    app.UseHsts();
+}
 
 // Em produção o build do Vite fica em wwwroot e é servido daqui: mesma origem, sem CORS.
 app.UseDefaultFiles();
@@ -54,6 +67,7 @@ app.UseMiddleware<CsrfHeaderMiddleware>();
 app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 

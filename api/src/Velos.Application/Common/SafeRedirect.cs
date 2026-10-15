@@ -17,11 +17,7 @@ public static class SafeRedirect
     {
         // Recusa tudo o que o navegador trataria como outro domínio: "https://x.com", "//x.com",
         // "/\x.com" e caracteres de controle ("/\t/x.com" vira "//x.com" no parser do navegador).
-        if (string.IsNullOrEmpty(next)
-            || next[0] != '/'
-            || next.StartsWith("//", StringComparison.Ordinal)
-            || next.StartsWith("/\\", StringComparison.Ordinal)
-            || next.Any(char.IsControl))
+        if (string.IsNullOrEmpty(next) || next[0] != '/' || LooksExternal(next) || next.Any(char.IsControl))
         {
             return fallback;
         }
@@ -31,6 +27,12 @@ public static class SafeRedirect
             return fallback;
         }
 
-        return url.PathAndQuery + url.Fragment;
+        // Confere de novo DEPOIS de normalizar: "/..//x.com" passa na checagem acima, mas o parser
+        // remove o ".." e sobra "//x.com" (o mesmo vale para "/.//x.com" e "/%2e%2e//x.com").
+        var resolved = url.PathAndQuery + url.Fragment;
+        return LooksExternal(resolved) ? fallback : resolved;
     }
+
+    private static bool LooksExternal(string path) =>
+        path.StartsWith("//", StringComparison.Ordinal) || path.StartsWith("/\\", StringComparison.Ordinal);
 }
