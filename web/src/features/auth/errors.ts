@@ -15,6 +15,12 @@ const OWN_MESSAGES = new Set([
   "auth_unavailable",
   "lockout_unavailable",
   "database_unavailable",
+  "session_expired",
+  // Recuperação de senha e Google: sem estes, o erro caía no genérico "tente de novo", que nunca
+  // resolve um link vencido (achado da T23). Todo code novo da API precisa entrar aqui.
+  "reset_link_invalid",
+  "reset_not_allowed",
+  "google_failed",
 ]);
 
 export type AuthAlert = {
