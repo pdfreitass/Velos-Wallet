@@ -7,6 +7,101 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L26 — Código de erro novo na API sem mensagem no front vira "tente de novo"
+*2026-10-15 · spec 001, T23 (agente `qa`)*
+
+- **O que aconteceu:** `reset_link_invalid`, `reset_not_allowed`, `google_failed` e `session_expired` não estavam em `OWN_MESSAGES`. Com o link de recuperação vencido, a tela dizia "Algo deu errado. Tente de novo", o que nunca resolve.
+- **Como evitar:** ao criar um `AppError` na API, abrir também `web/src/features/auth/errors.ts` e incluir o `code`.
+- **Regra em:** comentário de `OWN_MESSAGES` em `errors.ts`.
+
+## L25 — Conferir e registrar em transações separadas abre corrida
+*2026-10-15 · spec 001, T23 (agente `security`)*
+
+- **O que aconteceu:** o login consultava o bloqueio, chamava o Supabase e só depois registrava a falha. 8 tentativas em paralelo para o mesmo email chegavam as 8 ao Supabase, passando do limite de 5.
+- **Como foi resolvido:** a migration `0008` reserva a tentativa ANTES, com `select ... for update`; agora chegam 5.
+- **Como evitar:** contador de segurança se reserva atomicamente antes da ação, nunca "lê, age, registra".
+- **Regra em:** [ADR 0014](adr/0014-bloqueio-de-tentativas-de-login.md), `0008_reserve_login_attempt.sql`.
+
+## L24 — Com a API no meio, o limite por IP do Supabase enxerga um IP só
+*2026-10-15 · spec 001, T23 (agente `security`)*
+
+- **O que aconteceu:** o ADR 0014 contava com "o limite por IP do Supabase, por cima". Mas a API chama o Supabase servidor a servidor: para ele, todo usuário tem o IP da API, e um atacante travaria o login de todo mundo.
+- **Como evitar:** o limite por cliente passa a ser responsabilidade da API (`RateLimitingSetup`). Em produção, `ForwardedHeaders` restrito ao proxy para enxergar o IP real.
+- **Regra em:** [ARQUITETURA → Sessão](ARQUITETURA.md#sessão).
+
+## L23 — Endereço público vem de configuração, nunca do `Host` da request
+*2026-10-15 · spec 001, T23 (agente `security`)*
+
+- **O que aconteceu:** os links de volta do Google e do email eram montados com `Request.Scheme + Request.Host`. Um `Host` forjado chegava ao link; atrás do proxy TLS o esquema viraria `http`, e a correção "fácil" (curinga nas Redirect URLs) permitiria roubar o `code` do PKCE e tomar a conta pela recuperação.
+- **Como evitar:** `App:PublicOrigin` na configuração; Redirect URLs do Supabase exatas, sem curinga de host.
+- **Regra em:** `api/src/Velos.Api/Configuration/PublicOrigin.cs`, [ROADMAP → antes do deploy](ROADMAP.md).
+
+## L22 — Validar a saída de um redirect, não só a entrada
+*2026-10-15 · spec 001, T23 (agente `security`)*
+
+- **O que aconteceu:** `/..//site.com` passava na checagem de `//` e virava `//site.com` depois que o parser de URL removia o `..`.
+- **Como evitar:** toda sanitização que normaliza confere o resultado de novo.
+- **Regra em:** `SafeRedirect.cs` e `redirect.ts` (+4 casos de teste).
+
+## L21 — Tempo vindo de outro relógio precisa de limite
+*2026-10-15 · spec 001, T22*
+
+- **O que aconteceu:** o fim do bloqueio vem do relógio do banco; com o desta máquina 5 s atrasado, a tela dizia "11 minutos" para um bloqueio de 10.
+- **Como evitar:** valor de tempo calculado entre dois relógios fica entre limites conhecidos (`Math.Clamp`).
+- **Regra em:** `LoginLockoutPolicy.MinutesLeft`.
+
+## L20 — "Confirm email" ligada no painel, contra a decisão da spec
+*2026-10-15 · spec 001, T22*
+
+- **O que aconteceu:** o cadastro falhava com `email_address_invalid` (para `@example.com`) e depois `over_email_send_rate_limit`. Os dois só aparecem quando o Supabase **tenta enviar email** no cadastro: a *Confirm email* estava ligada, contra a Revisão 1 da spec. O limite de email é por hora, e travou os testes.
+- **Como evitar:** o log da API registra o código exato do Supabase ("Supabase Auth recusou {endpoint}: HTTP x, código y"): ler antes de supor. Contas de teste com domínio que tenha MX (`@mailinator.com`), nunca `@example.com`.
+- **Regra em:** [ARQUITETURA → Auth](ARQUITETURA.md#auth).
+
+## L19 — Proxy do Vite na forma curta troca o `Host`
+*2026-10-15 · spec 001, T22*
+
+- **O que aconteceu:** `"/api": url` liga `changeOrigin` sem avisar. A API recebia `localhost:5080` em vez de `localhost:3000`.
+- **Como evitar:** escrever o proxy por extenso, `{ target, changeOrigin: false }`, e não depender do `Host` para nada importante (L23).
+- **Regra em:** comentário em `web/vite.config.ts`.
+
+## L18 — Heredoc no Bash do agente come barras invertidas
+*2026-10-12 · spec 001, T10*
+
+- **O que aconteceu:** um arquivo de teste criado por heredoc saiu com `\\` virando `\`, e pareceu que uma regex estava quebrada.
+- **Como evitar:** código com barras invertidas se cria com a ferramenta de escrever arquivo, não por heredoc.
+
+## L17 — Smart App Control do Windows bloqueou DLL do `dotnet build`
+*2026-10-12 · spec 001, T13*
+
+- **O que aconteceu:** "Uma política de Controle de Aplicativo bloqueou este arquivo" (0x800711C7) na `Velos.Application.dll`. Bloqueio por reputação, parece aleatório (a DLL da T11 passou).
+- **Como foi resolvido:** o Pedro desligou o Smart App Control. Alternativa: .NET no WSL2.
+- **Como evitar:** é pré-requisito de máquina para desenvolver no Windows 11.
+
+## L16 — Entrada de MCP que instalava em vez de iniciar
+*2026-10-12*
+
+- **O que aconteceu:** a entrada `firecrawl` do `~/.claude.json` tinha como comando `npm install -g firecrawl-mcp`, que instala e termina; o servidor nunca subia.
+- **Como foi resolvido:** trocada pela versão HTTP com OAuth.
+
+## L15 — Git Bash converte `/c` em `C:/` nos argumentos
+*2026-10-12*
+
+- **O que aconteceu:** o `.mcp.json` saiu com `"C:/"` onde deveria haver `"/c"` (argumento do `cmd`), por causa da conversão de caminhos do MSYS.
+- **Como evitar:** conferir o arquivo gerado; para argumentos assim, usar PowerShell ou editar o JSON direto.
+
+## L14 — PowerShell 5.1 remove o `--` ao chamar executáveis
+*2026-10-12*
+
+- **O que aconteceu:** `claude mcp add ... -- cmd /c ...` falhou com "unknown option '-y'": o PowerShell engoliu o `--`.
+- **Como evitar:** passar `'--'` entre aspas.
+
+## L13 — Testar regra de senha pela API de cadastro gasta a cota de email
+*2026-10-12 · spec 001*
+
+- **O que aconteceu:** testar regras de senha via `POST /auth/v1/signup` esgotou o limite de envio do servidor de email padrão do Supabase e travou todo cadastro por cerca de 1 hora. O limite é checado antes da senha.
+- **Como evitar:** regras de senha se testam nos testes unitários (`PasswordPolicy`) e no formulário, nunca pelo cadastro real.
+- **Regra em:** [plano da spec 001 → Riscos](specs/001-autenticacao/plan.md#riscos-e-armadilhas).
+
 ## L12 — Estado medido a cada quadro no topo da árvore derruba o desempenho
 *2026-10-12 · spec 003*
 

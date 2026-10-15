@@ -6,6 +6,38 @@
 
 ## [Não lançado]
 
+### 2026-10-15 — Etapa 3 concluída: autenticação (spec 001)
+#### Adicionado
+- API ASP.NET Core (.NET 10, Clean Architecture) e front React + Vite em `web/`, na mesma origem ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)); o Next.js saiu.
+- Cadastro, entrar e sair com sessão em cookies `httpOnly` (`velos_at`/`velos_rt`), renovação automática do token, CSRF por header `X-Velos-Csrf`.
+- Banco acessado só pela API, com o role `velos_api` (sem `bypassrls`) e a RLS valendo em toda query (`0007`).
+- Bloqueio de tentativas: 5 senhas erradas → 10 min, aviso da 3ª em diante, tela de bloqueio com relógio; vale para email sem conta ([ADR 0014](adr/0014-bloqueio-de-tentativas-de-login.md); `0005`, `0008`).
+- Login com Google e recuperação de senha, os dois com PKCE feito pela API; telas `/recuperar-senha`, `/redefinir-senha` e `/auth/erro`.
+- Modelos de email de recuperação e confirmação com a identidade Velos (`supabase/templates/`, publicação adiada com o C3) e `npm run preview:emails`.
+- Limite de requisições por IP nas rotas de autenticação e cabeçalhos de segurança (`X-Frame-Options`, `frame-ancestors`, `nosniff`, `Referrer-Policy`, HSTS em produção).
+- ADRs [0014](adr/0014-bloqueio-de-tentativas-de-login.md) (bloqueio) e [0015](adr/0015-rotas-privadas-por-padrao.md) (rotas privadas por padrão).
+- 120 testes xUnit (Domain, Application e integração com o banco).
+#### Corrigido
+- Proxy do Vite trocava o `Host`, e os endereços de volta do Google e do email saíam fora da lista do Supabase.
+- Endereços de volta passam a vir de `App:PublicOrigin`, nunca do `Host` da request (Host forjado chegava ao link).
+- Redirect `/..//site.com` virava `//site.com` depois de normalizado; agora a saída também é conferida.
+- Tentativas de login em paralelo passavam do limite de 5 (agora a tentativa é reservada no banco antes de chamar o Supabase).
+- Tempo de bloqueio aparecia como "11 minutos" com o relógio da API atrás do banco.
+- "Sair" passa a apagar também os cookies dos fluxos de recuperação e Google.
+- Mensagens próprias para link de recuperação vencido, troca de senha sem o link e falha do Google (antes: "tente de novo").
+- Erros de campo e a confirmação do "Esqueci minha senha" anunciados ao leitor de tela.
+#### Configuração (painel)
+- Supabase: *Confirm email* desligada (estava ligada contra a Revisão 1 da spec), Google ligado (C4/C5), Data API (`/rest/v1`) desligada.
+#### Pendente
+- CA7 (recuperação de ponta a ponta com o email chegando) e CA16 (aparência do email nos clientes) — ver [ROADMAP](ROADMAP.md).
+
+### 2026-10-15 — Limpeza do repositório
+#### Alterado
+- Logos originais da raiz movidos para `media/brand/`; projeto do vídeo de lançamento versionado em `media/video-lancamento/` (só a fonte; MP4 e capturas ficam fora do Git).
+- Material de divulgação (Instagram, LinkedIn) reunido em `media/` e ignorado pelo Git.
+#### Removido
+- `supabase/migrations/.gitkeep` (gerava aviso em todo comando da CLI).
+
 ### 2026-10-12 — Cores revisadas pelo Pedro (spec 003)
 #### Alterado
 - Verde escuro passa a ser o tema padrão de quem ainda não escolheu ([ADR 0016](adr/0016-verde-escuro-como-tema-padrao.md)); a barra do navegador acompanha o tema aplicado.

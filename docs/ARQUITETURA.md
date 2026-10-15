@@ -37,10 +37,10 @@ api/
     Velos.Application/       # casos de uso, interfaces (Abstractions/), validators, Result
     Velos.Infrastructure/    # Supabase (GoTrue REST), Persistence (EF Core, UserDbSession)
     Velos.Api/               # Controllers, cookies de sessão, Program.cs; serve o SPA (wwwroot)
-  tests/                     # Velos.Domain.Tests, Velos.Application.Tests
+  tests/                     # Velos.Domain.Tests, Velos.Application.Tests, Velos.Infrastructure.IntegrationTests
 web/                         # SPA Vite: pages/, features/, components/ui|shared, lib/api|utils|validations
 supabase/
-  migrations/                # 0001–0006 aplicadas; 0007 (role da API) planejada
+  migrations/                # 0001–0008 aplicadas
   templates/                 # modelos de email (T18)
 public/brand/ → web/public/brand/
 docs/                        # esta documentação (SDD)
@@ -81,7 +81,10 @@ Formulário React (RHF + zodResolver)  ── useMutation ──► POST/PUT/DEL
 1. Login, cadastro, Google e links de email passam **pela API**, que chama o Supabase Auth (REST) com a chave publicável guardada só no servidor.
 2. A API grava `velos_at` (access token) e `velos_rt` (refresh token) em cookies `httpOnly; Secure; SameSite=Lax`.
 3. Em toda request, o `TokenRefreshMiddleware` renova o token perto de vencer, e o `JwtBearer` valida o access token pela **chave pública ES256** do projeto (OpenID Discovery).
-4. Toda rota da API é privada por padrão (`FallbackPolicy`). No front, `RequireAuth` só melhora a experiência (redireciona para `/entrar?next=`).
+4. Toda rota da API é privada por padrão (`FallbackPolicy`, [ADR 0015](adr/0015-rotas-privadas-por-padrao.md)). No front, `RequireAuth` só melhora a experiência (redireciona para `/entrar?next=`).
+5. Login por senha passa pelo bloqueio de tentativas ([ADR 0014](adr/0014-bloqueio-de-tentativas-de-login.md)): a tentativa é **reservada** no banco (`reserve_login_attempt`) antes de chamar o Supabase.
+6. As rotas de autenticação têm **limite por IP** na própria API (`RateLimitingSetup`): o Supabase, chamado servidor a servidor, só enxerga o IP da API.
+7. Os endereços de volta do Google e do email vêm de `App:PublicOrigin`, **nunca** do `Host` da request. Toda resposta leva `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff` e `Referrer-Policy`; HSTS fora de Development.
 
 ## Supabase
 
@@ -92,6 +95,7 @@ Formulário React (RHF + zodResolver)  ── useMutation ──► POST/PUT/DEL
 | Postgres | 17 |
 | Plano | Free (limite de 2 projetos ativos por organização) |
 | Vínculo local | `npx supabase link --project-ref khvottmyspapwsdeqqnm` (grava em `supabase/.temp/`, fora do git) |
+| Data API (PostgREST, `/rest/v1`) | **Desligada** desde 2026-10-15: desde o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) só a API acessa o banco, direto no Postgres. Ligada, qualquer um com a chave publicável chamaria as funções do bloqueio |
 
 ### Enums
 
@@ -138,6 +142,8 @@ O "saldo total" do app soma apenas contas `checking`/`savings`/`cash`. O cartão
 |---|---|---|
 | `set_updated_at()` | `BEFORE UPDATE` em profiles, accounts, categories, transactions, goals | `updated_at = now()` |
 | `handle_new_user()` | `AFTER INSERT` em `auth.users` | Cria o `profile` (nome vindo de `full_name` → `name` → parte do email → "Você") e as **10 categorias padrão** |
+| `reserve_login_attempt(email)` | Antes de todo login por senha (como `anon`) | Conta a tentativa com a linha travada e diz se está liberada (0008). Guarda só o sha256 do email em `login_attempts` |
+| `clear_my_login_failures()` | Depois de login certo ou senha redefinida (como `authenticated`) | Zera só o registro do email do próprio JWT (0005) |
 
 Categorias padrão — despesa: Alimentação, Moradia, Transporte, Saúde, Lazer, Educação, Outros · receita: Salário, Freelance, Outros.
 
@@ -145,7 +151,7 @@ Todas as funções usam `set search_path = ''` e nomes totalmente qualificados (
 
 ### Auth
 
-- Email/senha (**sem confirmação por enquanto**, Revisão 1 da spec 001) + **Google OAuth** (PKCE feito pela API).
+- Email/senha (**sem confirmação por enquanto**, Revisão 1 da spec 001; a opção *Confirm email* estava ligada por engano e foi desligada em 2026-10-15) + **Google OAuth** (PKCE feito pela API).
 - Assinatura dos JWT: **ES256** (chave assimétrica), validada pela API sem segredo.
 - *Site URL* e *Redirect URLs*: `http://localhost:3000` / `http://localhost:3000/**`. O domínio de produção entra antes do deploy.
 - Role de login da API: `velos_api` (`noinherit`, sem `bypassrls`, membro de `anon` e `authenticated`), migration `0007`.
@@ -180,7 +186,7 @@ Definidos em `web/src/styles/globals.css` (vindos do antigo `src/app/globals.css
 | Supabase | Banco, Auth, RLS | ✅ ativo (sa-east-1) |
 | GitHub | `pdfreitass/Velos-Wallet`, PRs para `main` | ✅ ativo |
 | Host do app | API + SPA num processo só | ⬜ **A DEFINIR** antes do deploy: Azure *Brazil South* ou Fly.io `gru` |
-| Google Cloud | OAuth client para login com Google | ⬜ Etapa 3 (T20) |
+| Google Cloud | OAuth client para login com Google | ✅ ativo (C4/C5 em 2026-10-15; app em modo *Teste*, só usuários de teste) |
 
 ## Configuração e segredos
 
@@ -190,7 +196,7 @@ O front **não tem variáveis de ambiente com chaves**: ele só fala com a API, 
 |---|---|---|
 | `Supabase:Url` | `appsettings.json` | `https://khvottmyspapwsdeqqnm.supabase.co` |
 | `Supabase:PublishableKey` | `appsettings.json` | Chave **publicável** (`sb_publishable_…`): não é secreta, mas também não vai para o navegador |
-| `App:SiteUrl` | `appsettings.Development.json` | `http://localhost:3000`; base dos links de email e do Google |
+| `App:PublicOrigin` | `appsettings.Development.json` (dev) / variável `App__PublicOrigin` (prod) | `http://localhost:3000`; base dos endereços de volta do Google e do email. A API não sobe sem ela |
 | `ConnectionStrings:Velos` | **`dotnet user-secrets`** (dev) / variável de ambiente do host (prod) | Usuário `velos_api`, pooler de sessão. **Nunca** em arquivo versionado |
 
 A **secret key** (`sb_secret_…`) e o `service_role` **não são usados** e nunca podem aparecer em código, commit, chat ou issue.

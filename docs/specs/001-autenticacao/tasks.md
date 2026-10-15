@@ -44,24 +44,24 @@
   - Modelos escritos e **C6 feito** (2026-10-13). **C3 adiado**: o painel exige SMTP próprio para editar
     modelo, então a publicação saiu da Etapa 3 e vai junto com o Resend + domínio, antes do deploy
     (P3 revisado). Passo a passo guardado em [`supabase/templates/README.md`](../../../supabase/templates/README.md)
-- [ ] **T19** — Recuperação: `/api/auth/password-reset`, `/auth/confirm`, `PUT /api/auth/password`, telas `/recuperar-senha` e `/redefinir-senha`
+- [x] **T19** — Recuperação: `/api/auth/password-reset`, `/auth/confirm`, `PUT /api/auth/password`, telas `/recuperar-senha` e `/redefinir-senha`
   - Verificação: CA7 (o mesmo link não funciona duas vezes; sem o cookie de recuperação, `PUT /api/auth/password` → 403)
   - Com o C3 adiado, o link vem do **modelo padrão**: usar **PKCE** (`code_challenge` no `recover`), que
     devolve `?code=` na query — o servidor lê, troca por sessão, 5 min e uso único. **Confirmar na task**
     que o `POST /auth/v1/recover` aceita `code_challenge`; se não aceitar, a T19 passa a depender do C3
-- [ ] **T20** — Google: `/api/auth/google`, `/auth/callback`, tela `/auth/erro` + C4/C5 com guia
+  - **CA7 pendente** (ROADMAP, T9): sem o cookie, `PUT /api/auth/password` → 403 conferido na T23; o fluxo com o email chegando ainda não foi testado
+- [x] **T20** — Google: `/api/auth/google`, `/auth/callback`, tela `/auth/erro` + C4/C5 com guia
   - Verificação: CA6, CA9
-  - Código pronto e guia escrito ([guia-google.md](guia-google.md)); **falta o Pedro fazer C4 e C5**,
-    sem os quais o botão cai num erro do Supabase ("provider is not enabled")
+  - C4 e C5 feitos pelo Pedro em 2026-10-15; CA6 e CA9 conferidos na T22 ([guia-google.md](guia-google.md))
 
 ### Fechamento
 - [x] **T21** — ADRs [0014](../../adr/0014-bloqueio-de-tentativas-de-login.md) (bloqueio de tentativas) e [0015](../../adr/0015-rotas-privadas-por-padrao.md) (rotas privadas por padrão)
-- [ ] **T22** — Rodar todos os critérios de aceite em 375 e 1440 px, temas claro e escuro
+- [x] **T22** — Rodar todos os critérios de aceite em 375 e 1440 px, temas claro e escuro
   - Feita em 2026-10-15, **menos CA7** (recuperação: aguarda o limite de email do Supabase e o Pedro clicar no link) e **CA16** (adiado com o C3). CA3 conferido pelo Pedro no Table Editor
 - [x] **T23** — Agentes `security` (CA-seg) e `qa` (CA-a11y, CA-build)
   - Os dois aprovaram com ressalvas (sem crítico nem alto). Corrigido o que valia para a Etapa 3; o que é de deploy foi para a lista do ROADMAP na T25
 - [x] **T24** — `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web`
-- [ ] **T25** — Atualizar ROADMAP (Etapa 3 ✅; pré-requisitos do deploy: host em São Paulo, Resend + domínio **e religar a confirmação de email**; spec 002 como próxima), CHANGELOG, LICOES (inclui as lições guardadas da sessão anterior), ARQUITETURA
+- [x] **T25** — Atualizar ROADMAP (Etapa 3 ✅; pré-requisitos do deploy: host em São Paulo, Resend + domínio **e religar a confirmação de email**; spec 002 como próxima), CHANGELOG, LICOES (inclui as lições guardadas da sessão anterior), ARQUITETURA
 - [ ] **T26** — Commits finais + PR para `main`
 
 ## Registro
@@ -86,3 +86,4 @@
 | T22 | `30885af`, `2b79bed` | Pela API (curl) e pela tela (Playwright, 375 e 1440 px, claro e escuro). ✅ CA1 (cadastro → `/painel` "Olá, Teste"), CA4, CA6 (Pedro entrou 2× com o Google; nome do Google no painel), CA8 (ida e volta com query), CA9 (`https://`, `//` e `/\` → `/painel`, na ida e na volta), CA10, CA11 (inclusive "voltar"), CA12/CA13 (front com ✓/✗ sem chamar a API; servidor 400 por campo), CA14/CA15 (aviso na 3ª e 4ª, bloqueio na 5ª, 6ª com senha certa → 429, igual para email sem conta), CA17, CSRF (400 sem header), rotas privadas (401 em `/api/me`, rota inexistente e `PUT /api/auth/password`). **Dois bugs achados e corrigidos:** (1) o proxy do Vite trocava o `Host` por `localhost:5080`, e os endereços de volta do Google e do email saíam fora da lista do Supabase (`30885af`); (2) o bloqueio mostrava "11 minutos" com o relógio da API 5 s atrás do banco (`2b79bed`). **Achado no painel:** a "Confirm email" estava LIGADA (contra a Revisão 1); o Supabase recusava `@example.com` (`email_address_invalid`) e esgotou o limite de envio (`over_email_send_rate_limit`). Pedro desligou. Contas de teste agora em `@mailinator.com` (o domínio precisa de MX). **CA3** conferido pelo Pedro no Table Editor: a conta de teste tem 1 perfil e 10 categorias (7 de despesa, 3 de receita), e a conta Google aparece uma vez só, com o nome do Google (RN9–RN11). **Em aberto:** CA7 e CA16 |
 | T24 | | 2026-10-15, depois das correções da T22: `dotnet build api` (0 avisos), testes 45 Domain + 65 Application + 6 Integração (1 pulado, sem `Tests:UserId`), `typecheck`, `lint` e `build` do `web` passam |
 | T23 | `0c0bb3b`…`e084ea1` | `security` e `qa`: **aprovados com ressalvas**, nenhum crítico ou alto. Corrigidos e conferidos: **S4** redirect `/..//x.com` virava `//x.com` depois de normalizar (agora confere a saída; +4 testes, C# e TS); **S1** endereços de volta vêm de `App:PublicOrigin`, nunca do `Host` (Host forjado não chega mais ao `redirect_to`); **S2** limite por IP nas rotas de auth (10/min; recuperação 3/15 min), porque o Supabase só vê o IP da API; **S3** corrida no bloqueio: migration **0008** `reserve_login_attempt` (`for update`) aplicada com aprovação do Pedro, 8 tentativas em paralelo agora chegam 5 ao Supabase; **S8** sair apaga também os cookies de fluxo; **S6** cabeçalhos de segurança + HSTS fora de dev; **Q1** mensagens de `reset_link_invalid`/`reset_not_allowed`/`google_failed`/`session_expired` (conferido: sem cookie, `PUT /api/auth/password` → 403 com a mensagem certa, metade do CA7); **Q2/Q4** erro de campo e confirmação do "Esqueci" anunciados. Senha de exemplo do `Velos.Api.http` trocada (a antiga está no histórico do repositório público: Pedro avisado). **Para o deploy (T25 → ROADMAP):** S5 tirar `public` da Data API do Supabase, S7 `SSL Mode=VerifyFull`, chaves do Data Protection persistidas, `AllowedHosts`, `ForwardedHeaders` restrito ao proxy, `App__PublicOrigin`, Redirect URLs sem curinga, S9 `recovery.html` com `{{ .ConfirmationURL }}` (junto com o C3). **Depois:** Q3 contraste do vermelho no painel decorativo (3,71:1, com a T8), Q5–Q10 e S10 (detalhes), FK de categorias da 0001 (Etapa 4) |
+| T25 | | ROADMAP (Etapa 3 ✅, 3 de 8; lista "antes do deploy" com os itens da T23; pendências T9–T12), CHANGELOG (Etapa 3 e limpeza do repositório), LICOES (L13–L26: as lições guardadas desde 2026-10-12 e as da T22/T23; a do `redirectType` do auth-js ficou de fora, obsoleta sem o Next), ARQUITETURA (migrations 0001–0008, Data API desligada, funções do bloqueio, `App:PublicOrigin`, limite por IP e cabeçalhos). **Data API do Supabase desligada** (S5) pelo painel, com autorização do Pedro: `/rest/v1` responde 503 e o app segue funcionando (login, `/api/me`, logo do Storage) |
