@@ -60,7 +60,7 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | # | Pendência | Onde | Quando |
 |---|---|---|---|
 | T1 | `goal_contributions` não tem `updated_at` nem trigger, o que viola a regra "toda tabela tem `updated_at`" | migration nova (a próxima livre; `0005`–`0007` já foram usadas) | antes da Etapa 7 |
-| T2 | `supabase/migrations/.gitkeep` gera o aviso "Skipping migration .gitkeep" em todo comando do CLI | apagar o arquivo (a pasta já tem conteúdo) | qualquer `chore` |
+| ~~T2~~ | ~~`supabase/migrations/.gitkeep` gera o aviso "Skipping migration .gitkeep"~~ | ✅ arquivo removido na limpeza de 2026-10-15 | — |
 | ~~T3~~ | ~~Textos de UI sem acento~~ | ✅ resolvida na T10 da spec 001 (`web/index.html` e página provisória com acento) | — |
 | ~~T4~~ | ~~`hasSupabaseEnv()` do middleware~~ | ✅ obsoleta: o middleware do Next saiu na troca de stack (ADR 0013) | — |
 | ~~T5~~ | ~~Imagens padrão do create-next-app sem uso~~ | ✅ removidas na T10 da spec 001 (`e4da686`) | — |
