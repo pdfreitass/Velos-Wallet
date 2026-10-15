@@ -21,7 +21,11 @@ public static class LoginLockoutPolicy
             ? MaxFailedAttempts - failedCount
             : null;
 
-    /// <summary>Minutos inteiros que faltam, arredondando para cima (nunca menos de 1).</summary>
+    /// <summary>
+    /// Minutos inteiros que faltam, arredondando para cima, entre 1 e a duração do bloqueio.
+    /// O teto existe porque <paramref name="lockedUntil"/> vem do relógio do banco: se o da API
+    /// estiver uns segundos atrasado, sobraria "10 min e pouco" e a tela diria "11 minutos".
+    /// </summary>
     public static int MinutesLeft(DateTimeOffset lockedUntil, DateTimeOffset now) =>
-        Math.Max(1, (int)Math.Ceiling((lockedUntil - now).TotalMinutes));
+        Math.Clamp((int)Math.Ceiling((lockedUntil - now).TotalMinutes), 1, (int)LockDuration.TotalMinutes);
 }
