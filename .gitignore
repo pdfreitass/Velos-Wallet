@@ -78,7 +78,8 @@ desktop.ini
 # Pré-visualização dos modelos de email (npm run preview:emails)
 web/.preview-emails/
 
-# Material de divulgação (posts e capturas do Instagram): só local, fora do Git
+# Material de divulgação (posts e capturas do Instagram e do LinkedIn): só local, fora do Git
 media/instagram/
+media/linkedin/
 # Pasta de saída de ferramentas do Claude, recriada a cada exportação
 Claude outputs/
