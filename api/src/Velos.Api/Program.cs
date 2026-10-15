@@ -50,6 +50,12 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseSecurityHeaders();
+if (!app.Environment.IsDevelopment())
+{
+    // Só em produção: em localhost o HSTS grudaria no navegador e quebraria o http://localhost.
+    app.UseHsts();
+}
 
 // Em produção o build do Vite fica em wwwroot e é servido daqui: mesma origem, sem CORS.
 app.UseDefaultFiles();
