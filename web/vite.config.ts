@@ -7,9 +7,8 @@ import { defineConfig } from "vite";
 /**
  * API ASP.NET em desenvolvimento (dotnet run --project api/src/Velos.Api).
  * changeOrigin: false — a forma curta ("/api": url) liga o changeOrigin, e a API
- * receberia Host localhost:5080. Ela monta os endereços de volta do Google
- * (/auth/callback) e do email (/auth/confirm) a partir do Host, e o Supabase só
- * aceita os de localhost:3000 (C2).
+ * receberia Host localhost:5080, diferente do que o navegador vê. Os endereços de
+ * volta do Google e do email NÃO dependem disso: vêm de App:PublicOrigin.
  */
 const API = { target: "http://localhost:5080", changeOrigin: false };
 

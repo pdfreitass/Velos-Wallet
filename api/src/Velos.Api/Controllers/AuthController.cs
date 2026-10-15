@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Velos.Api.Auth;
+using Velos.Api.Configuration;
 using Velos.Api.Http;
 using Velos.Application.Abstractions;
 using Velos.Application.Auth;
@@ -92,10 +93,10 @@ public sealed class AuthController : ControllerBase
     public IActionResult SignInWithGoogle(
         [FromQuery] string? next,
         [FromServices] StartGoogleSignInHandler handler,
-        [FromServices] AuthFlowCookies cookies)
+        [FromServices] AuthFlowCookies cookies,
+        [FromServices] PublicOrigin origin)
     {
-        var callback = $"{Request.Scheme}://{Request.Host}/auth/callback"
-            + $"?next={Uri.EscapeDataString(SafeRedirect.Resolve(next))}";
+        var callback = origin.Url($"/auth/callback?next={Uri.EscapeDataString(SafeRedirect.Resolve(next))}");
 
         var started = handler.Handle(callback);
         cookies.WriteOAuthVerifier(HttpContext, started.CodeVerifier);
@@ -112,13 +113,13 @@ public sealed class AuthController : ControllerBase
         PasswordResetRequest request,
         [FromServices] RequestPasswordResetHandler handler,
         [FromServices] AuthFlowCookies cookies,
+        [FromServices] PublicOrigin origin,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        // Endereço de volta montado a partir desta request. Um Host forjado não vira open redirect:
-        // o Supabase só aceita o que estiver nas Redirect URLs do projeto (passo C2).
-        var redirectTo = $"{Request.Scheme}://{Request.Host}/auth/confirm";
+        // Da configuração, nunca do Host da request (ver PublicOrigin).
+        var redirectTo = origin.Url("/auth/confirm");
 
         var result = await handler.HandleAsync(
             new RequestPasswordResetCommand(request.Email ?? ""), redirectTo, cancellationToken);

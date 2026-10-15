@@ -29,6 +29,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, HttpUserContext>();
 // Protege os cookies da recuperação de senha (httpOnly não impede o dono do navegador de forjar).
 builder.Services.AddSingleton<AuthFlowCookies>();
+// Endereço público dos links de volta (Google e email). Dev: appsettings.Development.json.
+// Produção: variável App__PublicOrigin com o domínio final.
+builder.Services.AddSingleton(new PublicOrigin(new Uri(
+    builder.Configuration["App:PublicOrigin"] ?? throw new InvalidOperationException("Configuração 'App:PublicOrigin' ausente."))));
 builder.Services.AddApplication();
 
 // Dev: dotnet user-secrets (passo C7 do plano da spec 001). Produção: variável de ambiente
