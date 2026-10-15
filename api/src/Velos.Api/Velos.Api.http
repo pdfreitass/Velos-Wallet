@@ -5,7 +5,7 @@
 # ⚠️ Cadastro gasta a cota do Supabase: rode o "sign-up" UMA vez e depois use o "sign-in".
 @api = http://localhost:5080
 @email = seu-email@exemplo.com.br
-@password = Pedro10@
+@password = velostest123@
 
 ### API de pé (pública)
 GET {{api}}/api/health
