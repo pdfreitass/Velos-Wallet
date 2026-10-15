@@ -8,7 +8,7 @@ public static class AuthenticationSetup
 {
     /// <summary>
     /// Valida o JWT emitido pelo Supabase Auth e torna TODA rota privada por padrão
-    /// (ADR 0013; ADR 0015 na T21). Rota pública precisa de [AllowAnonymous] explícito.
+    /// (ADR 0013, ADR 0015). Rota pública precisa de [AllowAnonymous] explícito.
     /// </summary>
     public static IServiceCollection AddVelosAuthentication(
         this IServiceCollection services,
