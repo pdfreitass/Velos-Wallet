@@ -3,7 +3,7 @@
 > Leia no **início de cada sessão** para saber onde paramos.
 > Atualize **ao terminar cada feature** (junto com [CHANGELOG.md](CHANGELOG.md) e [LICOES.md](LICOES.md)).
 
-**Progresso do MVP: 3 de 8 etapas (38%)** — atualizado em 2026-10-15.
+**Progresso do MVP: 3 de 8 etapas (38%), com a Etapa 4 pronta no código** — atualizado em 2026-10-17.
 
 > **Numeração:** são 8 etapas, a mesma que os comentários do código já usam ("Etapa 2" = banco, "Etapa 3" = autenticação, "Etapa 6" = dashboard). A identidade visual faz parte da Etapa 1. O checklist antigo do `CLAUDE.md` tinha 9 itens porque contava a identidade visual à parte.
 
@@ -46,13 +46,16 @@
 
 ## 🟡 Em andamento
 
-Nada em andamento. **Próxima: Etapa 4 — Contas e categorias**, começando pela spec `002` (copiar `docs/specs/_template/`).
+**Etapa 4 — Contas e categorias** ([spec 002](specs/002-contas-e-categorias/tasks.md)): **pronta no código** (T1–T13, T15–T17). Faltam: **T14** (critérios de aceite com login real, IDOR com duas contas, CA6b/CA10 com movimentações por SQL e os testes de integração) e **T18** (PR para a `main`).
+
+- API de contas e categorias com RLS e filtro por `user_id`; navegação do app (barra inferior / menu lateral); telas de contas e categorias com os estados de carregando, vazio e erro; `MoneyInput`, `CategoryBadge` e a paleta com contraste medido nos dois temas; [ADR 0017](adr/0017-excluir-conta-apaga-movimentacoes.md)
+- Auditoria de segurança (T15): nenhum crítico ou alto; SEC-001 corrigido; SEC-002 a SEC-005 na lista de deploy abaixo
 
 ## ⬜ Pendente
 
 | Etapa | Escopo | Depende de |
 |---|---|---|
-| **4 — Contas e categorias** | CRUD de contas (4 tipos) e categorias (cor + ícone), `MoneyInput`, `CategoryBadge` | 3 |
+| ~~4 — Contas e categorias~~ | ✅ no código; falta T14 e PR (ver acima) | 3 |
 | **5 — Transações** | CRUD, filtro por mês/categoria, transferências entre contas | 4 |
 | **6 — Dashboard** | Saldo total (sem cartão), card de dívida do cartão, receitas × despesas do mês, gráfico por categoria (Recharts); conteúdo real do `/painel` e layout para desktop | 5 |
 | **7 — Metas** | CRUD de metas, aportes manuais, barra de progresso via `goal_progress` | 3 |
@@ -65,6 +68,7 @@ Nada em andamento. **Próxima: Etapa 4 — Contas e categorias**, começando pel
 - Variáveis do host: `App__PublicOrigin=https://<domínio>`, `AllowedHosts=<domínio>`, `ConnectionStrings__Velos` com **`SSL Mode=VerifyFull`** e o certificado do Supabase (hoje `Require`, que cifra mas não valida o servidor)
 - `ForwardedHeaders` restrito ao proxy do host (`KnownProxies`/`KnownNetworks`), para o limite por IP ver o IP do cliente
 - Chaves do Data Protection persistidas (volume ou key vault): sem isso, reiniciar a API invalida os links de recuperação e o login com Google em andamento
+- Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-003** limite global de requisições em `/api`; **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
 - Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}` (hoje monta `token_hash`, e o `/auth/confirm` só aceita `?code=` do PKCE) — junto com o C3
 
 ## Pendências técnicas
@@ -83,5 +87,5 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | ~~T6~~ | ~~Logos originais duplicados na raiz~~ | ✅ movidos para `media/brand/` na limpeza de 2026-10-15 (`web/public/brand/` segue sendo o que o app usa) | — |
 | T9 | **CA7 da spec 001**: testar a recuperação de ponta a ponta (pedir o link, abrir, trocar a senha, entrar com ela, o link não funcionar de novo) com o email do Pedro | `/recuperar-senha` | quando o limite de email do Supabase permitir |
 | ~~T10~~ | ~~Vermelho de despesa sobre o card escuro dava 3,71:1~~ | ✅ resolvida na T8 da spec 002 (`#F08084`: 4,68:1 no card; contrastes do card anotados em `globals.css`) | — |
-| T11 | FK `(category_id, user_id) on delete set null` da `0001` tentaria anular também o `user_id` (que é `not null`): apagar categoria com transações falha. Corrigir com `on delete set null (category_id)` | migration nova | Etapa 4 |
+| ~~T11~~ | ✅ resolvida nas migrations `0009`/`0010` da spec 002. ~~FK `(category_id, user_id) on delete set null` da `0001` tentaria anular também o `user_id` (que é `not null`): apagar categoria com transações falha. Corrigir com `on delete set null (category_id)`~~ | migration nova | — |
 | T12 | Detalhes da revisão `qa`: texto "10 minutos"/"5 senhas" fixo no front (`SignInForm`, `LockedNotice`) em vez de vir da API; checklist de senha marca ✕ em momentos diferentes no cadastro e na redefinição; `SignInForm.tsx` (157) e `SupabaseAuthClient.cs` (179) acima de ~150 linhas; `result.Error!` repetido; comentários sem acento | `web/src/features/auth/`, `api/` | `chore` ou quando mexer nos arquivos |

@@ -6,6 +6,23 @@
 
 ## [Não lançado]
 
+### 2026-10-17 — Etapa 4: contas e categorias (spec 002)
+#### Adicionado
+- API de contas e categorias (`/api/accounts`, `/api/categories`), com handlers na `Application` (FluentValidation), stores com RLS e filtro por `user_id`, e o impacto da exclusão (`deletion-impact`). Saldo atual somado no SQL (`account_balances`).
+- Migrations `0009` e `0010`: cheque especial na conta corrente, limites de nome no banco, nome de categoria único por tipo sem diferenciar maiúsculas e `on delete set null (category_id)` nas transações.
+- Navegação do app logado: barra inferior no celular e menu lateral de 240 px no desktop, item atual marcado além da cor, "Pular para o conteúdo"; Início com atalhos para Contas e Categorias.
+- Telas de contas: lista com contas e cartões em seções ("Fatura atual"), formulário com o texto do valor por tipo e a opção de cheque especial, tipo travado na edição, exclusão com o detalhe da RN6 (receitas, despesas, transferências, contas afetadas) e o botão só ativo depois de "Entendi".
+- Telas de categorias: abas Despesas e Receitas (aba no endereço), 12 cores e 30 ícones com pré-visualização, exclusão avisando quantas movimentações passam a "Sem categoria".
+- Componentes reutilizáveis: `MoneyInput` (centavos, dígitos pela direita, teto de R$ 999.999.999,99), `CategoryBadge`, `LoadError`, `FormPageShell`; base shadcn `alert-dialog`, `checkbox`, `radio-group` e `skeleton`.
+- Paleta das categorias com um tom por tema e o ícone ≥ 3:1 (contraste medido em `globals.css`); o banco guarda o hex canônico.
+- "Conta/Categoria não encontrada" para id inexistente, de outra pessoa ou inválido (o mesmo 404).
+- [ADR 0017](adr/0017-excluir-conta-apaga-movimentacoes.md): excluir conta apaga as movimentações.
+#### Corrigido
+- Botões de 32–40 px passam a ter alvo de toque de 44 px (pendência T8) e o vermelho de despesa no card escuro passa de 3,71:1 para 4,68:1 (pendência T10).
+- Apagar categoria com transações falhava pela FK composta (pendência T11).
+#### Segurança
+- Auditoria completa (T15): nenhum achado crítico ou alto. Corrigido o SEC-001: um cookie de refresh inventado fazia a API chamar o Supabase a cada request; agora o refresh recusado encerra a sessão e as tentativas têm limite de 30 por minuto por IP.
+
 ### 2026-10-15 — Etapa 3 concluída: autenticação (spec 001)
 #### Adicionado
 - API ASP.NET Core (.NET 10, Clean Architecture) e front React + Vite em `web/`, na mesma origem ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)); o Next.js saiu.

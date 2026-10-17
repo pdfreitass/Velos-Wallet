@@ -7,6 +7,33 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L30 — Mockup HTML com JavaScript não aparece inteiro no visualizador do celular
+*2026-10-17 · spec 002*
+
+- **O que aconteceu:** o `mockup.html` enviado ao celular apareceu sem ícones nem as grades de cor e ícone: o visualizador não roda os scripts nem o lucide do CDN.
+- **Como evitar:** para revisão no celular, mandar PNG de cada tela (Playwright, `locator.screenshot`); o HTML fica para abrir no navegador do PC.
+
+## L29 — Invalidar a lista depois de excluir também refaz o GET do item excluído
+*2026-10-17 · spec 002, T11*
+
+- **O que aconteceu:** `invalidateQueries(["accounts"])` também invalida `["accounts", id]`; com a tela de edição ainda montada, o React Query buscou a conta apagada e recebeu 404.
+- **Como evitar:** depois do `DELETE`, `removeQueries` no item e `invalidateQueries` com `predicate` (ou `exact: true`) que deixa o item de fora.
+- **Regra em:** `useDeleteAccount` e `useDeleteCategory` (`features/*/api.ts`).
+
+## L28 — Contraste "de antes" escrito de memória estava errado
+*2026-10-17 · spec 002, T9*
+
+- **O que aconteceu:** no comentário dos tokens das categorias, os valores do hex original ("2,67" e "1,87") foram escritos sem medir; os reais eram 2,53 e 1,81. A contagem de cores ajustadas também saiu errada (eram as 12, não 9).
+- **Como evitar:** todo número de contraste em comentário sai de um script de medição (luminância WCAG), inclusive o "antes"; contagens saem da tabela final, não de cabeça.
+
+## L27 — Cookie de refresh inventado fazia a API chamar o Supabase a cada request
+*2026-10-17 · spec 002, T15 (auditoria de segurança)*
+
+- **O que aconteceu:** o `TokenRefreshMiddleware` tentava renovar com qualquer `velos_rt`, inclusive inventado, em rotas sem rate limit. O GoTrue responde `validation_failed`, tratado como "indisponível", e o cookie nunca era apagado. Como o Supabase limita por IP — o da API —, isso esgotaria a cota de renovação de todos (a mesma raiz da L24).
+- **Como foi resolvido:** refresh recusado com 4xx (exceto 429) vira sessão encerrada; as tentativas de refresh têm limite de 30/min por IP no middleware.
+- **Como evitar:** toda chamada da API a um serviço externo disparada por dado do cliente (cookie, header, corpo) precisa de limite por cliente na API, inclusive as que acontecem em middleware, fora das rotas de auth.
+- **Regra em:** `RateLimitingSetup.CreateRefreshLimiter` e [ARQUITETURA → Sessão](ARQUITETURA.md#sessão).
+
 ## L26 — Código de erro novo na API sem mensagem no front vira "tente de novo"
 *2026-10-15 · spec 001, T23 (agente `qa`)*
 
