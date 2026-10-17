@@ -53,6 +53,14 @@ public static class RateLimitingSetup
             };
         });
 
+    /// <summary>
+    /// Tentativas de renovar a sessão: 30 por minuto por IP (achado SEC-001 da T15). Uma pessoa
+    /// renova cerca de uma vez por hora; a folga é para várias pessoas atrás do mesmo IP (NAT).
+    /// Usado direto pelo TokenRefreshMiddleware, que roda antes do roteamento.
+    /// </summary>
+    public static PartitionedRateLimiter<HttpContext> CreateRefreshLimiter() =>
+        PartitionedRateLimiter.Create<HttpContext, string>(context => PerIp(context, permits: 30, TimeSpan.FromMinutes(1)));
+
     private static RateLimitPartition<string> PerIp(HttpContext context, int permits, TimeSpan window) =>
         RateLimitPartition.GetFixedWindowLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "desconhecido",

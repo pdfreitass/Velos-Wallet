@@ -24,7 +24,8 @@ internal sealed partial class SupabaseAuthClient(HttpClient http, ILogger<Supaba
         RequestSessionAsync("signup", new { email, password, data = new { full_name = name } }, isSignUp: true, cancellationToken);
 
     public Task<Result<AuthSession>> RefreshAsync(string refreshToken, CancellationToken cancellationToken) =>
-        RequestSessionAsync("token?grant_type=refresh_token", new { refresh_token = refreshToken }, isSignUp: false, cancellationToken);
+        RequestSessionAsync(
+            "token?grant_type=refresh_token", new { refresh_token = refreshToken }, isSignUp: false, cancellationToken, isRefresh: true);
 
     public async Task SignOutAsync(string accessToken, CancellationToken cancellationToken)
     {
@@ -106,7 +107,7 @@ internal sealed partial class SupabaseAuthClient(HttpClient http, ILogger<Supaba
     }
 
     private async Task<Result<AuthSession>> RequestSessionAsync(
-        string path, object body, bool isSignUp, CancellationToken cancellationToken)
+        string path, object body, bool isSignUp, CancellationToken cancellationToken, bool isRefresh = false)
     {
         var endpoint = path.Split('?')[0]; // só o endpoint vai para o log, sem query string
         try
@@ -127,7 +128,12 @@ internal sealed partial class SupabaseAuthClient(HttpClient http, ILogger<Supaba
 
             var code = await ReadErrorCodeAsync(response, cancellationToken) ?? "?";
             LogRejected(logger, endpoint, (int)response.StatusCode, code);
-            return Result.Failure<AuthSession>(MapError(code, response.StatusCode));
+            // Refresh recusado com 4xx (token inventado, vencido, revogado: o GoTrue responde até
+            // "validation_failed") é sessão encerrada, para o middleware apagar o cookie e não tentar
+            // de novo a cada request (achado SEC-001 da T15). 429 e 5xx seguem passageiros.
+            var refreshRejected = isRefresh && (int)response.StatusCode is >= 400 and < 500
+                && response.StatusCode != HttpStatusCode.TooManyRequests;
+            return Result.Failure<AuthSession>(refreshRejected ? AuthErrors.SessionExpired : MapError(code, response.StatusCode));
         }
         catch (Exception exception) when (IsTransient(exception, cancellationToken))
         {
