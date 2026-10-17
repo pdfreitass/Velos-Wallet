@@ -39,3 +39,95 @@ GET {{api}}/api/me
 ### Sair → 204, cookies apagados e sessão revogada no Supabase
 POST {{api}}/api/auth/sign-out
 X-Velos-Csrf: 1
+
+# ---------------------------------------------------------------- contas (spec 002)
+# Entre antes (sign-in acima). Valores em centavos, COM sinal: dívida do cartão e cheque especial negativos.
+
+### Listar contas → 200 [{ id, name, type, initialBalanceCents, balanceCents }]
+GET {{api}}/api/accounts
+
+### Criar conta corrente no cheque especial → 201 { id }
+# @name createAccount
+POST {{api}}/api/accounts
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Nubank", "type": "checking", "initialBalanceCents": -35000 }
+
+### Poupança negativa → 400 validation_failed (errors.initialBalanceCents)
+POST {{api}}/api/accounts
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Poupança", "type": "savings", "initialBalanceCents": -1 }
+
+### Tipo desconhecido → 400 validation_failed (errors.type)
+POST {{api}}/api/accounts
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Conta", "type": "credit_card", "initialBalanceCents": 0 }
+
+### Abrir → 200
+GET {{api}}/api/accounts/{{createAccount.response.body.$.id}}
+
+### Editar (o tipo não muda) → 204
+PUT {{api}}/api/accounts/{{createAccount.response.body.$.id}}
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Nubank PF", "initialBalanceCents": 123456 }
+
+### Impacto da exclusão → 200 { incomeCount, expenseCount, transferCount, affectedAccounts }
+GET {{api}}/api/accounts/{{createAccount.response.body.$.id}}/deletion-impact
+
+### Excluir sem o header CSRF → 400 csrf_header_missing
+DELETE {{api}}/api/accounts/{{createAccount.response.body.$.id}}
+
+### Excluir → 204 (de novo → 404 not_found)
+DELETE {{api}}/api/accounts/{{createAccount.response.body.$.id}}
+X-Velos-Csrf: 1
+
+### Id que não existe (ou de outra pessoa) → 404 not_found · id que não é GUID → 404
+GET {{api}}/api/accounts/00000000-0000-0000-0000-000000000000
+
+# ---------------------------------------------------------------- categorias (spec 002)
+
+### Listar → 200, despesas e depois receitas, por nome
+GET {{api}}/api/categories
+
+### Criar → 201 { id }
+# @name createCategory
+POST {{api}}/api/categories
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Pets", "type": "expense", "color": "#8A6A4F", "icon": "paw-print" }
+
+### "lazer" de despesa com "Lazer" padrão → 409 category_name_taken (errors.name)
+POST {{api}}/api/categories
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "lazer", "type": "expense", "color": "#D94FA8", "icon": "gamepad-2" }
+
+### Cor fora da paleta → 400 validation_failed (errors.color)
+POST {{api}}/api/categories
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Cor livre", "type": "expense", "color": "#000000", "icon": "tag" }
+
+### Editar → 204
+PUT {{api}}/api/categories/{{createCategory.response.body.$.id}}
+Content-Type: application/json
+X-Velos-Csrf: 1
+
+{ "name": "Pet", "color": "#C7A23A", "icon": "paw-print" }
+
+### Impacto da exclusão → 200 { transactionCount }
+GET {{api}}/api/categories/{{createCategory.response.body.$.id}}/deletion-impact
+
+### Excluir → 204
+DELETE {{api}}/api/categories/{{createCategory.response.body.$.id}}
+X-Velos-Csrf: 1

@@ -29,8 +29,9 @@
 - [x] **T6** — Infrastructure: `AccountStore` e `CategoryStore` + testes de integração (`Tests:UserId` da conta de teste)
   - Verificação: CRUD real; outro usuário não lê nem altera; impacto da exclusão conta os dois lados da transferência; cada teste limpa o que criou
   - Também `StoreGuard` (erro do Postgres → `AppError`, sem a mensagem crua), `PgEnums`, handlers e stores no DI (API sobe com `ValidateOnBuild`)
-- [ ] **T7** — Api: `AccountsController`, `CategoriesController`, `Velos.Api.http`
+- [x] **T7** — Api: `AccountsController`, `CategoriesController`, `Velos.Api.http`
   - Verificação: chamadas reais (curl) para cada rota, incluindo id alheio → 404 e sem CSRF → 400
+  - Enums no JSON em camelCase (`checking`, `creditCard`, `expense`); tipo inválido vira erro de campo (`ApiEnums`). Id alheio → 404 provado na T6 (banco) e nos handlers
 
 ## Interface
 - [ ] **T8** — Base: componentes shadcn (`alert-dialog`, `checkbox`, `radio-group`, `skeleton`), mensagens de erro em `lib/api/errors.ts`, botões com 44 px (pendência T8 do ROADMAP)
@@ -62,4 +63,5 @@
 | T3 | `f7d5ccd` | Domain.Tests 100/100; build sem aviso |
 | T4 | `067a0d3` | Application.Tests 94/94; um validador (`AccountInput`) para criar e editar |
 | T5 | `1468d76` | Application.Tests 113/113 |
-| T6 | | `StoreTests` 8/8 no banco real (rodado pelo Pedro); `dotnet run` sobe |
+| T6 | `373741f` | `StoreTests` 8/8 no banco real (rodado pelo Pedro); `dotnet run` sobe |
+| T7 | | curl sem sessão (401) e sem CSRF (400); 27/27 chamadas logadas pelo Chrome do Pedro, dados de teste apagados |
