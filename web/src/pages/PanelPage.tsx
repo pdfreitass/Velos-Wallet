@@ -1,49 +1,53 @@
-import { LoaderCircle, LogOut } from "lucide-react";
-import { useNavigate } from "react-router";
+import { ChevronRight, Tags, Wallet, type LucideIcon } from "lucide-react";
+import { Link } from "react-router";
 
-import { VelosMark } from "@/components/brand/VelosMark";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { Button } from "@/components/ui/button";
-import { useCurrentUser, useSignOut } from "@/features/auth/api";
+import { useCurrentUser } from "@/features/auth/api";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * Painel PROVISÓRIO da spec 001: prova o fluxo de login ("Olá, {nome}" + Sair).
- * O dashboard de verdade é a Etapa 6.
+ * Início (P4 da spec 002): "Olá" + atalhos para Contas e Categorias até o dashboard da Etapa 6.
+ * A casca (cabeçalho, navegação e Sair) vem do AppLayout.
  */
 export function PanelPage() {
-  const navigate = useNavigate();
   const me = useCurrentUser();
-  const signOut = useSignOut();
   const firstName = me.data?.name.split(" ")[0] ?? "";
 
-  function handleSignOut() {
-    signOut.mutate(undefined, { onSettled: () => navigate(ROUTES.signIn, { replace: true }) });
-  }
-
   return (
-    <div className="min-h-dvh">
-      <title>Painel · Velos Wallet</title>
-      <header className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 sm:px-8">
-        <div className="flex items-center gap-2">
-          <VelosMark className="h-7 w-auto" />
-          <span className="font-semibold tracking-tight">Velos Wallet</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Button variant="outline" size="sm" onClick={handleSignOut} disabled={signOut.isPending}>
-            {signOut.isPending ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <LogOut aria-hidden="true" />}
-            Sair
-          </Button>
-        </div>
-      </header>
+    <div className="mx-auto max-w-2xl lg:mx-0">
+      <title>Início · Velos Wallet</title>
+      <h1 className="text-3xl font-semibold tracking-tight">Olá, {firstName}</h1>
+      <p className="mt-2 text-muted-foreground">
+        Comece cadastrando suas contas e ajustando as categorias. O resumo do mês chega em breve.
+      </p>
 
-      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-8">
-        <h1 className="text-3xl font-semibold tracking-tight">Olá, {firstName}</h1>
-        <p className="mt-2 text-muted-foreground">
-          Seu painel está sendo construído. Em breve você vê aqui seu saldo, seus gastos e suas metas.
-        </p>
-      </main>
+      <ul className="mt-8 flex flex-col gap-3">
+        <li>
+          <Shortcut to={ROUTES.accounts} Icon={Wallet} title="Contas" description="Saldo de cada conta e cartão" />
+        </li>
+        <li>
+          <Shortcut to={ROUTES.categories} Icon={Tags} title="Categorias" description="Cor e ícone de cada categoria" />
+        </li>
+      </ul>
     </div>
+  );
+}
+
+type ShortcutProps = { to: string; Icon: LucideIcon; title: string; description: string };
+
+function Shortcut({ to, Icon, title, description }: ShortcutProps) {
+  return (
+    <Link
+      to={to}
+      className="flex min-h-11 items-center gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+        <Icon className="size-5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-medium">{title}</span>
+        <span className="block text-sm text-muted-foreground">{description}</span>
+      </span>
+      <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+    </Link>
   );
 }

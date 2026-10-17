@@ -12,4 +12,6 @@ export const ROUTES = {
   authError: "/auth/erro",
   /** Destino depois de entrar e fallback de todo redirecionamento. */
   home: "/painel",
+  accounts: "/contas",
+  categories: "/categorias",
 } as const;

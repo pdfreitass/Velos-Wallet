@@ -39,7 +39,7 @@
   - Também a pendência T10 do ROADMAP: no tema escuro, despesa/destrutivo `#F08084` (4,68:1 no card) e borda de campo `#718F85` (3,44:1 no card). Diálogo como folha inferior no celular (mockup). `applyServerFieldErrors` foi junto para `lib/api/errors.ts`
 - [x] **T9** — `MoneyInput`, catálogo e paleta das categorias (tokens claro/escuro com contraste medido), `CategoryBadge`
   - Verificação: 0,01 / 0,10 / 999.999.999,99 exatos; ícone ≥ 3:1 nos dois temas
-- [ ] **T10** — Navegação: `AppLayout`, `AppNav` (barra inferior / menu lateral) e o `/painel` com atalhos (P4)
+- [x] **T10** — Navegação: `AppLayout`, `AppNav` (barra inferior / menu lateral) e o `/painel` com atalhos (P4)
   - Verificação: 375 e 1440 px, dois temas; item atual marcado além da cor; a barra não cobre conteúdo
 - [ ] **T11** — Contas: lista, formulário (RN3 por tipo, cheque especial) e diálogo de exclusão detalhado (RN6)
   - Verificação: CA1, CA1b, CA2–CA6b; skeleton, vazio e erro
@@ -66,6 +66,7 @@
 | T5 | `1468d76` | Application.Tests 113/113 |
 | T6 | `373741f` | `StoreTests` 8/8 no banco real (rodado pelo Pedro); `dotnet run` sobe |
 | T7 | `b01fe36` | curl sem sessão (401) e sem CSRF (400); 27/27 chamadas logadas pelo Chrome do Pedro, dados de teste apagados |
-| T8 | | typecheck, lint e build verdes; package.json sem mudança; todos os botões medidos com alvo ≥ 44 px na página inicial |
-| T9 | | `MoneyInput`: 0,01 / 0,10 / 999.999.999,99 exatos, tecla acima do teto ignorada; 12 cores com ícone ≥ 3:1 nos dois temas (todas precisaram de tom ajustado em pelo menos um tema, só na exibição; banco intocado); typecheck, lint e build verdes; package.json sem mudança |
+| T8 | `5e1b3a9` | typecheck, lint e build verdes; package.json sem mudança; todos os botões medidos com alvo ≥ 44 px na página inicial |
+| T9 | `7acc32b` | `MoneyInput`: 0,01 / 0,10 / 999.999.999,99 exatos, tecla acima do teto ignorada; 12 cores com ícone ≥ 3:1 nos dois temas (todas precisaram de tom ajustado em pelo menos um tema, só na exibição; banco intocado); typecheck, lint e build verdes; package.json sem mudança |
+| T10 | | 375 e 1440 px, temas claro e escuro: item atual com cor + traço + ícone mais grosso e `aria-current`; com conteúdo longo o último item fica 39 px acima da barra; alvos ≥ 44 px; 1º Tab = "Pular para o conteúdo"; o "não encontrado" passou para dentro da casca (Contas/Categorias caem nele até a T11/T12); verificado no Playwright com `/api/me` simulado; typecheck, lint e build verdes |
 | UI | | Mockup HTML das 12 telas (Início, Contas, Nova/Editar conta, Excluir conta detalhado e curto, Categorias, Nova categoria, Excluir categoria, estados carregando/vazio/erro/não encontrado, desktop) aprovado pelo Pedro em 2026-10-17; referência para T8–T12 |

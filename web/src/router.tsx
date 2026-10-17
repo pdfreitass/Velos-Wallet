@@ -53,8 +53,15 @@ export const router = createBrowserRouter([
               },
             ],
           },
-          { path: "/painel", lazy: () => import("@/pages/PanelPage").then((m) => ({ Component: m.PanelPage })) },
-          { path: "*", lazy: () => import("@/pages/NotFoundPage").then((m) => ({ Component: m.NotFoundPage })) },
+          {
+            // Casca do app logado (spec 002, T10): navegação, tema e Sair. O "não encontrado" fica
+            // dentro dela para o menu continuar à mão (e Contas/Categorias caem aqui até a T11/T12).
+            lazy: () => import("@/features/app-shell/AppLayout").then((m) => ({ Component: m.AppLayout })),
+            children: [
+              { path: "/painel", lazy: () => import("@/pages/PanelPage").then((m) => ({ Component: m.PanelPage })) },
+              { path: "*", lazy: () => import("@/pages/NotFoundPage").then((m) => ({ Component: m.NotFoundPage })) },
+            ],
+          },
         ],
       },
     ],

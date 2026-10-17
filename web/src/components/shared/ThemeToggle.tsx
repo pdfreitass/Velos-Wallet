@@ -4,8 +4,13 @@ import { cn } from "cn";
 
 import { Button } from "@/components/ui/button";
 
-/** `iconOnly`: só o ícone (cabeçalho da página inicial no celular), com o mesmo rótulo acessível. */
-export function ThemeToggle({ iconOnly = false, className }: { iconOnly?: boolean; className?: string }) {
+type ThemeToggleProps = { iconOnly?: boolean; ghost?: boolean; className?: string };
+
+/**
+ * `iconOnly`: só o ícone (cabeçalho no celular), com o mesmo rótulo acessível.
+ * `ghost`: sem moldura, como os outros itens da casca do app logado.
+ */
+export function ThemeToggle({ iconOnly = false, ghost = false, className }: ThemeToggleProps) {
   // O tema real foi decidido pelo script inline do index.html; aqui só se lê.
   // Num SPA não há render no servidor, então dá para ler já no estado inicial.
   const [isDark, setIsDark] = useState(() =>
@@ -26,7 +31,7 @@ export function ThemeToggle({ iconOnly = false, className }: { iconOnly?: boolea
 
   return (
     <Button
-      variant="outline"
+      variant={ghost ? "ghost" : "outline"}
       size={iconOnly ? "icon" : "sm"}
       onClick={toggle}
       aria-label={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}

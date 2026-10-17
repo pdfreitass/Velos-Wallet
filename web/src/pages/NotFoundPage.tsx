@@ -7,7 +7,7 @@ import { ROUTES } from "@/lib/auth/routes";
 
 export function NotFoundPage() {
   return (
-    <div className="grid min-h-dvh place-items-center px-4">
+    <div className="grid min-h-[60dvh] place-items-center">
       <title>Página não encontrada · Velos Wallet</title>
       <div className="max-w-sm space-y-4 text-center">
         <VelosMark className="mx-auto h-10 w-auto" />
