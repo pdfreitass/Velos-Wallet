@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Transações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --background:#ECF1EA; --foreground:#0A2E24; --card:#F5F8F3; --primary:#0A2E24; --primary-foreground:#F4F7F2;
+  --secondary:#E1E8E1; --muted:#E1E8E1; --muted-foreground:#576E66; --accent:#2ED38C; --destructive:#C1393E;
+  --border:#CDD6CF; --input:#738880; --ring:#197A50; --income:#197A50; --expense:#C1393E; --page:#DDE5DC;
+}
+:root[data-theme="dark"] {
+  --background:#0A2E24; --foreground:#F4F7F2; --card:#1A3C32; --primary:#2ED38C; --primary-foreground:#0A2E24;
+  --secondary:#26463D; --muted:#26463D; --muted-foreground:#A9B7B0; --accent:#2ED38C; --destructive:#E96368;
+  --border:#345249; --input:#5C7A70; --ring:#2ED38C; --income:#2ED38C; --expense:#E96368; --page:#06201A;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:"Geist",ui-sans-serif,system-ui,sans-serif; background:var(--page); color:var(--foreground); }
+.top { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+  padding:14px 24px; background:var(--background); border-bottom:1px solid var(--border); }
+.top h1 { font-size:1.05rem; margin:0; font-weight:600; }
+.top p { margin:2px 0 0; color:var(--muted-foreground); font-size:.85rem; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 16px; border-radius:10px;
+  font:inherit; font-weight:500; font-size:.95rem; border:1px solid transparent; cursor:pointer; }
+.btn svg { width:18px; height:18px; }
+.btn-primary { background:var(--primary); color:var(--primary-foreground); }
+.btn-outline { background:transparent; color:var(--foreground); border-color:var(--input); }
+.btn-ghost { background:transparent; color:var(--foreground); }
+.btn-destructive { background:var(--destructive); color:#fff; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-block { width:100%; }
+.gallery { display:flex; flex-wrap:wrap; gap:36px 28px; padding:28px 24px 60px; justify-content:center; }
+.shot { display:flex; flex-direction:column; gap:10px; align-items:center; }
+.shot-label { font-size:.85rem; font-weight:600; text-align:center; max-width:375px; }
+.shot-label small { display:block; font-weight:400; color:var(--muted-foreground); margin-top:2px; }
+.phone { width:375px; height:760px; border-radius:44px; padding:10px; background:#1b2220; border:1px solid #3a4643; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+.screen { position:relative; height:100%; border-radius:34px; overflow:hidden; background:var(--background); display:flex; flex-direction:column; }
+.status { height:40px; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; padding:0 26px; font-size:.8rem; font-weight:600; }
+.island { width:96px; height:26px; border-radius:20px; background:#000; }
+.appbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 16px 10px; }
+.appbar h2 { font-size:1.5rem; margin:0; font-weight:600; letter-spacing:-.01em; }
+.back { display:flex; align-items:center; gap:4px; color:var(--muted-foreground); font-size:.9rem; min-height:44px; }
+.content { flex:1; overflow:auto; padding:4px 16px 96px; }
+.section-title { font-size:.8rem; font-weight:600; color:var(--muted-foreground); text-transform:uppercase; letter-spacing:.04em; margin:18px 2px 8px; }
+.list { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+.row { display:flex; align-items:center; gap:12px; padding:12px 14px; min-height:60px; border-top:1px solid var(--border); }
+.row:first-child { border-top:0; }
+.row-icon { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; background:var(--secondary); flex-shrink:0; }
+.row-icon svg { width:20px; height:20px; }
+.row-main { flex:1; min-width:0; }
+.row-title { font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.row-sub { font-size:.8rem; color:var(--muted-foreground); }
+.money { font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; text-align:right; }
+.money small { display:block; font-weight:400; font-size:.75rem; color:var(--muted-foreground); }
+.neg { color:var(--expense); } .pos { color:var(--income); }
+.chev { color:var(--muted-foreground); width:18px; height:18px; }
+.nav { position:absolute; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(3,1fr); padding:4px 8px 22px;
+  background:var(--background); border-top:1px solid var(--border); }
+.nav a { position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; min-height:52px; justify-content:center;
+  font-size:.75rem; font-weight:500; color:var(--muted-foreground); text-decoration:none; }
+.nav a svg { width:20px; height:20px; }
+.nav a[aria-current="page"] { color:var(--foreground); }
+.nav a[aria-current="page"]::before { content:""; position:absolute; top:-5px; width:28px; height:2px; border-radius:2px; background:var(--foreground); }
+.hello { font-size:1.75rem; font-weight:600; margin:10px 0 4px; }
+.lead { color:var(--muted-foreground); margin:0 0 18px; line-height:1.45; }
+.shortcut { display:flex; align-items:center; gap:14px; padding:16px; background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:12px; }
+.shortcut .row-icon { width:44px; height:44px; }
+.field { margin-bottom:16px; }
+.field label, .legend { display:block; font-weight:500; font-size:.9rem; margin-bottom:6px; }
+.hint { font-size:.8rem; color:var(--muted-foreground); margin-top:6px; }
+.input { width:100%; height:44px; border-radius:10px; border:1px solid var(--input); background:transparent; color:var(--foreground); padding:0 12px; font:inherit; font-size:1rem; }
+.input:focus { outline:3px solid color-mix(in srgb, var(--ring) 50%, transparent); border-color:var(--ring); }
+.input.money-input { font-variant-numeric:tabular-nums; font-weight:600; }
+.types { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.type { display:flex; align-items:center; gap:8px; min-height:52px; padding:8px 10px; border-radius:10px; border:1px solid var(--input); background:transparent; color:var(--foreground); font:inherit; font-size:.88rem; cursor:pointer; text-align:left; }
+.type svg { width:18px; height:18px; flex-shrink:0; }
+.type[aria-checked="true"] { border-color:var(--ring); box-shadow:0 0 0 2px var(--ring) inset; font-weight:600; }
+.check { display:flex; align-items:flex-start; gap:10px; min-height:44px; padding:10px 12px; border-radius:10px; background:var(--secondary); cursor:pointer; font-size:.9rem; }
+.check input { width:20px; height:20px; margin:0; accent-color:var(--primary); flex-shrink:0; }
+.sticky-actions { position:absolute; left:0; right:0; bottom:0; padding:12px 16px 26px; background:var(--background); border-top:1px solid var(--border); display:flex; gap:8px; }
+.tabs { display:grid; grid-template-columns:1fr 1fr; background:var(--secondary); border-radius:12px; padding:4px; margin:4px 0 6px; }
+.tabs button { min-height:40px; border:0; border-radius:9px; background:transparent; font:inherit; font-weight:500; color:var(--muted-foreground); cursor:pointer; }
+.tabs button[aria-selected="true"] { background:var(--card); color:var(--foreground); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.badge-icon { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; flex-shrink:0; }
+.badge-icon svg { width:20px; height:20px; }
+.swatches { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
+.swatch { aspect-ratio:1; min-height:44px; border-radius:50%; border:2px solid transparent; cursor:pointer; display:grid; place-items:center; color:#fff; }
+.swatch[aria-pressed="true"] { outline:2px solid var(--foreground); outline-offset:2px; }
+.swatch svg { width:18px; height:18px; display:none; }
+.swatch[aria-pressed="true"] svg { display:block; }
+.icons { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.icon-btn { min-height:44px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--foreground); display:grid; place-items:center; cursor:pointer; }
+.icon-btn svg { width:20px; height:20px; }
+.icon-btn[aria-pressed="true"] { border-color:var(--ring); box-shadow:0 0 0 2px var(--ring) inset; }
+.preview { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px dashed var(--input); border-radius:14px; margin-bottom:16px; }
+.overlay { position:absolute; inset:0; background:rgba(4,20,16,.55); display:flex; align-items:flex-end; }
+.dialog { width:100%; background:var(--card); border-radius:24px 24px 0 0; padding:22px 18px 28px; }
+.dialog h3 { margin:0 0 8px; font-size:1.2rem; }
+.dialog p { margin:0 0 12px; color:var(--muted-foreground); font-size:.92rem; line-height:1.45; }
+.facts { list-style:none; padding:0; margin:0 0 14px; display:grid; gap:8px; }
+.facts li { display:flex; gap:10px; align-items:flex-start; font-size:.9rem; line-height:1.4; }
+.facts svg { width:18px; height:18px; flex-shrink:0; margin-top:1px; }
+.dialog-actions { display:grid; gap:8px; margin-top:14px; }
+.skel { background:linear-gradient(90deg, var(--secondary) 0%, var(--border) 50%, var(--secondary) 100%); background-size:200% 100%; animation:sh 1.4s infinite; border-radius:8px; }
+@keyframes sh { to { background-position:-200% 0; } }
+.empty { text-align:center; padding:48px 16px; }
+.empty .row-icon { margin:0 auto 14px; width:56px; height:56px; border-radius:16px; }
+.empty h3 { margin:0 0 6px; }
+.empty p { color:var(--muted-foreground); margin:0 0 18px; }
+.desk { width:1100px; max-width:calc(100vw - 48px); height:640px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:var(--background); display:grid; grid-template-columns:240px 1fr; box-shadow:0 20px 50px rgba(0,0,0,.2); }
+.side { border-right:1px solid var(--border); padding:18px 12px; display:flex; flex-direction:column; gap:4px; }
+.brand { display:flex; align-items:center; gap:8px; font-weight:600; padding:4px 10px 18px; }
+.brand-mark { width:26px; height:26px; border-radius:7px; background:var(--primary); color:var(--primary-foreground); display:grid; place-items:center; font-size:.8rem; font-weight:700; }
+.side a { display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border-radius:10px; color:var(--muted-foreground); text-decoration:none; font-weight:500; position:relative; }
+.side a svg { width:20px; height:20px; }
+.side a[aria-current="page"] { background:var(--secondary); color:var(--foreground); }
+.side a[aria-current="page"]::before { content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:3px; background:var(--foreground); }
+.desk-main { padding:26px 36px; overflow:auto; }
+.desk-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.note { max-width:880px; margin:0 auto; padding:0 24px 40px; color:var(--muted-foreground); font-size:.9rem; line-height:1.5; }
+:root { --c-orange:#C45F17; --c-blue:#2A75F5; --c-violet:#7C5CF5; --c-red:#DD4150; --c-pink:#D43A9E; --c-cyan:#2986A0; --c-green:#1C7F54; }
+:root[data-theme="dark"] { --c-orange:#E8833A; --c-blue:#4F8DF7; --c-violet:#957BF7; --c-red:#E25F6C; --c-pink:#DC5CAE; --c-cyan:#2F9BB8; --c-green:#24A36B; }
+.cat { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; }
+.cat svg { width:19px; height:19px; }
+.nav5 { grid-template-columns:repeat(5,1fr); align-items:end; }
+.fab { display:flex; justify-content:center; }
+.fab span { width:52px; height:52px; border-radius:16px; background:var(--primary); color:var(--primary-foreground); display:grid; place-items:center; margin-bottom:10px; box-shadow:0 6px 16px rgba(0,0,0,.25); }
+.fab svg { width:24px; height:24px; }
+.month { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:2px 0 12px; }
+.month .btn { width:44px; padding:0; }
+.month strong { font-size:1.05rem; }
+.totals { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.total { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; }
+.total .lbl { display:flex; align-items:center; gap:6px; font-size:.8rem; color:var(--muted-foreground); }
+.total .lbl svg { width:16px; height:16px; }
+.total .val { font-weight:600; font-size:1.1rem; margin-top:4px; font-variant-numeric:tabular-nums; }
+.filter { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:44px; padding:0 12px; border:1px solid var(--input); border-radius:10px; margin-bottom:6px; font-size:.92rem; }
+.filter svg { width:18px; height:18px; }
+.day { font-size:.8rem; font-weight:600; color:var(--muted-foreground); margin:16px 2px 6px; }
+.tabs3 { grid-template-columns:repeat(3,1fr); }
+.big-money { height:60px; font-size:1.8rem; padding-left:14px; border-width:2px; border-color:var(--ring); outline:3px solid color-mix(in srgb, var(--ring) 40%, transparent); }
+.cats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.catbtn { display:flex; flex-direction:column; align-items:center; gap:6px; min-height:76px; padding:8px 4px; border:1px solid var(--border); border-radius:12px; background:var(--card); font:inherit; font-size:.78rem; color:var(--foreground); }
+.catbtn[aria-pressed="true"] { border-color:var(--ring); box-shadow:0 0 0 2px var(--ring) inset; font-weight:600; }
+.select { display:flex; align-items:center; justify-content:space-between; }
+.select svg { width:18px; height:18px; color:var(--muted-foreground); }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.transfer-hint { display:flex; gap:8px; align-items:flex-start; font-size:.85rem; color:var(--muted-foreground); background:var(--secondary); border-radius:10px; padding:10px 12px; margin-bottom:16px; }
+.transfer-hint svg { width:18px; height:18px; flex-shrink:0; }
+.side .new { margin:0 0 12px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Velos Wallet · Mockup das telas da Etapa 5 (spec 004 — Transações)</h1>
+    <p>Rascunho para aprovação, com as respostas P1–P5. Valores de exemplo.</p>
+  </div>
+  <button class="btn btn-outline" id="theme"><i data-lucide="moon"></i><span>Tema escuro</span></button>
+</header>
+<main class="gallery">
+
+  <section class="shot">
+    <div class="shot-label">1 · Transações do mês (/transacoes?mes=2026-10)<small>Totais do mês sem transferências (RN7); agrupado por dia; sinal + ícone, não só cor</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><h2>Transações</h2></div>
+      <div class="content">
+        <div class="month"><button class="btn btn-outline" aria-label="Mês anterior"><i data-lucide="chevron-left"></i></button><strong>outubro de 2026</strong><button class="btn btn-outline" aria-label="Próximo mês" disabled><i data-lucide="chevron-right"></i></button></div>
+        <div class="totals">
+          <div class="total"><div class="lbl"><i data-lucide="arrow-down-left" class="pos"></i>Receitas</div><div class="val pos">+R$ 3.000,00</div></div>
+          <div class="total"><div class="lbl"><i data-lucide="arrow-up-right" class="neg"></i>Despesas</div><div class="val neg">−R$ 1.245,30</div></div>
+        </div>
+        <div class="filter"><span><i data-lucide="filter" style="vertical-align:-3px"></i> Todas as categorias</span><i data-lucide="chevron-down"></i></div>
+        <div class="day">Hoje</div>
+        <div class="list">
+          <div class="row"><span class="cat" style="background:color-mix(in srgb,var(--c-orange) 15%,transparent);color:var(--c-orange)"><i data-lucide="utensils-crossed"></i></span><div class="row-main"><div class="row-title">Mercado do bairro</div><div class="row-sub">Alimentação · Nubank</div></div><div class="money neg">−R$ 45,90</div></div>
+          <div class="row"><span class="cat" style="background:color-mix(in srgb,var(--c-violet) 15%,transparent);color:var(--c-violet)"><i data-lucide="car"></i></span><div class="row-main"><div class="row-title">Transporte</div><div class="row-sub">Nubank</div></div><div class="money neg">−R$ 18,40</div></div>
+        </div>
+        <div class="day">Ontem</div>
+        <div class="list">
+          <div class="row"><span class="cat" style="background:var(--secondary)"><i data-lucide="arrow-left-right"></i></span><div class="row-main"><div class="row-title">Transferência</div><div class="row-sub">Nubank → Reserva</div></div><div class="money">R$ 500,00</div></div>
+        </div>
+        <div class="day">sexta, 10 de outubro</div>
+        <div class="list">
+          <div class="row"><span class="cat" style="background:color-mix(in srgb,var(--c-green) 15%,transparent);color:var(--c-green)"><i data-lucide="wallet"></i></span><div class="row-main"><div class="row-title">Salário</div><div class="row-sub">Itaú</div></div><div class="money pos">+R$ 3.000,00</div></div>
+          <div class="row"><span class="cat" style="background:color-mix(in srgb,var(--c-blue) 15%,transparent);color:var(--c-blue)"><i data-lucide="house"></i></span><div class="row-main"><div class="row-title">Aluguel</div><div class="row-sub">Moradia · Itaú</div></div><div class="money neg">−R$ 1.181,00</div></div>
+        </div>
+      </div>
+      <nav class="nav nav5"><a><i data-lucide="house"></i>Início</a><a aria-current="page"><i data-lucide="arrow-left-right"></i>Transações</a><a class="fab" aria-label="Nova transação"><span><i data-lucide="plus"></i></span></a><a><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <section class="shot">
+    <div class="shot-label">2 · Nova transação: despesa (/transacoes/nova)<small>Valor em foco ao abrir; categoria obrigatória com a última sugerida (P2); data até hoje (P1)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Transações</span></div>
+      <div class="content">
+        <h2 style="margin:0 0 12px;font-size:1.5rem">Nova transação</h2>
+        <div class="tabs tabs3" style="margin-bottom:16px"><button aria-selected="true">Despesa</button><button>Receita</button><button>Transferência</button></div>
+        <div class="field"><label>Valor</label><input class="input money-input big-money" value="R$ 45,90"></div>
+        <div class="field"><span class="legend">Categoria</span>
+          <div class="cats">
+            <button class="catbtn" aria-pressed="true"><span class="cat" style="background:color-mix(in srgb,var(--c-orange) 15%,transparent);color:var(--c-orange)"><i data-lucide="utensils-crossed"></i></span>Alimentação</button>
+            <button class="catbtn"><span class="cat" style="background:color-mix(in srgb,var(--c-violet) 15%,transparent);color:var(--c-violet)"><i data-lucide="car"></i></span>Transporte</button>
+            <button class="catbtn"><span class="cat" style="background:color-mix(in srgb,var(--c-blue) 15%,transparent);color:var(--c-blue)"><i data-lucide="house"></i></span>Moradia</button>
+            <button class="catbtn"><span class="cat" style="background:color-mix(in srgb,var(--c-pink) 15%,transparent);color:var(--c-pink)"><i data-lucide="gamepad-2"></i></span>Lazer</button>
+            <button class="catbtn"><span class="cat" style="background:color-mix(in srgb,var(--c-red) 15%,transparent);color:var(--c-red)"><i data-lucide="heart-pulse"></i></span>Saúde</button>
+            <button class="catbtn"><span class="cat" style="background:color-mix(in srgb,var(--c-cyan) 15%,transparent);color:var(--c-cyan)"><i data-lucide="graduation-cap"></i></span>Educação</button>
+          </div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Conta</label><div class="input select"><span>Nubank</span><i data-lucide="chevron-down"></i></div></div>
+          <div class="field"><label>Data</label><div class="input select"><span>17/10/2026</span><i data-lucide="calendar"></i></div></div>
+        </div>
+        <div class="field"><label>Descrição <span style="color:var(--muted-foreground);font-weight:400">(opcional)</span></label><input class="input" value="Mercado do bairro"></div>
+      </div>
+      <div class="sticky-actions"><button class="btn btn-outline" style="flex:1">Cancelar</button><button class="btn btn-primary" style="flex:2">Salvar despesa</button></div>
+    </div></div>
+  </section>
+
+  <section class="shot">
+    <div class="shot-label">3 · Nova transação: transferência<small>De e Para no lugar da categoria; para o cartão = pagar a fatura (RN3)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Transações</span></div>
+      <div class="content">
+        <h2 style="margin:0 0 12px;font-size:1.5rem">Nova transação</h2>
+        <div class="tabs tabs3" style="margin-bottom:16px"><button>Despesa</button><button>Receita</button><button aria-selected="true">Transferência</button></div>
+        <div class="field"><label>Valor</label><input class="input money-input big-money" value="R$ 640,90"></div>
+        <div class="field"><label>De</label><div class="input select"><span>Nubank · R$ 1.188,66</span><i data-lucide="chevron-down"></i></div></div>
+        <div class="field"><label>Para</label><div class="input select"><span>Inter (cartão) · −R$ 640,90</span><i data-lucide="chevron-down"></i></div></div>
+        <div class="transfer-hint"><i data-lucide="info"></i><span>Transferência não é gasto nem ganho: não entra nos totais do mês. Para o cartão, diminui a fatura.</span></div>
+        <div class="field"><label>Data</label><div class="input select"><span>17/10/2026</span><i data-lucide="calendar"></i></div></div>
+      </div>
+      <div class="sticky-actions"><button class="btn btn-outline" style="flex:1">Cancelar</button><button class="btn btn-primary" style="flex:2">Salvar transferência</button></div>
+    </div></div>
+  </section>
+
+  <section class="shot">
+    <div class="shot-label">4 · Mês sem transações<small>Estados: skeleton, vazio e erro como nas outras listas</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><h2>Transações</h2></div>
+      <div class="content">
+        <div class="month"><button class="btn btn-outline" aria-label="Mês anterior"><i data-lucide="chevron-left"></i></button><strong>setembro de 2026</strong><button class="btn btn-outline" aria-label="Próximo mês"><i data-lucide="chevron-right"></i></button></div>
+        <div class="totals">
+          <div class="total"><div class="lbl"><i data-lucide="arrow-down-left" class="pos"></i>Receitas</div><div class="val">R$ 0,00</div></div>
+          <div class="total"><div class="lbl"><i data-lucide="arrow-up-right" class="neg"></i>Despesas</div><div class="val">R$ 0,00</div></div>
+        </div>
+        <div class="empty"><div class="row-icon"><i data-lucide="receipt"></i></div><h3>Nenhuma transação em setembro</h3><p>Lance uma despesa, receita ou transferência.</p><button class="btn btn-primary"><i data-lucide="plus"></i>Nova transação</button></div>
+      </div>
+      <nav class="nav nav5"><a><i data-lucide="house"></i>Início</a><a aria-current="page"><i data-lucide="arrow-left-right"></i>Transações</a><a class="fab" aria-label="Nova transação"><span><i data-lucide="plus"></i></span></a><a><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <section class="shot">
+    <div class="shot-label">5 · Excluir transação<small>Confirmação curta (RN9); "Cancelar" com o foco</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Transações</span></div>
+      <div class="content"><h2 style="margin:0;font-size:1.5rem">Editar transação</h2></div>
+      <div class="overlay"><div class="dialog" role="alertdialog">
+        <h3>Excluir esta despesa de R$ 45,90?</h3>
+        <p>Mercado do bairro · Alimentação · 17 de outubro. O valor volta para o saldo do Nubank.</p>
+        <ul class="facts"><li><i data-lucide="triangle-alert" class="neg"></i><span>Não dá para desfazer.</span></li></ul>
+        <div class="dialog-actions"><button class="btn btn-destructive">Excluir transação</button><button class="btn btn-outline">Cancelar</button></div>
+      </div></div>
+    </div></div>
+  </section>
+
+  <section class="shot">
+    <div class="shot-label">6 · Início com "Nova transação" (P5)<small>Até o dashboard da Etapa 6</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><div class="brand" style="padding:0"><span class="brand-mark">V</span>Velos Wallet</div><button class="btn btn-ghost" aria-label="Sair"><i data-lucide="log-out"></i></button></div>
+      <div class="content">
+        <div class="hello">Olá, Pedro</div>
+        <p class="lead">Lance o que entrou e o que saiu. O resumo do mês chega em breve.</p>
+        <button class="btn btn-primary btn-block" style="min-height:52px;margin-bottom:14px"><i data-lucide="plus"></i>Nova transação</button>
+        <div class="shortcut"><span class="row-icon"><i data-lucide="arrow-left-right"></i></span><div class="row-main"><div class="row-title">Transações</div><div class="row-sub">O que entrou e saiu no mês</div></div><i data-lucide="chevron-right" class="chev"></i></div>
+        <div class="shortcut"><span class="row-icon"><i data-lucide="wallet"></i></span><div class="row-main"><div class="row-title">Contas</div><div class="row-sub">Saldo de cada conta e cartão</div></div><i data-lucide="chevron-right" class="chev"></i></div>
+        <div class="shortcut"><span class="row-icon"><i data-lucide="tags"></i></span><div class="row-main"><div class="row-title">Categorias</div><div class="row-sub">Cor e ícone de cada categoria</div></div><i data-lucide="chevron-right" class="chev"></i></div>
+      </div>
+      <nav class="nav nav5"><a aria-current="page"><i data-lucide="house"></i>Início</a><a><i data-lucide="arrow-left-right"></i>Transações</a><a class="fab" aria-label="Nova transação"><span><i data-lucide="plus"></i></span></a><a><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <section class="shot" style="width:100%">
+    <div class="shot-label">7 · Desktop (1440 px): "Nova transação" no topo do menu lateral (P4)</div>
+    <div class="desk">
+      <aside class="side">
+        <div class="brand"><span class="brand-mark">V</span>Velos Wallet</div>
+        <button class="btn btn-primary new"><i data-lucide="plus"></i>Nova transação</button>
+        <a><i data-lucide="house"></i>Início</a><a aria-current="page"><i data-lucide="arrow-left-right"></i>Transações</a><a><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a>
+        <div style="flex:1"></div><a><i data-lucide="log-out"></i>Sair</a>
+      </aside>
+      <div class="desk-main">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0;font-size:1.75rem">Transações</h2>
+          <div class="month" style="margin:0;gap:12px"><button class="btn btn-outline" aria-label="Mês anterior"><i data-lucide="chevron-left"></i></button><strong>outubro de 2026</strong><button class="btn btn-outline" aria-label="Próximo mês" disabled><i data-lucide="chevron-right"></i></button></div></div>
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start">
+          <div>
+            <div class="totals" style="grid-template-columns:1fr">
+              <div class="total"><div class="lbl"><i data-lucide="arrow-down-left" class="pos"></i>Receitas</div><div class="val pos">+R$ 3.000,00</div></div>
+              <div class="total"><div class="lbl"><i data-lucide="arrow-up-right" class="neg"></i>Despesas</div><div class="val neg">−R$ 1.245,30</div></div>
+            </div>
+            <div class="filter"><span><i data-lucide="filter" style="vertical-align:-3px"></i> Todas as categorias</span><i data-lucide="chevron-down"></i></div>
+          </div>
+          <div>
+            <div class="day" style="margin-top:0">Hoje</div>
+            <div class="list">
+              <div class="row"><span class="cat" style="background:color-mix(in srgb,var(--c-orange) 15%,transparent);color:var(--c-orange)"><i data-lucide="utensils-crossed"></i></span><div class="row-main"><div class="row-title">Mercado do bairro</div><div class="row-sub">Alimentação · Nubank</div></div><div class="money neg">−R$ 45,90</div></div>
+              <div class="row"><span class="cat" style="background:color-mix(in srgb,var(--c-violet) 15%,transparent);color:var(--c-violet)"><i data-lucide="car"></i></span><div class="row-main"><div class="row-title">Transporte</div><div class="row-sub">Nubank</div></div><div class="money neg">−R$ 18,40</div></div>
+            </div>
+            <div class="day">Ontem</div>
+            <div class="list"><div class="row"><span class="cat" style="background:var(--secondary)"><i data-lucide="arrow-left-right"></i></span><div class="row-main"><div class="row-title">Transferência</div><div class="row-sub">Nubank → Reserva</div></div><div class="money">R$ 500,00</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+lucide.createIcons();
+document.getElementById("theme").onclick = () => {
+  const dark = document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  document.querySelector("#theme span").textContent = dark ? "Tema claro" : "Tema escuro";
+};
+</script>
+</body>
+</html>
