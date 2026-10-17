@@ -15,6 +15,8 @@ export const ROUTES = {
   accounts: "/contas",
   newAccount: "/contas/nova",
   categories: "/categorias",
+  newCategory: "/categorias/nova",
 } as const;
 
 export const accountPath = (id: string) => `${ROUTES.accounts}/${id}`;
+export const categoryPath = (id: string) => `${ROUTES.categories}/${id}`;
