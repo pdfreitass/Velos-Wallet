@@ -10,9 +10,10 @@
   - Verificação: status da [spec.md](spec.md) e do [plan.md](plan.md) = **Aprovada**
 
 ## Banco
-- [ ] **T1** — Migration `0009_contas_e_categorias.sql`: cheque especial, cartão só com dívida, tamanho dos nomes, nome de categoria único sem maiúsculas, FK da T11 com `set null (category_id)`
+- [x] **T1** — Migration `0009_contas_e_categorias.sql`: cheque especial, cartão só com dívida, tamanho dos nomes, nome de categoria único sem maiúsculas, FK da T11 com `set null (category_id)`
   - Verificação: `npx supabase db push --dry-run` lista só a `0009`
-- [ ] **T2** — Aplicar (**com aprovação do Pedro**)
+  - Extra: `0010_categoria_tipo_on_delete.sql` — a segunda FK `(category_id, type)` também bloqueava a exclusão; agora `set null (category_id)`
+- [x] **T2** — Aplicar (**com aprovação do Pedro**) — `0009` e `0010` aplicadas (`migration list` sincronizado); `AccountCategoryRulesTests` 4/4
   - Verificação: `migration list` sincronizado; por SQL numa transação desfeita: corrente negativa aceita, poupança negativa recusada, "lazer"/"Lazer" de despesa recusado, excluir categoria com transação deixa `category_id` nulo
 
 ## API
@@ -52,3 +53,5 @@
 | Task | Commit | Observação |
 |---|---|---|
 | T0 | | Spec e plano aprovados pelo Pedro em 2026-10-15 |
+| T1 | | `0009` + `0010` (a segunda FK foi achada pelo teste de integração) |
+| T2 | | Aplicadas em 2026-10-17; `AccountCategoryRulesTests` 4/4 verdes |
