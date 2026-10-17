@@ -109,6 +109,22 @@
   --chart-3: #B45309;
   --chart-4: #6D28D9;
   --chart-5: #BE123C;
+  /* Categorias (RN10 da spec 002), na ordem de features/categories/catalog.ts. O banco guarda o hex
+     canônico; aqui fica o tom de cada tema. Ícone é componente gráfico: alvo 3:1 (WCAG 1.4.11),
+     medido contra o card, o fundo e o círculo do CategoryBadge (15% da cor sobre card e fundo).
+     Valores: card / fundo / pior caso. "= canônico" quando o hex do banco já passa. */
+  --category-orange: #C45F17;         /* 3.92 / 3.67 / 3.07 (canônico #E8833A dava 2.53 no card) */
+  --category-blue: #2A75F5;           /* 3.95 / 3.70 / 3.09 */
+  --category-violet: #7C5CF5;         /* 4.17 / 3.90 / 3.26 = canônico */
+  --category-red: #DD4150;            /* 3.96 / 3.71 / 3.05 */
+  --category-pink: #D43A9E;           /* 4.00 / 3.74 / 3.08 */
+  --category-cyan: #2986A0;           /* 3.91 / 3.66 / 3.09 */
+  --category-gray: #6B8075;           /* 3.94 / 3.69 / 3.14 = canônico */
+  --category-green: #1C7F54;          /* 4.65 / 4.35 / 3.60 = canônico */
+  --category-mint: #1E8D5D;           /* 3.90 / 3.65 / 3.07 (o verde vivo dava 1.81 no card) */
+  --category-sage: #438967;           /* 3.91 / 3.66 / 3.10 */
+  --category-mustard: #94792A;        /* 3.90 / 3.65 / 3.10 */
+  --category-brown: #8A6A4F;          /* 4.61 / 4.31 / 3.60 = canônico */
   --radius: 0.625rem;
   --sidebar: #F5F8F3;
   --sidebar-foreground: #0A2E24;
@@ -151,6 +167,19 @@
   --chart-3: #FBBF24;
   --chart-4: #A78BFA;
   --chart-5: #FB7185;
+  /* Categorias no escuro: mesma medição do tema claro (card / fundo / pior caso). */
+  --category-orange: #E8833A;         /* 4.46 / 5.41 / 3.66 = canônico */
+  --category-blue: #4F8DF7;           /* 3.74 / 4.54 / 3.07 = canônico */
+  --category-violet: #957BF7;         /* 3.72 / 4.52 / 3.09 */
+  --category-red: #E25F6C;            /* 3.51 / 4.26 / 3.05 */
+  --category-pink: #DC5CAE;           /* 3.56 / 4.33 / 3.09 */
+  --category-cyan: #2F9BB8;           /* 3.74 / 4.55 / 3.06 = canônico */
+  --category-gray: #7F9489;           /* 3.74 / 4.55 / 3.06 */
+  --category-green: #24A36B;          /* 3.76 / 4.57 / 3.07 */
+  --category-mint: #2ED38C;           /* 6.23 / 7.57 / 4.60 = canônico */
+  --category-sage: #4FA37A;           /* 3.95 / 4.79 / 3.18 = canônico */
+  --category-mustard: #C7A23A;        /* 4.99 / 6.06 / 3.92 = canônico */
+  --category-brown: #AB886C;          /* 3.73 / 4.53 / 3.08 */
   --sidebar: #1A3C32;
   --sidebar-foreground: #F4F7F2;
   --sidebar-primary: #2ED38C;
