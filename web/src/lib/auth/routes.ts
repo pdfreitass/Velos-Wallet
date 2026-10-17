@@ -13,5 +13,8 @@ export const ROUTES = {
   /** Destino depois de entrar e fallback de todo redirecionamento. */
   home: "/painel",
   accounts: "/contas",
+  newAccount: "/contas/nova",
   categories: "/categorias",
 } as const;
+
+export const accountPath = (id: string) => `${ROUTES.accounts}/${id}`;

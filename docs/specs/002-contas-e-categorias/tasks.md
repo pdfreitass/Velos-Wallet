@@ -41,7 +41,7 @@
   - Verificação: 0,01 / 0,10 / 999.999.999,99 exatos; ícone ≥ 3:1 nos dois temas
 - [x] **T10** — Navegação: `AppLayout`, `AppNav` (barra inferior / menu lateral) e o `/painel` com atalhos (P4)
   - Verificação: 375 e 1440 px, dois temas; item atual marcado além da cor; a barra não cobre conteúdo
-- [ ] **T11** — Contas: lista, formulário (RN3 por tipo, cheque especial) e diálogo de exclusão detalhado (RN6)
+- [x] **T11** — Contas: lista, formulário (RN3 por tipo, cheque especial) e diálogo de exclusão detalhado (RN6)
   - Verificação: CA1, CA1b, CA2–CA6b; skeleton, vazio e erro
 - [ ] **T12** — Categorias: lista, formulário com cor e ícone, diálogo de exclusão (RN11)
   - Verificação: CA7–CA10; skeleton, vazio e erro
@@ -68,5 +68,6 @@
 | T7 | `b01fe36` | curl sem sessão (401) e sem CSRF (400); 27/27 chamadas logadas pelo Chrome do Pedro, dados de teste apagados |
 | T8 | `5e1b3a9` | typecheck, lint e build verdes; package.json sem mudança; todos os botões medidos com alvo ≥ 44 px na página inicial |
 | T9 | `7acc32b` | `MoneyInput`: 0,01 / 0,10 / 999.999.999,99 exatos, tecla acima do teto ignorada; 12 cores com ícone ≥ 3:1 nos dois temas (todas precisaram de tom ajustado em pelo menos um tema, só na exibição; banco intocado); typecheck, lint e build verdes; package.json sem mudança |
-| T10 | | 375 e 1440 px, temas claro e escuro: item atual com cor + traço + ícone mais grosso e `aria-current`; com conteúdo longo o último item fica 39 px acima da barra; alvos ≥ 44 px; 1º Tab = "Pular para o conteúdo"; o "não encontrado" passou para dentro da casca (Contas/Categorias caem nele até a T11/T12); verificado no Playwright com `/api/me` simulado; typecheck, lint e build verdes |
+| T10 | `fe167a6` | 375 e 1440 px, temas claro e escuro: item atual com cor + traço + ícone mais grosso e `aria-current`; com conteúdo longo o último item fica 39 px acima da barra; alvos ≥ 44 px; 1º Tab = "Pular para o conteúdo"; o "não encontrado" passou para dentro da casca (Contas/Categorias caem nele até a T11/T12); verificado no Playwright com `/api/me` simulado; typecheck, lint e build verdes |
+| T11 | | Front verificado no Playwright com a API de contas simulada (contrato da T7): CA1, CA1b, CA2, CA3 (0,10 volta 0,10), CA4 no formulário (vazio, espaços, 41 caracteres), CA5, CA6, CA6b (fatos, foco em Cancelar, botão só com "Entendi", Esc fecha), CA11 (GUID alheio e id inválido); o front envia o saldo com sinal (-35000 no cheque especial, -64090 no cartão); erro por campo da API vai para o campo com foco; skeleton, vazio e erro; 375 e 1440 px, dois temas; alvos ≥ 44 px. **Pendente com login real:** CA4 na API e CA6b com movimentações preparadas por SQL (T14). `FormField`/`FormAlert` movidos para `components/shared` |
 | UI | | Mockup HTML das 12 telas (Início, Contas, Nova/Editar conta, Excluir conta detalhado e curto, Categorias, Nova categoria, Excluir categoria, estados carregando/vazio/erro/não encontrado, desktop) aprovado pelo Pedro em 2026-10-17; referência para T8–T12 |

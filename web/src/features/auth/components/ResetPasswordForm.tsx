@@ -7,8 +7,8 @@ import type { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { useChangePassword } from "@/features/auth/api";
-import { FormAlert } from "@/features/auth/components/FormAlert";
-import { FormField } from "@/features/auth/components/FormField";
+import { FormAlert } from "@/components/shared/FormAlert";
+import { FormField } from "@/components/shared/FormField";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
 import { PasswordRequirements } from "@/features/auth/components/PasswordRequirements";
 import { applyServerFieldErrors, toErrorAlert, type ErrorAlert } from "@/lib/api/errors";

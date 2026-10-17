@@ -59,6 +59,15 @@ export const router = createBrowserRouter([
             lazy: () => import("@/features/app-shell/AppLayout").then((m) => ({ Component: m.AppLayout })),
             children: [
               { path: "/painel", lazy: () => import("@/pages/PanelPage").then((m) => ({ Component: m.PanelPage })) },
+              { path: "/contas", lazy: () => import("@/pages/AccountsPage").then((m) => ({ Component: m.AccountsPage })) },
+              {
+                path: "/contas/nova",
+                lazy: () => import("@/pages/AccountFormPage").then((m) => ({ Component: m.NewAccountPage })),
+              },
+              {
+                path: "/contas/:id",
+                lazy: () => import("@/pages/AccountFormPage").then((m) => ({ Component: m.EditAccountPage })),
+              },
               { path: "*", lazy: () => import("@/pages/NotFoundPage").then((m) => ({ Component: m.NotFoundPage })) },
             ],
           },
