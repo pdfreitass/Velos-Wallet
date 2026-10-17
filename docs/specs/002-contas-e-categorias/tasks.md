@@ -26,8 +26,9 @@
 - [x] **T5** — Application de categorias: `ICategoryStore`, casos de uso, validadores + testes
   - Verificação: `dotnet test`; `409 category_name_taken`
   - O store devolve o `category_name_taken` genérico; o handler troca pela mensagem do tipo (CA9), com o erro no campo `name`
-- [ ] **T6** — Infrastructure: `AccountStore` e `CategoryStore` + testes de integração (`Tests:UserId` da conta de teste)
+- [x] **T6** — Infrastructure: `AccountStore` e `CategoryStore` + testes de integração (`Tests:UserId` da conta de teste)
   - Verificação: CRUD real; outro usuário não lê nem altera; impacto da exclusão conta os dois lados da transferência; cada teste limpa o que criou
+  - Também `StoreGuard` (erro do Postgres → `AppError`, sem a mensagem crua), `PgEnums`, handlers e stores no DI (API sobe com `ValidateOnBuild`)
 - [ ] **T7** — Api: `AccountsController`, `CategoriesController`, `Velos.Api.http`
   - Verificação: chamadas reais (curl) para cada rota, incluindo id alheio → 404 e sem CSRF → 400
 
@@ -60,4 +61,5 @@
 | T2 | `a7607da` | Aplicadas em 2026-10-17; `AccountCategoryRulesTests` 4/4 verdes |
 | T3 | `f7d5ccd` | Domain.Tests 100/100; build sem aviso |
 | T4 | `067a0d3` | Application.Tests 94/94; um validador (`AccountInput`) para criar e editar |
-| T5 | | Application.Tests 113/113 |
+| T5 | `1468d76` | Application.Tests 113/113 |
+| T6 | | `StoreTests` 8/8 no banco real (rodado pelo Pedro); `dotnet run` sobe |

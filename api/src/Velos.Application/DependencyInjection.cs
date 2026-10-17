@@ -1,6 +1,8 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Velos.Application.Accounts;
+using Velos.Application.Categories;
 using Velos.Application.Auth.Google;
 using Velos.Application.Auth.PasswordReset;
 using Velos.Application.Auth.SignIn;
@@ -26,6 +28,20 @@ public static class DependencyInjection
         services.AddScoped<ChangePasswordHandler>();
         services.AddScoped<StartGoogleSignInHandler>();
         services.AddScoped<CompleteGoogleSignInHandler>();
+
+        services.AddScoped<ListAccountsHandler>();
+        services.AddScoped<GetAccountHandler>();
+        services.AddScoped<CreateAccountHandler>();
+        services.AddScoped<UpdateAccountHandler>();
+        services.AddScoped<GetAccountDeletionImpactHandler>();
+        services.AddScoped<DeleteAccountHandler>();
+
+        services.AddScoped<ListCategoriesHandler>();
+        services.AddScoped<GetCategoryHandler>();
+        services.AddScoped<CreateCategoryHandler>();
+        services.AddScoped<UpdateCategoryHandler>();
+        services.AddScoped<GetCategoryDeletionImpactHandler>();
+        services.AddScoped<DeleteCategoryHandler>();
 
         return services;
     }
