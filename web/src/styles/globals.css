@@ -126,6 +126,8 @@
   /* Inversao exata da identidade, como nas duas imagens de perfil. */
   --background: #0A2E24;
   --foreground: #F4F7F2;              /* 13.60:1 sobre o fundo */
+  /* Sobre o card (listas e diálogos da spec 002): texto 11.19:1, muted 5.81:1, receita 6.23:1,
+     despesa 4.68:1, campo 3.44:1. Pendência T10 do ROADMAP: o #E96368 dava 3.71:1 aqui. */
   --card: #1A3C32;
   --card-foreground: #F4F7F2;
   --popover: #1A3C32;
@@ -138,12 +140,12 @@
   --muted-foreground: #A9B7B0;        /* 7.06:1 sobre o fundo */
   --accent: #2ED38C;
   --accent-foreground: #0A2E24;
-  --destructive: #E96368;             /* 4.51:1 sobre o fundo */
+  --destructive: #F08084;             /* 5.69:1 sobre o fundo, 4.68:1 sobre o card (antes #E96368) */
   --border: #345249;
-  --input: #5C7A70;                   /* 3.13:1 sobre o fundo (antes #345249, 1.71:1) */
+  --input: #718F85;                   /* 4.18:1 sobre o fundo, 3.44:1 sobre o card (antes #5C7A70, 2.58:1 no card) */
   --ring: #2ED38C;                    /* 7.57:1 sobre o fundo */
   --income: #2ED38C;                  /* 7.57:1 sobre o fundo */
-  --expense: #E96368;                 /* 4.51:1 sobre o fundo */
+  --expense: #F08084;                 /* 5.69:1 sobre o fundo, 4.68:1 sobre o card (antes #E96368) */
   --chart-1: #2ED38C;
   --chart-2: #22D3EE;
   --chart-3: #FBBF24;

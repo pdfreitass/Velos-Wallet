@@ -30,7 +30,7 @@ export function ThemeToggle({ iconOnly = false, className }: { iconOnly?: boolea
       size={iconOnly ? "icon" : "sm"}
       onClick={toggle}
       aria-label={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
-      className={cn(iconOnly && "size-10 [&_svg:not([class*='size-'])]:size-4.5", className)}
+      className={cn(iconOnly && "[&_svg:not([class*='size-'])]:size-4.5", className)}
     >
       {isDark ? <Sun /> : <Moon />}
       {iconOnly ? null : isDark ? "Tema claro" : "Tema escuro"}

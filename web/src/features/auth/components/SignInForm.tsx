@@ -13,8 +13,9 @@ import { FormField } from "@/features/auth/components/FormField";
 import { LockedNotice } from "@/features/auth/components/LockedNotice";
 import { GoogleSignIn } from "@/features/auth/components/GoogleSignIn";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
-import { attemptsLeftOf, minutesLeftOf, toAuthAlert, type AuthAlert } from "@/features/auth/errors";
-import { applyServerFieldErrors, withNext } from "@/features/auth/form-errors";
+import { attemptsLeftOf, minutesLeftOf } from "@/features/auth/errors";
+import { applyServerFieldErrors, toErrorAlert, type ErrorAlert } from "@/lib/api/errors";
+import { withNext } from "@/features/auth/form-errors";
 import { useCountdown } from "@/features/auth/useCountdown";
 import { ROUTES } from "@/lib/auth/routes";
 import { signInSchema, type SignInInput } from "@/lib/validations/auth";
@@ -34,7 +35,7 @@ function lockFor(email: string, minutes: number): Lock {
 export function SignInForm({ next }: { next: string }) {
   const navigate = useNavigate();
   const signIn = useSignIn();
-  const [alert, setAlert] = useState<AuthAlert | null>(null);
+  const [alert, setAlert] = useState<ErrorAlert | null>(null);
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const [lock, setLock] = useState<Lock | null>(null);
   const secondsLeft = useCountdown(lock?.until ?? null);
@@ -69,7 +70,7 @@ export function SignInForm({ next }: { next: string }) {
         setLock(lockFor(values.email, minutes));
         return;
       }
-      setAlert(toAuthAlert(error));
+      setAlert(toErrorAlert(error));
       setAttemptsLeft(attemptsLeftOf(error));
     }
   });

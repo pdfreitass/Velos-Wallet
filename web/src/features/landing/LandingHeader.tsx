@@ -34,10 +34,10 @@ export function LandingHeader() {
 
         <nav aria-label="Acesso" className="flex items-center gap-2">
           <ThemeToggle iconOnly />
-          <Link to={ROUTES.signIn} className={cn(buttonVariants({ variant: "outline" }), "h-10 border-input px-4 text-sm")}>
+          <Link to={ROUTES.signIn} className={cn(buttonVariants({ variant: "outline" }), "h-11 border-input px-4 text-sm")}>
             Entrar
           </Link>
-          <Link to={ROUTES.signUp} className={cn(buttonVariants(), "hidden h-10 px-4 text-sm sm:inline-flex")}>
+          <Link to={ROUTES.signUp} className={cn(buttonVariants(), "hidden h-11 px-4 text-sm sm:inline-flex")}>
             Criar conta
           </Link>
         </nav>

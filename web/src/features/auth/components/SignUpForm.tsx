@@ -13,8 +13,8 @@ import { FormField } from "@/features/auth/components/FormField";
 import { GoogleSignIn } from "@/features/auth/components/GoogleSignIn";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
 import { PasswordRequirements } from "@/features/auth/components/PasswordRequirements";
-import { toAuthAlert, type AuthAlert } from "@/features/auth/errors";
-import { applyServerFieldErrors, withNext } from "@/features/auth/form-errors";
+import { applyServerFieldErrors, toErrorAlert, type ErrorAlert } from "@/lib/api/errors";
+import { withNext } from "@/features/auth/form-errors";
 import { ROUTES } from "@/lib/auth/routes";
 import { signUpSchema, type SignUpInput } from "@/lib/validations/auth";
 
@@ -24,7 +24,7 @@ const fields = ["name", "email", "password", "confirmPassword"] as const;
 export function SignUpForm({ next }: { next: string }) {
   const navigate = useNavigate();
   const signUp = useSignUp();
-  const [alert, setAlert] = useState<AuthAlert | null>(null);
+  const [alert, setAlert] = useState<ErrorAlert | null>(null);
   const {
     register,
     handleSubmit,
@@ -44,7 +44,7 @@ export function SignUpForm({ next }: { next: string }) {
       await signUp.mutateAsync(values);
       navigate(next, { replace: true });
     } catch (error) {
-      if (!applyServerFieldErrors(error, fields, setError)) setAlert(toAuthAlert(error));
+      if (!applyServerFieldErrors(error, fields, setError)) setAlert(toErrorAlert(error));
     }
   });
 

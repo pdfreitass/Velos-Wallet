@@ -11,8 +11,7 @@ import { FormAlert } from "@/features/auth/components/FormAlert";
 import { FormField } from "@/features/auth/components/FormField";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
 import { PasswordRequirements } from "@/features/auth/components/PasswordRequirements";
-import { toAuthAlert, type AuthAlert } from "@/features/auth/errors";
-import { applyServerFieldErrors } from "@/features/auth/form-errors";
+import { applyServerFieldErrors, toErrorAlert, type ErrorAlert } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/auth/routes";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validations/auth";
 
@@ -29,7 +28,7 @@ const REQUIREMENTS_ID = "reset-password-requirements";
 export function ResetPasswordForm() {
   const navigate = useNavigate();
   const changePassword = useChangePassword();
-  const [alert, setAlert] = useState<AuthAlert | null>(null);
+  const [alert, setAlert] = useState<ErrorAlert | null>(null);
 
   const {
     register,
@@ -52,7 +51,7 @@ export function ResetPasswordForm() {
       navigate(ROUTES.home, { replace: true });
     } catch (error) {
       if (applyServerFieldErrors(error, ["password", "confirmPassword"], setError)) return;
-      setAlert(toAuthAlert(error));
+      setAlert(toErrorAlert(error));
     }
   });
 
