@@ -17,8 +17,9 @@
   - Verificação: `migration list` sincronizado; por SQL numa transação desfeita: corrente negativa aceita, poupança negativa recusada, "lazer"/"Lazer" de despesa recusado, excluir categoria com transação deixa `category_id` nulo
 
 ## API
-- [ ] **T3** — Domain: `AccountType`, `AccountRules`, `CategoryRules`, `CategoryCatalog` + testes
+- [x] **T3** — Domain: `AccountType`, `AccountRules`, `CategoryRules`, `CategoryCatalog` + testes
   - Verificação: `dotnet test` (sinal do saldo por tipo, limites, catálogo)
+  - Também `CategoryType` (só despesa/receita). Catálogo: 12 cores (10 do seed + 2) e 30 ícones do lucide, conferidos no `node_modules`
 - [ ] **T4** — Application de contas: `IAccountStore`, casos de uso, validadores + testes com dublês
   - Verificação: `dotnet test`; usuário sempre do `IUserContext`; 404 igual para alheio e inexistente
 - [ ] **T5** — Application de categorias: `ICategoryStore`, casos de uso, validadores + testes
@@ -53,5 +54,6 @@
 | Task | Commit | Observação |
 |---|---|---|
 | T0 | | Spec e plano aprovados pelo Pedro em 2026-10-15 |
-| T1 | | `0009` + `0010` (a segunda FK foi achada pelo teste de integração) |
-| T2 | | Aplicadas em 2026-10-17; `AccountCategoryRulesTests` 4/4 verdes |
+| T1 | `a7607da` | `0009` + `0010` (a segunda FK foi achada pelo teste de integração) |
+| T2 | `a7607da` | Aplicadas em 2026-10-17; `AccountCategoryRulesTests` 4/4 verdes |
+| T3 | | Domain.Tests 100/100; build sem aviso |
