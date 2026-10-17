@@ -20,8 +20,9 @@
 - [x] **T3** — Domain: `AccountType`, `AccountRules`, `CategoryRules`, `CategoryCatalog` + testes
   - Verificação: `dotnet test` (sinal do saldo por tipo, limites, catálogo)
   - Também `CategoryType` (só despesa/receita). Catálogo: 12 cores (10 do seed + 2) e 30 ícones do lucide, conferidos no `node_modules`
-- [ ] **T4** — Application de contas: `IAccountStore`, casos de uso, validadores + testes com dublês
+- [x] **T4** — Application de contas: `IAccountStore`, casos de uso, validadores + testes com dublês
   - Verificação: `dotnet test`; usuário sempre do `IUserContext`; 404 igual para alheio e inexistente
+  - Os handlers entram no DI só na T6, junto com o `AccountStore`: em Development o `ValidateOnBuild` impede a API de subir sem a implementação
 - [ ] **T5** — Application de categorias: `ICategoryStore`, casos de uso, validadores + testes
   - Verificação: `dotnet test`; `409 category_name_taken`
 - [ ] **T6** — Infrastructure: `AccountStore` e `CategoryStore` + testes de integração (`Tests:UserId` da conta de teste)
@@ -56,4 +57,5 @@
 | T0 | | Spec e plano aprovados pelo Pedro em 2026-10-15 |
 | T1 | `a7607da` | `0009` + `0010` (a segunda FK foi achada pelo teste de integração) |
 | T2 | `a7607da` | Aplicadas em 2026-10-17; `AccountCategoryRulesTests` 4/4 verdes |
-| T3 | | Domain.Tests 100/100; build sem aviso |
+| T3 | `f7d5ccd` | Domain.Tests 100/100; build sem aviso |
+| T4 | | Application.Tests 94/94; um validador (`AccountInput`) para criar e editar |
