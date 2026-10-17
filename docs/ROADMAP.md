@@ -49,7 +49,7 @@
 **Etapa 4 — Contas e categorias** ([spec 002](specs/002-contas-e-categorias/tasks.md)): **pronta no código** (T1–T13, T15–T17). Faltam: **T14** (critérios de aceite com login real, IDOR com duas contas, CA6b/CA10 com movimentações por SQL e os testes de integração) e **T18** (PR para a `main`).
 
 - API de contas e categorias com RLS e filtro por `user_id`; navegação do app (barra inferior / menu lateral); telas de contas e categorias com os estados de carregando, vazio e erro; `MoneyInput`, `CategoryBadge` e a paleta com contraste medido nos dois temas; [ADR 0017](adr/0017-excluir-conta-apaga-movimentacoes.md)
-- Auditoria de segurança (T15): nenhum crítico ou alto; SEC-001 corrigido; SEC-002 a SEC-005 na lista de deploy abaixo
+- Auditoria de segurança (T15): nenhum crítico ou alto; SEC-001 e SEC-003 corrigidos; SEC-002, SEC-004 e SEC-005 na lista de deploy abaixo
 
 ## ⬜ Pendente
 
@@ -68,7 +68,7 @@
 - Variáveis do host: `App__PublicOrigin=https://<domínio>`, `AllowedHosts=<domínio>`, `ConnectionStrings__Velos` com **`SSL Mode=VerifyFull`** e o certificado do Supabase (hoje `Require`, que cifra mas não valida o servidor)
 - `ForwardedHeaders` restrito ao proxy do host (`KnownProxies`/`KnownNetworks`), para o limite por IP ver o IP do cliente
 - Chaves do Data Protection persistidas (volume ou key vault): sem isso, reiniciar a API invalida os links de recuperação e o login com Google em andamento
-- Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-003** limite global de requisições em `/api`; **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
+- Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
 - Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}` (hoje monta `token_hash`, e o `/auth/confirm` só aceita `?code=` do PKCE) — junto com o C3
 
 ## Pendências técnicas

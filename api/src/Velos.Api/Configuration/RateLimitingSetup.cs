@@ -22,11 +22,29 @@ public static class RateLimitingSetup
     /// <summary>Pedir email de recuperação: 3 a cada 15 minutos por IP (cada um gasta cota de email).</summary>
     public const string PasswordReset = "password-reset";
 
+    /// <summary>Teto geral de qualquer rota /api: 300 por minuto por pessoa (ou por IP, sem sessão).</summary>
+    public const int GlobalPermitsPerMinute = 300;
+
     public static IServiceCollection AddVelosRateLimiting(this IServiceCollection services) =>
         services.AddRateLimiter(options =>
         {
             options.AddPolicy(Auth, context => PerIp(context, permits: 10, TimeSpan.FromMinutes(1)));
             options.AddPolicy(PasswordReset, context => PerIp(context, permits: 3, TimeSpan.FromMinutes(15)));
+
+            // Teto geral de /api (achado SEC-003 da T15): por pessoa (sub do JWT já validado, pois o
+            // UseRateLimiter vem depois do UseAuthentication) ou, sem sessão, por IP. Folgado para o uso
+            // normal; só segura abuso. As políticas acima continuam valendo por cima deste teto.
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                context.Request.Path.StartsWithSegments("/api")
+                    ? RateLimitPartition.GetFixedWindowLimiter(
+                        context.User.FindFirst("sub")?.Value is { } sub
+                            ? $"user:{sub}"
+                            : $"ip:{context.Connection.RemoteIpAddress}",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = GlobalPermitsPerMinute, Window = TimeSpan.FromMinutes(1), QueueLimit = 0,
+                        })
+                    : RateLimitPartition.GetNoLimiter("spa"));
 
             // Mesmo code e mensagem do limite do Supabase: a tela já sabe mostrar.
             options.OnRejected = async (rejected, cancellationToken) =>

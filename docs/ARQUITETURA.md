@@ -88,7 +88,7 @@ Formulário React (RHF + zodResolver)  ── useMutation ──► POST/PUT/DEL
 3. Em toda request, o `TokenRefreshMiddleware` renova o token perto de vencer, e o `JwtBearer` valida o access token pela **chave pública ES256** do projeto (OpenID Discovery).
 4. Toda rota da API é privada por padrão (`FallbackPolicy`, [ADR 0015](adr/0015-rotas-privadas-por-padrao.md)). No front, `RequireAuth` só melhora a experiência (redireciona para `/entrar?next=`).
 5. Login por senha passa pelo bloqueio de tentativas ([ADR 0014](adr/0014-bloqueio-de-tentativas-de-login.md)): a tentativa é **reservada** no banco (`reserve_login_attempt`) antes de chamar o Supabase.
-6. As rotas de autenticação têm **limite por IP** na própria API (`RateLimitingSetup`): o Supabase, chamado servidor a servidor, só enxerga o IP da API. As **tentativas de renovar a sessão** também (30/min por IP, dentro do `TokenRefreshMiddleware`), e um refresh recusado com 4xx apaga os cookies ([LICOES L27](LICOES.md)).
+6. As rotas de autenticação têm **limite por IP** na própria API (`RateLimitingSetup`): o Supabase, chamado servidor a servidor, só enxerga o IP da API. As **tentativas de renovar a sessão** também (30/min por IP, dentro do `TokenRefreshMiddleware`), e um refresh recusado com 4xx apaga os cookies ([LICOES L27](LICOES.md)). Toda rota `/api` tem ainda um **teto geral de 300/min** por pessoa (ou por IP, sem sessão); o `UseRateLimiter` fica entre a autenticação e a autorização para contar também as requests anônimas.
 7. Os endereços de volta do Google e do email vêm de `App:PublicOrigin`, **nunca** do `Host` da request. Toda resposta leva `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff` e `Referrer-Policy`; HSTS fora de Development.
 
 ## Supabase

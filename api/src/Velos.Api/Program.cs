@@ -72,8 +72,10 @@ app.UseNoStoreForApi();
 app.UseMiddleware<CsrfHeaderMiddleware>();
 app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthentication();
-app.UseAuthorization();
+// Entre a autenticação e a autorização: o limite já enxerga a pessoa (sub do JWT) e também conta
+// as requests anônimas a rotas privadas, que a autorização recusaria antes de chegar aqui.
 app.UseRateLimiter();
+app.UseAuthorization();
 
 app.MapControllers();
 
