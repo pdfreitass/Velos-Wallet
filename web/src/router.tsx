@@ -80,6 +80,18 @@ export const router = createBrowserRouter([
                 path: "/categorias/:id",
                 lazy: () => import("@/pages/CategoryFormPage").then((m) => ({ Component: m.EditCategoryPage })),
               },
+              {
+                path: "/transacoes",
+                lazy: () => import("@/pages/TransactionsPage").then((m) => ({ Component: m.TransactionsPage })),
+              },
+              {
+                path: "/transacoes/nova",
+                lazy: () => import("@/pages/TransactionFormPage").then((m) => ({ Component: m.NewTransactionPage })),
+              },
+              {
+                path: "/transacoes/:id",
+                lazy: () => import("@/pages/TransactionFormPage").then((m) => ({ Component: m.EditTransactionPage })),
+              },
               { path: "*", lazy: () => import("@/pages/NotFoundPage").then((m) => ({ Component: m.NotFoundPage })) },
             ],
           },
