@@ -4,7 +4,8 @@ import type { Account } from "@/features/accounts/types";
 import type { Category } from "@/features/categories/types";
 import type { TransactionFormInput } from "@/lib/validations/transactions";
 
-import { AccountSelect, CategoryGrid } from "./TransactionFields";
+import { AccountSelect } from "./AccountSelect";
+import { CategoryGrid } from "./TransactionFields";
 import { TRANSACTION_TYPE_INFO, type TransactionType } from "./types";
 
 type TransactionPlaceFieldsProps = {
