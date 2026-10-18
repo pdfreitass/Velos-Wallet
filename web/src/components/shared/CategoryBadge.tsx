@@ -17,13 +17,17 @@ type CategoryBadgeProps = {
  * e o nome sempre na cor do texto. A categoria nunca é identificada só pela cor.
  */
 export function CategoryBadge({ name, color, icon, className }: CategoryBadgeProps) {
-  const Icon = categoryIcon(icon);
   return (
     <span className={cn("inline-flex min-w-0 items-center gap-3", className)}>
-      <CategoryIconCircle color={color} Icon={Icon} />
+      <CategoryIcon color={color} icon={icon} />
       <span className="truncate text-foreground">{name}</span>
     </span>
   );
+}
+
+/** Só o círculo do ícone, para quando o texto ao lado não é o nome da categoria (lista de transações). */
+export function CategoryIcon({ color, icon }: { color: string; icon: string }) {
+  return <CategoryIconCircle color={color} Icon={categoryIcon(icon)} />;
 }
 
 type CategoryIconCircleProps = {
