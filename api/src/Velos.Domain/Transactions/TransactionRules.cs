@@ -31,8 +31,14 @@ public static class TransactionRules
         return DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(time.GetUtcNow(), SaoPaulo).DateTime);
     }
 
-    /// <summary>RN4: nunca no futuro (P1). Lançar algo de amanhã seria recorrência, fora do MVP.</summary>
-    public static bool IsValidDate(DateOnly date, DateOnly today) => date <= today;
+    /// <summary>
+    /// A data mais antiga aceita. É a mesma faixa que a lista do mês lê (2000 a 2100): uma data fora
+    /// dela entraria no saldo e nunca apareceria na tela para ser corrigida.
+    /// </summary>
+    public static readonly DateOnly MinDate = new(2000, 1, 1);
+
+    /// <summary>RN4: nunca no futuro (P1) nem antes de 2000. Lançar algo de amanhã seria recorrência, fora do MVP.</summary>
+    public static bool IsValidDate(DateOnly date, DateOnly today) => date >= MinDate && date <= today;
 
     /// <summary>
     /// RN8 (P3): na edição o tipo só troca entre despesa e receita. Transferência não vira despesa

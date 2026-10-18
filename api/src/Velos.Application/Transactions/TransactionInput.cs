@@ -34,6 +34,7 @@ public sealed class TransactionInputValidator : AbstractValidator<TransactionInp
         // "Hoje" é lido a cada validação: o validador é singleton-friendly e a meia-noite passa.
         RuleFor(input => input.Date).Cascade(CascadeMode.Stop)
             .NotNull().WithMessage("Informe a data")
+            .Must(date => date!.Value >= TransactionRules.MinDate).WithMessage("Informe uma data a partir de 2000")
             .Must(date => TransactionRules.IsValidDate(date!.Value, TransactionRules.Today(time)))
                 .WithMessage("A data não pode ser no futuro");
 

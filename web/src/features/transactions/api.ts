@@ -37,11 +37,15 @@ export function useTransaction(id: string) {
   });
 }
 
-/** Toda mutação muda o saldo das contas e os totais do mês: as duas listas são buscadas de novo. */
-function invalidateMoney(queryClient: QueryClient) {
+/**
+ * Toda mutação muda o saldo das contas, os totais do mês e o Início: as três são buscadas de novo.
+ * Contas e categorias também chamam isto quando mudam nomes ou somem (a lista mostra os nomes).
+ */
+export function invalidateMoney(queryClient: QueryClient) {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: transactionsKey }),
     queryClient.invalidateQueries({ queryKey: ["accounts"] }),
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
   ]);
 }
 

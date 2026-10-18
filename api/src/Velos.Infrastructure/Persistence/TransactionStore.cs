@@ -13,6 +13,9 @@ namespace Velos.Infrastructure.Persistence;
 /// </summary>
 internal sealed class TransactionStore(UserDbSession session, ILogger<TransactionStore> logger) : ITransactionStore
 {
+    /// <summary>Teto defensivo da lista do mês (sem paginação no MVP; o mês é a página).</summary>
+    private const int MaxMonthItems = 2000;
+
     public Task<Result<IReadOnlyList<TransactionListItem>>> ListMonthAsync(
         Guid userId, DateOnly monthStart, Guid? categoryId, CancellationToken cancellationToken) =>
         StoreGuard.RunAsync<IReadOnlyList<TransactionListItem>>(logger, "listar transações", async () =>
@@ -33,6 +36,7 @@ internal sealed class TransactionStore(UserDbSession session, ILogger<Transactio
                     where t.user_id = {userId} and t.date >= {monthStart} and t.date < {monthEnd}
                       and ({categoryId}::uuid is null or t.category_id = {categoryId}::uuid)
                     order by t.date desc, t.created_at desc
+                    limit {MaxMonthItems}
                     """).ToListAsync(ct),
                 cancellationToken);
             return rows.Select(row => row.ToItem()).ToList();

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
+import { invalidateMoney } from "@/features/transactions/api";
 
 import type { Category, CategoryDeletionImpact, CategoryType } from "./types";
 
@@ -50,7 +51,8 @@ export function useUpdateCategory(id: string) {
   return useMutation({
     mutationFn: (body: CategoryChangesRequest) =>
       api(`/api/categories/${encodeURIComponent(id)}`, { method: "PUT", body }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: categoriesKey }),
+    // O nome, a cor e o ícone aparecem nas transações e no Início.
+    onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: categoriesKey }), invalidateMoney(queryClient)]),
   });
 }
 
@@ -61,7 +63,11 @@ export function useDeleteCategory(id: string) {
     mutationFn: () => api(`/api/categories/${encodeURIComponent(id)}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: categoryKey(id) });
-      return queryClient.invalidateQueries({ queryKey: categoriesKey, exact: true });
+      // As transações dela viram "Sem categoria" (RN11) na lista e no Início.
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: categoriesKey, exact: true }),
+        invalidateMoney(queryClient),
+      ]);
     },
   });
 }

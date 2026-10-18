@@ -10,6 +10,4 @@ public static class TransactionErrors
     public const string AccountNotFound = "Conta não encontrada";
 
     public const string TypeChangeNotAllowed = "O tipo só pode trocar entre despesa e receita";
-
-    public const string InvalidMonth = "Mês inválido";
 }

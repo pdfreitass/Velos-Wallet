@@ -10,6 +10,8 @@ import { CATEGORY_PARAM, MONTH_PARAM } from "@/features/transactions/types";
 import { ROUTES } from "@/lib/auth/routes";
 import { currentMonthKey, isMonthKey } from "@/lib/utils/date";
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * /transacoes?mes=2026-10&categoria=<id> (spec 004, T8). O mês e o filtro ficam no endereço
  * (CA7, CA8): voltar do formulário ou recarregar mantém onde a pessoa estava. Mês inválido no
@@ -19,7 +21,9 @@ export function TransactionsPage() {
   const [params, setParams] = useSearchParams();
   const monthParam = params.get(MONTH_PARAM);
   const month = isMonthKey(monthParam) ? monthParam : currentMonthKey();
-  const categoryId = params.get(CATEGORY_PARAM) || null;
+  // Só um UUID vira filtro: qualquer outra coisa no endereço cai em "Todas as categorias".
+  const categoryParam = params.get(CATEGORY_PARAM);
+  const categoryId = categoryParam && UUID.test(categoryParam) ? categoryParam : null;
 
   function update(next: { month?: string; categoryId?: string | null }) {
     const merged = new URLSearchParams(params);

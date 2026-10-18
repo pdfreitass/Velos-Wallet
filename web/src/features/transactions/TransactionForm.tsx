@@ -12,43 +12,24 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Account } from "@/features/accounts/types";
 import type { Category } from "@/features/categories/types";
-import { ApiError } from "@/lib/api/client";
 import { applyServerFieldErrors, toErrorAlert, type ErrorAlert } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/auth/routes";
 import { todayInSaoPaulo } from "@/lib/utils/date";
 import { lastUsed } from "@/lib/utils/last-used";
 import {
   DESCRIPTION_MAX_LENGTH,
+  MIN_TRANSACTION_DATE,
   transactionFormSchema,
   type TransactionFormInput,
   type TransactionFormValues,
 } from "@/lib/validations/transactions";
 
 import { useCreateTransaction, useUpdateTransaction } from "./api";
+import { focusFirstError, TRANSACTION_FIELDS } from "./form-focus";
 import { initialValues, suggestedCategory, toRequest } from "./form-values";
-import { AccountSelect, CategoryGrid } from "./TransactionFields";
+import { TransactionPlaceFields } from "./TransactionPlaceFields";
 import { TransactionTypeTabs } from "./TransactionTypeTabs";
-import { MONTH_PARAM, TRANSACTION_TYPE_INFO, type TransactionDetail, type TransactionType } from "./types";
-
-/** Na ordem da tela: o foco vai para o primeiro com erro. */
-const serverFields = ["type", "amountCents", "categoryId", "accountId", "transferAccountId", "date", "description"] as const;
-
-/**
- * Leva o foco ao primeiro campo com erro (do Zod ou da API). A categoria é uma grade: o foco vai
- * para o primeiro botão dela.
- */
-function focusFirstError(errors: unknown) {
-  const fieldErrors = errors instanceof ApiError ? errors.fieldErrors : (errors as Record<string, unknown>);
-  const first = serverFields.find((name) => name in fieldErrors && name !== "type");
-  if (!first) return;
-  requestAnimationFrame(() => {
-    const target =
-      first === "categoryId"
-        ? document.querySelector<HTMLElement>("fieldset[aria-describedby='categoryId-error'] button")
-        : document.getElementById(first);
-    target?.focus();
-  });
-}
+import { MONTH_PARAM, type TransactionDetail, type TransactionType } from "./types";
 
 type TransactionFormProps = {
   accounts: Account[];
@@ -81,14 +62,10 @@ export function TransactionForm({ accounts, categories, transaction, footer }: T
     // o layout descia e o toque em "Salvar" caía fora do botão (o envio se perdia).
     mode: "onSubmit",
     reValidateMode: "onChange",
-    // O foco vai pelo focusFirstError: a grade de categorias não tem um único ref para focar.
     shouldFocusError: false,
   });
   const type = useWatch({ control, name: "type" });
   const amount = useController({ control, name: "amountCents" });
-  const account = useController({ control, name: "accountId" });
-  const target = useController({ control, name: "transferAccountId" });
-  const category = useController({ control, name: "categoryId" });
 
   function changeType(next: TransactionType) {
     if (next === type) return;
@@ -105,13 +82,10 @@ export function TransactionForm({ accounts, categories, transaction, footer }: T
       lastUsed.remember(body.accountId, body.type, body.categoryId);
       navigate(`${ROUTES.transactions}?${MONTH_PARAM}=${body.date.slice(0, 7)}`);
     } catch (error) {
-      if (applyServerFieldErrors(error, serverFields, setError)) focusFirstError(error);
+      if (applyServerFieldErrors(error, TRANSACTION_FIELDS, setError)) focusFirstError(error);
       else setAlert(toErrorAlert(error));
     }
   }, focusFirstError);
-
-  const ofType = categories.filter((c) => c.type === type);
-  const isTransfer = type === "transfer";
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-6">
@@ -139,56 +113,19 @@ export function TransactionForm({ accounts, categories, transaction, footer }: T
         )}
       </FormField>
 
-      {isTransfer ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <AccountSelect
-            id="accountId"
-            label="De"
-            accounts={accounts}
-            value={account.field.value}
-            onChange={account.field.onChange}
-            onBlur={account.field.onBlur}
-            selectRef={account.field.ref}
-            error={errors.accountId?.message}
-            placeholder="Escolha a conta"
-          />
-          <AccountSelect
-            id="transferAccountId"
-            label="Para"
-            accounts={accounts}
-            value={target.field.value}
-            onChange={target.field.onChange}
-            onBlur={target.field.onBlur}
-            selectRef={target.field.ref}
-            error={errors.transferAccountId?.message}
-            placeholder="Escolha a conta"
-          />
-        </div>
-      ) : (
-        <>
-          <CategoryGrid
-            legend={`Categoria de ${TRANSACTION_TYPE_INFO[type].lower}`}
-            categories={ofType}
-            value={category.field.value}
-            onChange={category.field.onChange}
-            error={errors.categoryId?.message}
-          />
-          <AccountSelect
-            id="accountId"
-            label="Conta"
-            accounts={accounts}
-            value={account.field.value}
-            onChange={account.field.onChange}
-            onBlur={account.field.onBlur}
-            selectRef={account.field.ref}
-            error={errors.accountId?.message}
-            placeholder="Escolha a conta"
-          />
-        </>
-      )}
+      <TransactionPlaceFields type={type} control={control} errors={errors} accounts={accounts} categories={categories} />
 
       <FormField id="date" label="Data" error={errors.date?.message}>
-        {(field) => <Input {...field} {...register("date")} type="date" max={todayInSaoPaulo()} className="h-11 text-base" />}
+        {(field) => (
+          <Input
+            {...field}
+            {...register("date")}
+            type="date"
+            min={MIN_TRANSACTION_DATE}
+            max={todayInSaoPaulo()}
+            className="h-11 text-base"
+          />
+        )}
       </FormField>
 
       <FormField id="description" label="Descrição (opcional)" error={errors.description?.message}>

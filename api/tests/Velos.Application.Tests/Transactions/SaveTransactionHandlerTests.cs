@@ -88,6 +88,14 @@ public class SaveTransactionHandlerTests
     }
 
     [Fact]
+    public async Task Date_before_2000_is_refused()
+    {
+        var result = await Create.HandleAsync(Expense(100) with { Date = new DateOnly(1, 1, 1) }, default);
+
+        Assert.Equal(["Informe uma data a partir de 2000"], Errors(result)["date"]);
+    }
+
+    [Fact]
     public async Task Missing_fields_are_refused_with_their_messages()
     {
         var result = await Create.HandleAsync(new SaveTransactionCommand(TransactionType.Expense, 100, null, null, null, null, null), default);

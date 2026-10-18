@@ -1,7 +1,5 @@
-using System.Globalization;
 using Velos.Application.Abstractions;
 using Velos.Application.Common;
-using Velos.Domain.Transactions;
 
 namespace Velos.Application.Transactions;
 
@@ -13,15 +11,9 @@ public sealed class ListTransactionsHandler(IUserContext user, ITransactionStore
 {
     public async Task<Result<TransactionMonth>> HandleAsync(string? month, Guid? categoryId, CancellationToken cancellationToken)
     {
-        if (!TryParseMonth(month, out var monthStart))
+        if (MonthKey.Parse(month, time) is not { } monthStart)
         {
-            return Result.Failure<TransactionMonth>(ValidationErrors.Field("month", TransactionErrors.InvalidMonth));
-        }
-
-        if (string.IsNullOrEmpty(month))
-        {
-            var today = TransactionRules.Today(time);
-            monthStart = new DateOnly(today.Year, today.Month, 1);
+            return Result.Failure<TransactionMonth>(ValidationErrors.Field("month", MonthKey.InvalidMessage));
         }
 
         var userId = user.UserId;
@@ -32,25 +24,10 @@ public sealed class ListTransactionsHandler(IUserContext user, ITransactionStore
         if (!totals.IsSuccess) return Result.Failure<TransactionMonth>(totals.Error!);
 
         return Result.Success(new TransactionMonth(
-            monthStart.ToString("yyyy-MM", CultureInfo.InvariantCulture),
+            MonthKey.Format(monthStart),
             totals.Value.IncomeCents,
             totals.Value.ExpenseCents,
             items.Value));
-    }
-
-    /// <summary>Vazio é válido (mês atual). Fora disso, só <c>yyyy-MM</c> exato, de 2000 a 2100.</summary>
-    private static bool TryParseMonth(string? month, out DateOnly monthStart)
-    {
-        monthStart = default;
-        if (string.IsNullOrEmpty(month)) return true;
-
-        if (!DateOnly.TryParseExact(month, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
-        {
-            return false;
-        }
-
-        monthStart = parsed;
-        return parsed.Year is >= 2000 and <= 2100;
     }
 }
 

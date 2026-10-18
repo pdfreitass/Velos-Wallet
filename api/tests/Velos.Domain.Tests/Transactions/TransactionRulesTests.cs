@@ -48,6 +48,8 @@ public class TransactionRulesTests
         Assert.True(TransactionRules.IsValidDate(today, today));
         Assert.True(TransactionRules.IsValidDate(today.AddYears(-3), today));
         Assert.False(TransactionRules.IsValidDate(today.AddDays(1), today));
+        Assert.True(TransactionRules.IsValidDate(new DateOnly(2000, 1, 1), today));
+        Assert.False(TransactionRules.IsValidDate(new DateOnly(1999, 12, 31), today));   // a lista não mostraria
     }
 
     [Theory]

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
+import { invalidateMoney } from "@/features/transactions/api";
 
 import type { Account, AccountDeletionImpact, AccountType } from "./types";
 
@@ -40,7 +41,7 @@ export function useCreateAccount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: NewAccountRequest) => api<{ id: string }>("/api/accounts", { method: "POST", body }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: accountsKey }),
+    onSuccess: () => invalidateMoney(queryClient),
   });
 }
 
@@ -49,7 +50,7 @@ export function useUpdateAccount(id: string) {
   return useMutation({
     mutationFn: (body: AccountChangesRequest) =>
       api(`/api/accounts/${encodeURIComponent(id)}`, { method: "PUT", body }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: accountsKey }),
+    onSuccess: () => invalidateMoney(queryClient),
   });
 }
 
@@ -63,10 +64,11 @@ export function useDeleteAccount(id: string) {
     mutationFn: () => api(`/api/accounts/${encodeURIComponent(id)}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: accountKey(id) });
-      return queryClient.invalidateQueries({
-        queryKey: accountsKey,
-        predicate: (query) => query.queryKey[1] !== id,
-      });
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: accountsKey, predicate: (query) => query.queryKey[1] !== id }),
+        queryClient.invalidateQueries({ queryKey: ["transactions"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      ]);
     },
   });
 }

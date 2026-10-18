@@ -7,6 +7,9 @@ import { todayInSaoPaulo } from "@/lib/utils/date";
 /** RN5: o mesmo limite do TransactionRules.DescriptionMaxLength da API. */
 export const DESCRIPTION_MAX_LENGTH = 100;
 
+/** O mesmo TransactionRules.MinDate da API: a lista do mês só lê de 2000 em diante. */
+export const MIN_TRANSACTION_DATE = "2000-01-01";
+
 /**
  * Formulário de transação (spec 004, RN1–RN6). Só experiência do usuário: quem decide é a API,
  * com as MESMAS mensagens (api/src/Velos.Application/Transactions/TransactionInput.cs).
@@ -24,6 +27,7 @@ export const transactionFormSchema = z
     date: z
       .string()
       .min(1, "Informe a data")
+      .refine((date) => date >= MIN_TRANSACTION_DATE, "Informe uma data a partir de 2000")
       .refine((date) => date <= todayInSaoPaulo(), "A data não pode ser no futuro"),
     description: z
       .string()
