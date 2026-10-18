@@ -41,7 +41,9 @@ export function CategorySpending({ data }: { data: Dashboard }) {
 
 function SpendingRow({ item, month, totalCents }: { item: Spending; month: string; totalCents: number }) {
   // Porcentagem e largura são só exibição (o valor em centavos veio somado do banco).
+  // Arredondada por linha, então a soma pode dar 99% ou 101%; abaixo de 0,5% vira "<1%", não "0%".
   const percent = totalCents > 0 ? Math.round((item.amountCents * 100) / totalCents) : 0;
+  const percentLabel = percent === 0 && item.amountCents > 0 ? "<1%" : `${percent}%`;
   const name = item.name ?? "Sem categoria";
   const color = item.color ? categoryColorVar(item.color) : "var(--muted-foreground)";
   const href = item.categoryId
@@ -66,7 +68,7 @@ function SpendingRow({ item, month, totalCents }: { item: Spending; month: strin
           <span className="truncate font-medium">{name}</span>
           <span className="shrink-0 text-sm tabular-nums">
             <span className="font-semibold text-expense">{formatSignedCurrency(item.amountCents, "out")}</span>
-            <span className="ml-2 text-muted-foreground">{percent}%</span>
+            <span className="ml-2 text-muted-foreground">{percentLabel}</span>
           </span>
         </span>
         <span className="block h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true">

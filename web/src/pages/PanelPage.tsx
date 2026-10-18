@@ -26,12 +26,14 @@ export function PanelPage() {
   const monthParam = params.get(MONTH_PARAM);
   const month = isMonthKey(monthParam) ? monthParam : currentMonthKey();
   const dashboard = useDashboard(month);
+  const changeMonth = (value: string) => setParams({ [MONTH_PARAM]: value }, { replace: true });
+  const greeting = firstName ? `Olá, ${firstName}` : "Olá";
 
   return (
     <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-5xl">
       <title>Início · Velos Wallet</title>
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight">Olá, {firstName}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{greeting}</h1>
         <Link to={ROUTES.newTransaction} className={cn(buttonVariants(), "h-11 px-4 text-base lg:hidden")}>
           <Plus aria-hidden="true" />
           Lançar
@@ -42,12 +44,16 @@ export function PanelPage() {
       {dashboard.isPending ? (
         <DashboardSkeleton />
       ) : dashboard.isError ? (
-        <LoadError
-          title="Não foi possível carregar o resumo"
-          message="Confira sua conexão e tente de novo em instantes."
-          onRetry={() => void dashboard.refetch()}
-          isRetrying={dashboard.isFetching}
-        />
+        // O seletor de mês continua na tela: se um mês falhar, dá para voltar a outro.
+        <div className="space-y-3 lg:max-w-[calc(50%-0.75rem)] lg:ml-auto">
+          <MonthSwitcher month={month} onChange={changeMonth} />
+          <LoadError
+            title="Não foi possível carregar o resumo"
+            message="Confira sua conexão e tente de novo em instantes."
+            onRetry={() => void dashboard.refetch()}
+            isRetrying={dashboard.isFetching}
+          />
+        </div>
       ) : dashboard.data.accountCount + dashboard.data.creditCardCount === 0 ? (
         <FirstSteps />
       ) : (
@@ -55,7 +61,7 @@ export function PanelPage() {
           data={dashboard.data}
           month={month}
           isStale={dashboard.isPlaceholderData}
-          onMonthChange={(value) => setParams({ [MONTH_PARAM]: value }, { replace: true })}
+          onMonthChange={changeMonth}
         />
       )}
     </div>
