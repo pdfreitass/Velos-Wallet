@@ -19,3 +19,13 @@ createRoot(root).render(
     </QueryClientProvider>
   </StrictMode>,
 );
+
+// PWA instalável (spec 007): o service worker só existe no build de produção, para não interferir
+// no HMR do Vite. Sem ele o app funciona igual; a falha fica só no console, sem aviso na tela.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .catch((error: unknown) => console.warn("Service worker não registrado:", error));
+  });
+}
