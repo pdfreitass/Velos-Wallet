@@ -5,6 +5,7 @@ import { useController, useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { cn } from "cn";
 
+import { DatePicker } from "@/components/shared/DatePicker";
 import { FormAlert } from "@/components/shared/FormAlert";
 import { FormField } from "@/components/shared/FormField";
 import { MoneyInput } from "@/components/shared/MoneyInput";
@@ -66,6 +67,7 @@ export function TransactionForm({ accounts, categories, transaction, footer }: T
   });
   const type = useWatch({ control, name: "type" });
   const amount = useController({ control, name: "amountCents" });
+  const date = useController({ control, name: "date" });
 
   function changeType(next: TransactionType) {
     if (next === type) return;
@@ -117,13 +119,17 @@ export function TransactionForm({ accounts, categories, transaction, footer }: T
 
       <FormField id="date" label="Data" error={errors.date?.message}>
         {(field) => (
-          <Input
-            {...field}
-            {...register("date")}
-            type="date"
+          <DatePicker
+            id={field.id}
+            ref={date.field.ref}
+            value={date.field.value}
+            onChange={date.field.onChange}
+            onBlur={date.field.onBlur}
             min={MIN_TRANSACTION_DATE}
             max={todayInSaoPaulo()}
-            className="h-11 text-base"
+            today={todayInSaoPaulo()}
+            invalid={field["aria-invalid"]}
+            describedBy={field["aria-describedby"]}
           />
         )}
       </FormField>

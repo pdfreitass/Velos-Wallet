@@ -10,14 +10,19 @@ import { cn } from "cn"
  */
 const Select = SelectPrimitive.Root
 
+/** Campo fechado de seletores (Select, DatePicker): igual aos inputs de 44 px. */
+const fieldTriggerClass =
+  "group/select flex h-11 w-full min-w-0 items-center gap-3 rounded-lg border border-input bg-transparent pr-3 pl-3 text-left text-base text-foreground transition-colors outline-none select-none hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-[popup-open]:border-ring aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50"
+
+/** Cartão que abre sob o campo (lista do Select, calendário do DatePicker). */
+const fieldPopupClass =
+  "origin-(--transform-origin) rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-[0_18px_40px_-16px_rgb(4_20_15/0.45)] outline-none transition-[transform,opacity] duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 motion-reduce:transition-none"
+
 function SelectTrigger({ className, children, ...props }: SelectPrimitive.Trigger.Props) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
-      className={cn(
-        "group/select flex h-11 w-full min-w-0 items-center gap-3 rounded-lg border border-input bg-transparent pr-3 pl-3 text-left text-base text-foreground transition-colors outline-none select-none hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-[popup-open]:border-ring aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50",
-        className
-      )}
+      className={cn(fieldTriggerClass, className)}
       {...props}
     >
       {children}
@@ -52,7 +57,8 @@ function SelectContent({ className, children, ...props }: SelectPrimitive.Popup.
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            "max-h-[min(var(--available-height),22rem)] w-max max-w-[min(var(--available-width),22rem)] min-w-(--anchor-width) origin-(--transform-origin) overflow-y-auto overscroll-contain rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-[0_18px_40px_-16px_rgb(4_20_15/0.45)] outline-none transition-[transform,opacity] duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 motion-reduce:transition-none",
+            fieldPopupClass,
+            "max-h-[min(var(--available-height),22rem)] w-max max-w-[min(var(--available-width),22rem)] min-w-(--anchor-width) overflow-y-auto overscroll-contain",
             className
           )}
           {...props}
@@ -119,6 +125,8 @@ function SelectIconTile({ className, children }: { className?: string; children:
 }
 
 export {
+  fieldPopupClass,
+  fieldTriggerClass,
   Select,
   SelectContent,
   SelectGroup,
