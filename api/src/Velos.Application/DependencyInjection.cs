@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Velos.Application.Accounts;
 using Velos.Application.Categories;
+using Velos.Application.Dashboard;
 using Velos.Application.Auth.Google;
 using Velos.Application.Auth.PasswordReset;
 using Velos.Application.Auth.SignIn;
@@ -49,6 +50,8 @@ public static class DependencyInjection
         services.AddScoped<CreateTransactionHandler>();
         services.AddScoped<UpdateTransactionHandler>();
         services.AddScoped<DeleteTransactionHandler>();
+
+        services.AddScoped<GetDashboardHandler>();
 
         return services;
     }

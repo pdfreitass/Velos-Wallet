@@ -21,7 +21,10 @@ internal sealed class StoreTestContext : IAsyncDisposable
         Accounts = new AccountStore(Session, NullLogger<AccountStore>.Instance);
         Categories = new CategoryStore(Session, NullLogger<CategoryStore>.Instance);
         Transactions = new TransactionStore(Session, NullLogger<TransactionStore>.Instance);
+        Dashboard = new DashboardStore(Session, NullLogger<DashboardStore>.Instance);
     }
+
+    public IDashboardStore Dashboard { get; }
 
     public ITransactionStore Transactions { get; }
 
