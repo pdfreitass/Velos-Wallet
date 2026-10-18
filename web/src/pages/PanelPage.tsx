@@ -1,5 +1,6 @@
-import { ChevronRight, Tags, Wallet, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, Plus, Tags, Wallet, type LucideIcon } from "lucide-react";
 import { Link } from "react-router";
+import { cn } from "cn";
 
 import { useCurrentUser } from "@/features/auth/api";
 import { ROUTES } from "@/lib/auth/routes";
@@ -17,10 +18,27 @@ export function PanelPage() {
       <title>Início · Velos Wallet</title>
       <h1 className="text-3xl font-semibold tracking-tight">Olá, {firstName}</h1>
       <p className="mt-2 text-muted-foreground">
-        Comece cadastrando suas contas e ajustando as categorias. O resumo do mês chega em breve.
+        Lance o que entra e o que sai, e acompanhe o saldo de cada conta.
       </p>
 
       <ul className="mt-8 flex flex-col gap-3">
+        <li>
+          <Shortcut
+            to={ROUTES.newTransaction}
+            Icon={Plus}
+            title="Nova transação"
+            description="Lance uma despesa, receita ou transferência"
+            primary
+          />
+        </li>
+        <li>
+          <Shortcut
+            to={ROUTES.transactions}
+            Icon={ArrowLeftRight}
+            title="Transações"
+            description="O que entrou e saiu no mês"
+          />
+        </li>
         <li>
           <Shortcut to={ROUTES.accounts} Icon={Wallet} title="Contas" description="Saldo de cada conta e cartão" />
         </li>
@@ -32,15 +50,21 @@ export function PanelPage() {
   );
 }
 
-type ShortcutProps = { to: string; Icon: LucideIcon; title: string; description: string };
+type ShortcutProps = { to: string; Icon: LucideIcon; title: string; description: string; primary?: boolean };
 
-function Shortcut({ to, Icon, title, description }: ShortcutProps) {
+/** `primary`: o atalho do lançamento (P5 da spec 004), com o ícone na cor da marca. */
+function Shortcut({ to, Icon, title, description, primary = false }: ShortcutProps) {
   return (
     <Link
       to={to}
       className="flex min-h-11 items-center gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+      <span
+        className={cn(
+          "flex size-11 shrink-0 items-center justify-center rounded-xl",
+          primary ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground",
+        )}
+      >
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">

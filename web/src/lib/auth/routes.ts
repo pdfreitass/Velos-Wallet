@@ -16,7 +16,10 @@ export const ROUTES = {
   newAccount: "/contas/nova",
   categories: "/categorias",
   newCategory: "/categorias/nova",
+  transactions: "/transacoes",
+  newTransaction: "/transacoes/nova",
 } as const;
 
 export const accountPath = (id: string) => `${ROUTES.accounts}/${id}`;
 export const categoryPath = (id: string) => `${ROUTES.categories}/${id}`;
+export const transactionPath = (id: string) => `${ROUTES.transactions}/${id}`;
