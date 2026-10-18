@@ -31,7 +31,10 @@ public static class GoalRules
     /// </summary>
     /// <param name="currentDeadline">O prazo gravado (na criação, <c>null</c>).</param>
     public static bool IsValidDeadline(DateOnly? deadline, DateOnly today, DateOnly? currentDeadline = null) =>
-        deadline is not { } value || value >= today || value == currentDeadline;
+        deadline is not { } value || value == currentDeadline || (value >= today && value <= MaxDeadline);
+
+    /// <summary>O mesmo fim de faixa do <c>MonthKey</c>: sem ele, 31/12/9999 viraria "Guarde R$ 0,01 por mês".</summary>
+    public static readonly DateOnly MaxDeadline = new(2100, 12, 31);
 
     /// <summary>RN3: a mesma faixa das transações (de 2000 até hoje, nunca no futuro).</summary>
     public static bool IsValidContributionDate(DateOnly date, DateOnly today) => TransactionRules.IsValidDate(date, today);

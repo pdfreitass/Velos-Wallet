@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Velos.Application.Accounts;
 using Velos.Application.Categories;
 using Velos.Application.Dashboard;
+using Velos.Application.Goals;
 using Velos.Application.Auth.Google;
 using Velos.Application.Auth.PasswordReset;
 using Velos.Application.Auth.SignIn;
@@ -52,6 +53,15 @@ public static class DependencyInjection
         services.AddScoped<DeleteTransactionHandler>();
 
         services.AddScoped<GetDashboardHandler>();
+
+        services.AddScoped<ListGoalsHandler>();
+        services.AddScoped<GetGoalHandler>();
+        services.AddScoped<CreateGoalHandler>();
+        services.AddScoped<UpdateGoalHandler>();
+        services.AddScoped<DeleteGoalHandler>();
+        services.AddScoped<AddContributionHandler>();
+        services.AddScoped<UpdateContributionHandler>();
+        services.AddScoped<DeleteContributionHandler>();
 
         return services;
     }

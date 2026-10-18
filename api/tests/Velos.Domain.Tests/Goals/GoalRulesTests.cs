@@ -35,6 +35,8 @@ public class GoalRulesTests
         Assert.True(GoalRules.IsValidDeadline(Today, Today));
         Assert.True(GoalRules.IsValidDeadline(new DateOnly(2027, 6, 30), Today));
         Assert.False(GoalRules.IsValidDeadline(Today.AddDays(-1), Today));
+        Assert.True(GoalRules.IsValidDeadline(new DateOnly(2100, 12, 31), Today));
+        Assert.False(GoalRules.IsValidDeadline(new DateOnly(2101, 1, 1), Today));
     }
 
     [Fact]
