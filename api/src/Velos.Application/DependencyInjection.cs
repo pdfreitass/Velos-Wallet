@@ -9,6 +9,7 @@ using Velos.Application.Auth.SignIn;
 using Velos.Application.Auth.SignOut;
 using Velos.Application.Auth.SignUp;
 using Velos.Application.Profiles;
+using Velos.Application.Transactions;
 
 namespace Velos.Application;
 
@@ -42,6 +43,12 @@ public static class DependencyInjection
         services.AddScoped<UpdateCategoryHandler>();
         services.AddScoped<GetCategoryDeletionImpactHandler>();
         services.AddScoped<DeleteCategoryHandler>();
+
+        services.AddScoped<ListTransactionsHandler>();
+        services.AddScoped<GetTransactionHandler>();
+        services.AddScoped<CreateTransactionHandler>();
+        services.AddScoped<UpdateTransactionHandler>();
+        services.AddScoped<DeleteTransactionHandler>();
 
         return services;
     }
