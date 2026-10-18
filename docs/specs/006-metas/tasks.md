@@ -9,7 +9,7 @@
   - Verificação: testes do Domain (CA2 = R$ 666,67; prazo no mês atual = 1 mês; virada às 21h UTC-3; prazo vencido sem ritmo)
 - [x] **T3** — Application: inputs + validators, handlers de meta e de aporte, `GoalErrors`, `GoalModels`, `IGoalStore`
   - Verificação: testes da Application (CA6, 404 para meta de outro, prazo vencido mantido na edição)
-- [ ] **T4** — Infrastructure + Api: `GoalStore`, `GoalsController`, registro na DI
+- [x] **T4** — Infrastructure + Api: `GoalStore`, `GoalsController`, registro na DI
   - Verificação: testes de integração (soma, contagem, ordem RN8, `updated_at` do aporte, IDOR, aporte não muda saldo); `dotnet build` sem aviso
 - [ ] **T5** — Front: tipos, hooks (`["goals"]`), Zod, `GoalProgress`, lista `/metas`, formulário de meta
   - Verificação: CA1, CA6 no Playwright com a API simulada; estados; 375 e 1440 px; dois temas
@@ -25,6 +25,7 @@
 | Task | Commit | Observação |
 |---|---|---|
 | T0 | | Spec e plano aprovados pelo Pedro em 2026-10-18 (plano revisado pela 2c) |
-| T1 | c504e5e | SQL aprovado pela 2c; dry-run lista só a 0013; aplicar no banco é com o Pedro |
+| T1 | c504e5e | SQL aprovado pela 2c; **aplicada no banco em 2026-10-18** com o OK do Pedro |
 | T2 | bd26057 | Aprovado pela 2c; Domain 138/138 |
-| T3 | (este) | Aprovado pela f2; Application 171/171 |
+| T3 | 5a26efb | Aprovado pela f2; Application 171/171 |
+| T4 | (este) | GoalStore + GoalsController + DI; 4 testes de integração novos (progresso somado no banco, ordem da RN8, editar/excluir inexistente, outro usuário não lê nem altera); integração 28/28 |
