@@ -6,6 +6,26 @@
 
 ## [Não lançado]
 
+### 2026-10-18 — Etapa 6: dashboard (spec 005)
+#### Adicionado
+- `GET /api/dashboard?month=yyyy-MM`: saldo total sem o cartão, dívida do cartão, receitas × despesas do mês e gastos por categoria, tudo somado no banco (ADR 0006).
+- Migration `0012`: view `category_spending` (`security_invoker = on`), despesas por categoria e mês, com "Sem categoria" para a categoria excluída.
+- Início vira o dashboard: cards de saldo e dívida, seletor de mês (`?mes=`), resultado do mês e barras de gastos por categoria em HTML/CSS, sem biblioteca de gráfico ([ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)). Cada categoria leva à lista de transações já filtrada. Primeiros passos para quem ainda não tem conta.
+- `MonthKey` compartilhado entre transações e dashboard (2000 a 2100, mês atual de São Paulo como padrão).
+#### Corrigido
+- Revisão `qa` (T4): o seletor de mês continua na tela quando um mês falha ao carregar; o título não mostra "Olá, " sem nome; categoria abaixo de 0,5% aparece como "<1%".
+- Testes de integração rodam em sequência: todas as classes usam o mesmo usuário de teste, e em paralelo uma estragava o "antes/depois" da outra.
+#### Segurança
+- Revisão `security`: aprovada, sem achados críticos, altos ou médios. O `join` com `categories` também filtra por `user_id` (defesa além da RLS).
+
+### 2026-10-17 — Etapa 5: transações (spec 004)
+#### Adicionado
+- API de transações (`/api/transactions`): criar, editar, excluir e listar o mês com totais da `monthly_summary`; conta, conta de destino e categoria conferidas como da própria pessoa (id alheio = 404).
+- Regras no `Domain` com o "hoje" de São Paulo: valor > 0 até R$ 999.999.999,99, data entre 01/01/2000 e hoje, descrição até 100 caracteres (check no banco pela `0011`), tipo trocado só entre despesa e receita na edição.
+- Telas: lista do mês com totais, filtro por categoria (`?categoria=`) e agrupamento por dia; formulário com lançamento em 3 toques, última conta e categoria usadas já sugeridas, edição e exclusão com confirmação curta.
+- "Transações" na navegação e botão "Nova transação" na barra, no menu e no Início.
+- Lista do mês limitada no servidor (`MaxMonthItems`) e categoria do filtro validada como UUID no front.
+
 ### 2026-10-17 — Etapa 4: contas e categorias (spec 002)
 #### Adicionado
 - API de contas e categorias (`/api/accounts`, `/api/categories`), com handlers na `Application` (FluentValidation), stores com RLS e filtro por `user_id`, e o impacto da exclusão (`deletion-impact`). Saldo atual somado no SQL (`account_balances`).

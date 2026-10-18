@@ -7,6 +7,20 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L32 — Testes de integração em paralelo misturavam os totais do mesmo usuário
+*2026-10-18 · spec 005, T4*
+
+- **O que aconteceu:** `DashboardStoreTests` comparava a contagem de contas "antes/depois" e às vezes dava 0 em vez de 2: outras classes, rodando ao mesmo tempo com o mesmo usuário de teste, criavam e apagavam contas no meio.
+- **Por que:** o xUnit roda classes diferentes em paralelo por padrão, e o banco real é compartilhado.
+- **Como evitar:** testes de integração contra o banco real rodam em sequência.
+- **Regra em:** `api/tests/Velos.Infrastructure.IntegrationTests/AssemblyInfo.cs` (`DisableTestParallelization`).
+
+## L31 — Teste que depende de view nova falha até a migration ser aplicada
+*2026-10-18 · spec 005*
+
+- **O que aconteceu:** dois testes do dashboard falharam (`database_unavailable` e totais zerados) e pareciam bug, mas a view `category_spending` ainda não existia no banco.
+- **Como evitar:** antes de diagnosticar, rodar `npx supabase db push --dry-run`; se a migration da task está pendente, aplicar (com a aprovação do Pedro) e rodar `dotnet test` de novo. Em query de soma com `join` numa tabela de apoio, pôr `user_id` também na condição do `join`.
+
 ## L30 — Mockup HTML com JavaScript não aparece inteiro no visualizador do celular
 *2026-10-17 · spec 002*
 

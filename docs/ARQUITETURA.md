@@ -116,7 +116,7 @@ Todas em `public`, todas com RLS ligada. Valores de dinheiro em `bigint` de **ce
 | `profiles` | `id` (= `auth.users.id`), `name`, `currency` (default `BRL`) | Criada pelo trigger `handle_new_user`. Sem policy de DELETE: morre em cascata com o usuário. |
 | `accounts` | `user_id`, `name`, `type`, `initial_balance_cents` | Saldo inicial com sinal: cartão ≤ 0 (dívida), conta corrente qualquer sinal (cheque especial, `0009`), poupança e dinheiro ≥ 0. Nome de 1 a 40 caracteres (check no banco). `UNIQUE (id, user_id)` para FKs compostas. |
 | `categories` | `user_id`, `name`, `type`, `color` (`#RRGGBB`), `icon` (nome lucide) | `type <> 'transfer'`. `UNIQUE (id, type)` e `UNIQUE (user_id, name, type)`. |
-| `transactions` | `user_id`, `account_id`, `category_id?`, `type`, `amount_cents`, `description?`, `date`, `transfer_account_id?` | `amount_cents > 0`. FK `(category_id, type)` impede despesa em categoria de receita. FKs `(account_id, user_id)` impedem usar conta alheia. CHECK de forma da transferência. |
+| `transactions` | `user_id`, `account_id`, `category_id?`, `type`, `amount_cents`, `description?`, `date`, `transfer_account_id?` | `amount_cents > 0`. Descrição até 100 caracteres (`0011`). FK `(category_id, type)` impede despesa em categoria de receita. FKs `(account_id, user_id)` impedem usar conta alheia. CHECK de forma da transferência. |
 | `goals` | `user_id`, `name`, `target_cents`, `deadline?` | `target_cents > 0`. Não guarda progresso. |
 | `goal_contributions` | `user_id`, `goal_id`, `amount_cents`, `date` | `amount_cents > 0`. ⚠️ **Sem `updated_at`** (ver [ROADMAP](ROADMAP.md#pendências-técnicas)). |
 
@@ -130,6 +130,7 @@ Todas com **`security_invoker = on`**: sem isso a view rodaria com as permissõe
 |---|---|
 | `account_balances` | `balance_cents` = saldo inicial + receitas − despesas − transferências de saída + transferências de entrada |
 | `monthly_summary` | `income_cents` e `expense_cents` por `user_id` e `month`, **excluindo transferências** |
+| `category_spending` | `expense_cents` por `user_id`, `month` e `category_id` (nulo = "Sem categoria"); só despesas (`0012`, dashboard) |
 | `goal_progress` | `current_cents` = soma dos aportes de cada meta |
 
 O "saldo total" do app soma apenas contas `checking`/`savings`/`cash`. O cartão de crédito aparece em card separado ([ADR 0007](adr/0007-transferencia-registro-unico-e-cartao.md)).

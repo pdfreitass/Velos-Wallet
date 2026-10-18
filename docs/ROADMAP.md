@@ -3,7 +3,7 @@
 > Leia no **início de cada sessão** para saber onde paramos.
 > Atualize **ao terminar cada feature** (junto com [CHANGELOG.md](CHANGELOG.md) e [LICOES.md](LICOES.md)).
 
-**Progresso do MVP: 3 de 8 etapas (38%), com a Etapa 4 pronta no código** — atualizado em 2026-10-17.
+**Progresso do MVP: 3 de 8 etapas fechadas (38%); Etapas 4, 5 e 6 prontas no código; 7 (Metas) e 8 (PWA) em andamento** — atualizado em 2026-10-18.
 
 > **Numeração:** são 8 etapas, a mesma que os comentários do código já usam ("Etapa 2" = banco, "Etapa 3" = autenticação, "Etapa 6" = dashboard). A identidade visual faz parte da Etapa 1. O checklist antigo do `CLAUDE.md` tinha 9 itens porque contava a identidade visual à parte.
 
@@ -46,6 +46,14 @@
 
 ## 🟡 Em andamento
 
+**Etapa 5 — Transações** ([spec 004](specs/004-transacoes/tasks.md)): **pronta no código** (T1–T9, revisões `security`/`qa` na T11, migration `0011` aplicada). Falta: T10 (critérios de aceite com login real) e a PR.
+
+**Etapa 6 — Dashboard** ([spec 005](specs/005-dashboard/tasks.md)): **pronta no código** (T1–T5; `0012` aplicada; revisões aprovadas; 289 testes passando). Falta: CA1–CA7 no navegador com login real e a PR.
+
+**Etapa 7 — Metas** ([spec 006](specs/006-metas/tasks.md)): spec e plano aprovados; `0013` escrita (aplicar com o Pedro); Domain pronto. Em execução pela sessão d2, cada task revisada pela 2c.
+
+**Etapa 8 — PWA** ([spec 007](specs/007-pwa/tasks.md)): spec e plano aprovados; ícones e manifest prontos. Em execução pela sessão 1c, cada task revisada pela 2c.
+
 **Etapa 4 — Contas e categorias** ([spec 002](specs/002-contas-e-categorias/tasks.md)): **pronta no código** (T1–T13, T15–T17). Faltam: **T14** (critérios de aceite com login real, IDOR com duas contas, CA6b/CA10 com movimentações por SQL e os testes de integração) e **T18** (PR para a `main`).
 
 - API de contas e categorias com RLS e filtro por `user_id`; navegação do app (barra inferior / menu lateral); telas de contas e categorias com os estados de carregando, vazio e erro; `MoneyInput`, `CategoryBadge` e a paleta com contraste medido nos dois temas; [ADR 0017](adr/0017-excluir-conta-apaga-movimentacoes.md)
@@ -56,10 +64,10 @@
 | Etapa | Escopo | Depende de |
 |---|---|---|
 | ~~4 — Contas e categorias~~ | ✅ no código; falta T14 e PR (ver acima) | 3 |
-| **5 — Transações** | CRUD, filtro por mês/categoria, transferências entre contas | 4 |
-| **6 — Dashboard** | Saldo total (sem cartão), card de dívida do cartão, receitas × despesas do mês, gráfico por categoria (Recharts); conteúdo real do `/painel` e layout para desktop | 5 |
-| **7 — Metas** | CRUD de metas, aportes manuais, barra de progresso via `goal_progress` | 3 |
-| **8 — PWA** | `manifest.webmanifest`, ícones, instalável no celular e no PC (sem offline-first) | 6 |
+| ~~5 — Transações~~ | ✅ no código; falta T10 e PR (ver acima) | 4 |
+| ~~6 — Dashboard~~ | ✅ no código (barras sem Recharts, [ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)); falta teste com login e PR | 5 |
+| **7 — Metas** | 🟡 em andamento ([spec 006](specs/006-metas/spec.md)) | 3 |
+| **8 — PWA** | 🟡 em andamento ([spec 007](specs/007-pwa/spec.md)) | 6 |
 
 **Antes do deploy em produção** (sem etapa própria ainda — **A DEFINIR** quando entra):
 - Escolher o host do app (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md); HTTPS/HSTS e connection string como variável de ambiente
@@ -68,7 +76,7 @@
 - Variáveis do host: `App__PublicOrigin=https://<domínio>`, `AllowedHosts=<domínio>`, `ConnectionStrings__Velos` com **`SSL Mode=VerifyFull`** e o certificado do Supabase (hoje `Require`, que cifra mas não valida o servidor)
 - `ForwardedHeaders` restrito ao proxy do host (`KnownProxies`/`KnownNetworks`), para o limite por IP ver o IP do cliente
 - Chaves do Data Protection persistidas (volume ou key vault): sem isso, reiniciar a API invalida os links de recuperação e o login com Google em andamento
-- Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
+- Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`, e `worker-src 'self'` + `manifest-src 'self'` por causa do PWA da spec 007); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
 - Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}` (hoje monta `token_hash`, e o `/auth/confirm` só aceita `?code=` do PKCE) — junto com o C3
 
 ## Pendências técnicas
@@ -77,7 +85,7 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 
 | # | Pendência | Onde | Quando |
 |---|---|---|---|
-| T1 | `goal_contributions` não tem `updated_at` nem trigger, o que viola a regra "toda tabela tem `updated_at`" | migration nova (a próxima livre; `0005`–`0008` já foram usadas) | antes da Etapa 7 |
+| T1 | `goal_contributions` sem `updated_at` | resolvida na `0013` (spec 006), falta aplicar | Etapa 7 |
 | ~~T2~~ | ~~`supabase/migrations/.gitkeep` gera o aviso "Skipping migration .gitkeep"~~ | ✅ arquivo removido na limpeza de 2026-10-15 | — |
 | ~~T3~~ | ~~Textos de UI sem acento~~ | ✅ resolvida na T10 da spec 001 (`web/index.html` e página provisória com acento) | — |
 | ~~T4~~ | ~~`hasSupabaseEnv()` do middleware~~ | ✅ obsoleta: o middleware do Next saiu na troca de stack (ADR 0013) | — |

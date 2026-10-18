@@ -31,7 +31,7 @@
 - [ ] **T10** — Critérios de aceite em 375 e 1440 px, temas claro e escuro (CA1–CA12), com login real
 - [ ] **T11** — Agentes `security` (CA-seg, IDOR) e `qa` (CA-a11y, CA-build)
 - [ ] **T12** — `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web`
-- [ ] **T13** — Atualizar ROADMAP, CHANGELOG, LICOES e ARQUITETURA
+- [x] **T13** — Atualizar ROADMAP, CHANGELOG, LICOES e ARQUITETURA
 - [ ] **T14** — PR para `main` com descrição e checklist de testes
 
 ## Registro
