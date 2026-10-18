@@ -1,6 +1,7 @@
 using System.Globalization;
 using Velos.Domain.Accounts;
 using Velos.Domain.Categories;
+using Velos.Domain.Transactions;
 
 namespace Velos.Infrastructure.Persistence;
 
@@ -40,6 +41,22 @@ internal static class PgEnums
         "expense" => CategoryType.Expense,
         "income" => CategoryType.Income,
         _ => throw new InvalidOperationException($"tipo de categoria desconhecido: {value}"),
+    };
+
+    public static string ToDb(TransactionType type) => type switch
+    {
+        TransactionType.Expense => "expense",
+        TransactionType.Income => "income",
+        TransactionType.Transfer => "transfer",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+    };
+
+    public static TransactionType ToTransactionType(string value) => value switch
+    {
+        "expense" => TransactionType.Expense,
+        "income" => TransactionType.Income,
+        "transfer" => TransactionType.Transfer,
+        _ => throw new InvalidOperationException($"transaction_type desconhecido: {value}"),
     };
 
     /// <summary>Ordem de nomes em português ("Água" junto do "A", sem diferenciar maiúsculas).</summary>

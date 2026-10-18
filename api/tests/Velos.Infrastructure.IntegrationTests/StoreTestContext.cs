@@ -20,7 +20,10 @@ internal sealed class StoreTestContext : IAsyncDisposable
         Session = new UserDbSession(_db, new FakeUserContext(userId));
         Accounts = new AccountStore(Session, NullLogger<AccountStore>.Instance);
         Categories = new CategoryStore(Session, NullLogger<CategoryStore>.Instance);
+        Transactions = new TransactionStore(Session, NullLogger<TransactionStore>.Instance);
     }
+
+    public ITransactionStore Transactions { get; }
 
     public Guid UserId { get; }
 
