@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "test": "vitest run",
     "typecheck": "tsc -b --noEmit",
     "check:password": "node scripts/password-parity.ts",
     "preview:emails": "node scripts/preview-emails.ts"
@@ -43,6 +44,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.1",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
   }
 }
