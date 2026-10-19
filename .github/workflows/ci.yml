@@ -1,0 +1,56 @@
+name: CI
+
+# Spec 007 (A0.1): o que o CLAUDE.md pede antes de dizer "pronto", rodando sozinho em todo PR.
+# Sem segredos (RN8): os testes de integração com o banco são PULADOS aqui, porque não há
+# ConnectionStrings__Velos. Eles rodam na máquina de quem tem o user-secrets.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Compilar
+        run: dotnet build api --configuration Release
+      - name: Testar
+        run: dotnet test api --configuration Release --no-build
+
+  web:
+    name: Front (React + Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Testes
+        run: npm run test
+      - name: Regra de senha igual no front e na API
+        run: npm run check:password
+      - name: Build
+        run: npm run build
