@@ -79,3 +79,6 @@ app.Map("/api/{**path}", () => Results.NotFound());
 app.MapFallbackToFile("index.html").AllowAnonymous();
 
 app.Run();
+
+// Expõe o Program para o WebApplicationFactory dos testes de endpoint (Velos.Api.Tests).
+public partial class Program;
