@@ -6,6 +6,14 @@
   "scripts": {
     "preview": "remotion studio",
     "render": "remotion render Lancamento ../velos-wallet-lancamento.mp4 --codec=h264 --crf=16 --pixel-format=yuv420p",
+    "render:reels": "remotion render Reels ../velos-wallet-reels.mp4 --codec=h264 --crf=17 --pixel-format=yuv420p --audio-codec=aac --audio-bitrate=192k",
+    "trilha": "node scripts/gerar-trilha.mjs",
+    "locucao": "node scripts/gerar-locucao.mjs --motor windows --velocidade 2",
+    "locucao:ia": "node scripts/gerar-locucao.mjs --motor kokoro",
+    "locucao:minha": "node scripts/gerar-locucao.mjs --motor gravacao",
+    "locucao:vs": "node scripts/gerar-locucao.mjs --motor voicestudio --engine confucius4-tts",
+    "locucao:11labs": "node scripts/gerar-locucao.mjs --motor elevenlabs",
+    "audio": "npm run trilha && npm run locucao",
     "still": "remotion still Lancamento"
   },
   "dependencies": {
