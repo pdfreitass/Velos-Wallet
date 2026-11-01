@@ -80,6 +80,19 @@ export const router = createBrowserRouter([
                 path: "/categorias/:id",
                 lazy: () => import("@/pages/CategoryFormPage").then((m) => ({ Component: m.EditCategoryPage })),
               },
+              { path: "/metas", lazy: () => import("@/pages/GoalsPage").then((m) => ({ Component: m.GoalsPage })) },
+              {
+                path: "/metas/nova",
+                lazy: () => import("@/pages/GoalFormPage").then((m) => ({ Component: m.NewGoalPage })),
+              },
+              {
+                path: "/metas/:id",
+                lazy: () => import("@/pages/GoalDetailPage").then((m) => ({ Component: m.GoalDetailPage })),
+              },
+              {
+                path: "/metas/:id/editar",
+                lazy: () => import("@/pages/GoalFormPage").then((m) => ({ Component: m.EditGoalPage })),
+              },
               {
                 path: "/transacoes",
                 lazy: () => import("@/pages/TransactionsPage").then((m) => ({ Component: m.TransactionsPage })),

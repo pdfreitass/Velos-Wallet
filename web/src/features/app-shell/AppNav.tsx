@@ -1,4 +1,4 @@
-import { ArrowLeftRight, House, Plus, Tags, Wallet, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, House, Plus, Tags, Target, Wallet, type LucideIcon } from "lucide-react";
 import { Link, NavLink } from "react-router";
 import { cn } from "cn";
 
@@ -7,12 +7,20 @@ import { ROUTES } from "@/lib/auth/routes";
 
 type NavItem = { to: string; label: string; Icon: LucideIcon; end?: boolean };
 
-const NAV_ITEMS: readonly NavItem[] = [
-  { to: ROUTES.home, label: "Início", Icon: House, end: true },
-  { to: ROUTES.transactions, label: "Transações", Icon: ArrowLeftRight },
-  { to: ROUTES.accounts, label: "Contas", Icon: Wallet },
-  { to: ROUTES.categories, label: "Categorias", Icon: Tags },
-];
+/**
+ * Menu do desktop, na ordem em que aparece. No celular a barra tem 5 espaços (quatro itens e o
+ * "+"), então **Categorias fica só aqui** (P1 da spec 006): no celular, chega-se a ela pelo link
+ * "Gerenciar categorias" na tela de Contas.
+ */
+const NAV_ITEMS = {
+  home: { to: ROUTES.home, label: "Início", Icon: House, end: true },
+  transactions: { to: ROUTES.transactions, label: "Transações", Icon: ArrowLeftRight },
+  accounts: { to: ROUTES.accounts, label: "Contas", Icon: Wallet },
+  goals: { to: ROUTES.goals, label: "Metas", Icon: Target },
+  categories: { to: ROUTES.categories, label: "Categorias", Icon: Tags },
+} satisfies Record<string, NavItem>;
+
+const SIDE_NAV_ITEMS: readonly NavItem[] = Object.values(NAV_ITEMS);
 
 const focusRing = "outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
 
@@ -24,7 +32,7 @@ const bottomLinkClass = `relative flex min-h-14 flex-col items-center justify-ce
  * a cor do texto, um traço acima do ícone e o ícone mais grosso (nunca só a cor).
  */
 export function BottomNav() {
-  const [home, transactions, accounts, categories] = NAV_ITEMS;
+  const { home, transactions, accounts, goals } = NAV_ITEMS;
   return (
     <nav
       aria-label="Navegação principal"
@@ -46,7 +54,7 @@ export function BottomNav() {
           </Link>
         </li>
         <BottomLink item={accounts} />
-        <BottomLink item={categories} />
+        <BottomLink item={goals} />
       </ul>
     </nav>
   );
@@ -76,7 +84,7 @@ export function SideNavLinks() {
       </Link>
       <nav aria-label="Navegação principal">
         <ul className="flex flex-col gap-1">
-          {NAV_ITEMS.map(({ to, label, Icon, end }) => (
+          {SIDE_NAV_ITEMS.map(({ to, label, Icon, end }) => (
             <li key={to}>
               <NavLink
                 to={to}

@@ -11,13 +11,13 @@
   - Verificação: testes da Application (CA6, 404 para meta de outro, prazo vencido mantido na edição)
 - [x] **T4** — Infrastructure + Api: `GoalStore`, `GoalsController`, registro na DI
   - Verificação: testes de integração (soma, contagem, ordem RN8, `updated_at` do aporte, IDOR, aporte não muda saldo); `dotnet build` sem aviso
-- [ ] **T5** — Front: tipos, hooks (`["goals"]`), Zod, `GoalProgress`, lista `/metas`, formulário de meta
+- [x] **T5** — Front: tipos, hooks (`["goals"]`), Zod, `GoalProgress`, lista `/metas`, formulário de meta
   - Verificação: CA1, CA6 no Playwright com a API simulada; estados; 375 e 1440 px; dois temas
-- [ ] **T6** — Front: detalhe `/metas/:id`, aportes (diálogo, editar, excluir), excluir meta
+- [x] **T6** — Front: detalhe `/metas/:id`, aportes (diálogo, editar, excluir), excluir meta
   - Verificação: CA2–CA5 no Playwright
-- [ ] **T7** — Front: navegação (P1: Metas no lugar de Categorias no celular, link "Gerenciar categorias" em Contas) e `GoalsHomeBlock` no `PanelPage` (relendo depois do commit da 2c)
+- [x] **T7** — Front: navegação (P1: Metas no lugar de Categorias no celular, link "Gerenciar categorias" em Contas) e `GoalsHomeBlock` no `PanelPage` (relendo depois do commit da 2c)
   - Verificação: CA8; navegação nos dois tamanhos
-- [ ] **T8** — Revisões `security` e `qa`; build, testes, typecheck, lint e build do `web`
+- [x] **T8** — Revisões `security` e `qa`; build, testes, typecheck, lint e build do `web`
 - [ ] **T9** — Resumo para a 2c atualizar ROADMAP, CHANGELOG, LICOES e ARQUITETURA
 
 ## Registro
@@ -28,4 +28,6 @@
 | T1 | c504e5e | SQL aprovado pela 2c; **aplicada no banco em 2026-10-18** com o OK do Pedro |
 | T2 | bd26057 | Aprovado pela 2c; Domain 138/138 |
 | T3 | 5a26efb | Aprovado pela f2; Application 171/171 |
-| T4 | (este) | GoalStore + GoalsController + DI; 4 testes de integração novos (progresso somado no banco, ordem da RN8, editar/excluir inexistente, outro usuário não lê nem altera); integração 28/28 |
+| T4 | 48c1430 | GoalStore + GoalsController + DI; 4 testes de integração novos (progresso somado no banco, ordem da RN8, editar/excluir inexistente, outro usuário não lê nem altera); integração 28/28 |
+| T8 | (este) | `security` **APROVADO** (sem crítico nem alto; CA-seg coberto). `qa` pronto com ressalvas: corrigidos o 100% da barra com a meta em andamento, o contraste do hover do botão destrutivo (4,22 escuro / 3,63 claro → 6,40 / 5,57), o hover do cartão de meta (income caía para 4,27:1 no claro → hover passou a acender a borda), `text-expense` no "Prazo encerrado" (cor de dinheiro → `text-destructive`), alvo de 44 px no "Ver todas", rótulo do skeleton do detalhe, `min` do calendário na edição, Esc/fundo fechando o diálogo durante o salvamento, `max-h` no `DialogContent`, contagem redundante de aportes e recarga em 404 de mutação. Ficou de fora: `localStorage` de "última conta" sobrevive ao logout (pré-existente, fora da spec — vai para pendências técnicas) |
+| T5–T7 | (este) | Front completo numa sessão só (back + front): `features/goals/` (tipos, hooks `["goals"]`, `GoalProgress`, `deadline-note`, cartão, lista, formulário, detalhe, aportes, excluir, bloco do Início), Zod em `lib/validations/goals.ts`, 4 rotas em `lazy()`, `components/ui/dialog.tsx` (Base UI Dialog, sem dependência nova), P1 da navegação e "Gerenciar categorias" em Contas. typecheck, lint e build do `web` verdes |

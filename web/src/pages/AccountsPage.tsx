@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus, Tags } from "lucide-react";
 import { Link } from "react-router";
 import { cn } from "cn";
 
@@ -20,6 +20,21 @@ export function AccountsPage() {
         </Link>
       </div>
       <AccountList />
+
+      {/*
+        P1 da spec 006: Categorias saiu da barra do celular para dar lugar a Metas, então é por
+        aqui que se chega a ela. No desktop o menu lateral já tem o item.
+      */}
+      <Link
+        to={ROUTES.categories}
+        className="mt-6 flex min-h-14 items-center gap-3 rounded-xl border border-border bg-card px-4 text-card-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 lg:hidden"
+      >
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+          <Tags className="size-5" aria-hidden="true" />
+        </span>
+        <span className="flex-1 font-medium">Gerenciar categorias</span>
+        <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </Link>
     </div>
   );
 }

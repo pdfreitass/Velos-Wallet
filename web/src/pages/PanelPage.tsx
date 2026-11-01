@@ -9,6 +9,7 @@ import { useDashboard, type Dashboard } from "@/features/dashboard/api";
 import { BalanceCards } from "@/features/dashboard/BalanceCards";
 import { CategorySpending } from "@/features/dashboard/CategorySpending";
 import { DashboardSkeleton, FirstSteps } from "@/features/dashboard/DashboardStates";
+import { GoalsHomeBlock } from "@/features/goals/GoalsHomeBlock";
 import { MonthSummary } from "@/features/dashboard/MonthSummary";
 import { MonthSwitcher } from "@/features/transactions/MonthSwitcher";
 import { MONTH_PARAM } from "@/features/transactions/types";
@@ -78,7 +79,11 @@ type DashboardContentProps = {
 function DashboardContent({ data, month, isStale, onMonthChange }: DashboardContentProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-      <BalanceCards data={data} />
+      <div className="space-y-6">
+        <BalanceCards data={data} />
+        {/* RN9 da spec 006: as metas ficam junto dos saldos, no que é "hoje" (o mês fica à direita). */}
+        <GoalsHomeBlock />
+      </div>
       <div className={cn("space-y-3 transition-opacity", isStale && "opacity-60")} aria-busy={isStale}>
         <MonthSwitcher month={month} onChange={onMonthChange} />
         <MonthSummary data={data} />
