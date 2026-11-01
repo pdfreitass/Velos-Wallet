@@ -6,6 +6,7 @@
     <Project Path="src/Velos.Infrastructure/Velos.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Velos.Api.Tests/Velos.Api.Tests.csproj" />
     <Project Path="tests/Velos.Application.Tests/Velos.Application.Tests.csproj" />
     <Project Path="tests/Velos.Domain.Tests/Velos.Domain.Tests.csproj" />
     <Project Path="tests/Velos.Infrastructure.IntegrationTests/Velos.Infrastructure.IntegrationTests.csproj" />
