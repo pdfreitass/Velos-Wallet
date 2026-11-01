@@ -16,8 +16,12 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+        // Confirmar uma exclusão: cor sólida, como as outras ações principais. O fundo tingido
+        // anterior (destructive/10 e /20) deixava o texto em 3.53:1 no escuro, abaixo dos 4.5:1.
+        // O hover mistura com o foreground (padrão do secondary) em vez de reduzir a opacidade:
+        // com /80 o fundo clareia na direção do cartão e o contraste caía para 4.22:1.
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+          "bg-destructive text-destructive-foreground hover:bg-[color-mix(in_oklch,var(--destructive),var(--foreground)_12%)] focus-visible:border-destructive focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

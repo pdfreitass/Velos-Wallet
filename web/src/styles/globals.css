@@ -39,6 +39,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -91,6 +92,7 @@
   --accent: #2ED38C;                  /* verde vivo: so como acento */
   --accent-foreground: #0A2E24;       /* 7.57:1 sobre o accent */
   --destructive: #C1393E;             /* 4.68:1 sobre o fundo */
+  --destructive-foreground: #F4F7F2;  /* 4.95:1 sobre o destructive; 5.57:1 no hover do botao */
   --border: #CDD6CF;                  /* divisores decorativos (sem exigência de contraste) */
   /* Borda de campo identifica o controle: WCAG 1.4.11 pede >= 3:1.
      O #D3DBD5 anterior dava 1.31:1 (medido na spec 001, T16). */
@@ -157,6 +159,7 @@
   --accent: #2ED38C;
   --accent-foreground: #0A2E24;
   --destructive: #F08084;             /* 5.69:1 sobre o fundo, 4.68:1 sobre o card (antes #E96368) */
+  --destructive-foreground: #0A2E24;  /* 5.69:1 sobre o destructive; 6.40:1 no hover do botao */
   --border: #345249;
   --input: #718F85;                   /* 4.18:1 sobre o fundo, 3.44:1 sobre o card (antes #5C7A70, 2.58:1 no card) */
   --ring: #2ED38C;                    /* 7.57:1 sobre o fundo */
