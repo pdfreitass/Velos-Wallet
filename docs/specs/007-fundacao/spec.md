@@ -3,10 +3,28 @@
 > **O QUE** fazer e **como saber que está pronto.** O **como** vai no `plan.md`, depois da aprovação desta spec.
 
 - **Etapa do roadmap:** Fase 0 da [auditoria de 2026-10-19](../../audit/08-implementation-roadmap.md) (tarefas A0.2, A0.1, A0.3, A0.4). Vem **antes** da Etapa 4.
-- **Status:** **Rascunho** (aguardando aprovação do Pedro)
+- **Status:** **Rascunho, e em parte ultrapassado** — ver "Estado em 2026-11-01" abaixo antes de executar qualquer coisa daqui
 - **Data:** 2026-10-19
 - **Numeração:** 007 (era 004). Os comentários das migrations 0009–0013 já aplicadas no banco usam 002 (contas), 004 (transações), 005 (dashboard) e 006 (metas); 007 evita a colisão.
 - **Decisões já tomadas pelo Pedro (2026-10-19):** D1 fazer a Fase 0 antes da Etapa 4 · D2 arquivar conta e bloquear exclusão com movimentos · D3 bloquear data futura no MVP (regra da Etapa 5; aqui só preparamos o banco) · D5 liberadas as bibliotecas **Vitest** e **Microsoft.AspNetCore.Mvc.Testing**.
+
+## Estado em 2026-11-01
+
+Esta spec foi escrita em 19/10 para rodar **antes da Etapa 4**. Isso não aconteceu: as Etapas 4, 5, 6 e 7 foram entregues em paralelo, e parte do que está aqui já chegou por outro caminho — enquanto outra parte agora colide com o que foi feito. Conferido contra o banco real em 2026-11-01:
+
+| Item desta spec | Estado |
+|---|---|
+| **FI-01** — recusar exclusão de conta com movimentos | ❌ **Conflita com o [ADR 0017](../../adr/0017-excluir-conta-apaga-movimentacoes.md)**, que decidiu o contrário e é o que o código faz. As duas FKs seguem `on delete cascade`. Decisão do Pedro |
+| **Arquivar** (`archived_at` em `accounts` e `categories`) | ❌ Não existe no banco. Mesma decisão do item acima |
+| **FI-02** — `on delete set null (category_id)` | ✅ Feito na migration `0010` |
+| **T1** — `updated_at` + trigger em `goal_contributions` | ✅ Feito na migration `0013` (spec 006) |
+| **FI-04** — tirar o `default current_date` de `goal_contributions.date` | ❌ Em aberto: o default continua lá. A API sempre envia a data, então não machuca hoje |
+| **FI-07** — teto de valor por CHECK no banco | ⚠️ Parcial: existe `> 0` em transações, metas e aportes, mas **não** o teto de R$ 999.999.999,99, que está só no validator da API |
+| **CI em todo PR** | ✅ Feito (`f176683`) |
+| **Vitest + testes de dinheiro e data** | ✅ Feito (`8b457b0`), 42 testes |
+| **Testes de endpoint da API** | ✅ Feito (`9b2d1df`), 9 testes |
+
+**A migration `0009` que esta spec pede não existe mais como número livre:** a `0009_contas_e_categorias.sql` foi aplicada em 17/10, e o banco já está na `0013`. O que sobrar daqui precisa de um arquivo novo, da `0014` em diante.
 
 ## Problema
 

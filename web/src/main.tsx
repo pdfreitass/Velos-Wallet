@@ -20,7 +20,7 @@ createRoot(root).render(
   </StrictMode>,
 );
 
-// PWA instalável (spec 007): o service worker só existe no build de produção, para não interferir
+// PWA instalável (spec 009): o service worker só existe no build de produção, para não interferir
 // no HMR do Vite. Sem ele o app funciona igual; a falha fica só no console, sem aviso na tela.
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {

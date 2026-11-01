@@ -1,8 +1,21 @@
 # ADR 0017 — Excluir conta apaga as movimentações (sem arquivar)
 
-- **Status:** Aceita
+- **Status:** Aceita — **contestada, aguardando decisão do Pedro** (ver "Conflito aberto")
 - **Data:** 2026-10-17
 - **Etapa:** 4 — Contas e categorias ([spec 002](../specs/002-contas-e-categorias/spec.md), P2 e RN6)
+
+## Conflito aberto (anotado em 2026-11-01)
+
+A [spec 007 — Fundação](../specs/007-fundacao/spec.md), escrita em 2026-10-19 a partir da auditoria, registra a decisão **D2: "arquivar conta e bloquear exclusão com movimentos"**, e a sua RN1 diz que uma conta com qualquer transação **não pode ser excluída, só arquivada**. Isso é o oposto desta ADR, e as duas falam do mesmo dia-seguinte.
+
+As duas linhas de trabalho seguiram em paralelo e nenhuma sabia da outra:
+
+- **O que está no ar hoje** é esta ADR: as duas FKs de `transactions` para `accounts` continuam `on delete cascade`, e a tela de excluir conta (Etapa 4) mostra o aviso detalhado da RN6. Confirmado no banco em 2026-11-01.
+- **O que a spec 007 pediria** é recusar a exclusão no banco e acrescentar `archived_at` a `accounts` e `categories`. Nenhuma das duas coisas existe no banco hoje.
+
+Decidir qual vale é do Pedro, e é decisão de produto, não técnica. Enquanto não for decidida, **esta ADR é o que o código faz**.
+
+Se a D2 vencer, o custo não é só a migration: a tela de exclusão, o `deletion-impact` e o diálogo da RN6 saem, e entra o arquivamento inteiro (esconder das listas, decidir se entra no saldo total, "desarquivar") — que é justamente o que a seção "Alternativas consideradas" abaixo descartou por ser funcionalidade inteira, fora do MVP.
 
 ## Contexto
 
@@ -44,6 +57,7 @@ Com movimentações, o botão diz o que faz ("Excluir conta e 12 movimentações
 
 ## Quando revisitar
 
+- **Agora**: a D2 da [spec 007 — Fundação](../specs/007-fundacao/spec.md) decide o contrário (ver "Conflito aberto" no topo).
 - Se aparecerem pedidos de "desfazer" ou de recuperar uma conta excluída nos testes com usuários.
 - Antes de importar extratos (OFX/CSV), quando apagar uma conta passaria a destruir muitos dados de uma vez.
 - Se entrarem relatórios de anos anteriores, em que contas encerradas precisam continuar aparecendo.

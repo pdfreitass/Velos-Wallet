@@ -1,4 +1,4 @@
-# Plano — Spec 007: PWA instalável
+# Plano — Spec 009: PWA instalável
 
 > **COMO** fazer a [spec.md](spec.md). Sem biblioteca nova, sem migration, sem endpoint novo.
 

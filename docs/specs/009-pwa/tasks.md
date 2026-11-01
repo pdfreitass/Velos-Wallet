@@ -1,4 +1,4 @@
-# Tasks — Spec 007: PWA instalável
+# Tasks — Spec 009: PWA instalável
 
 > Passos pequenos e verificáveis, a partir do [plan.md](plan.md). Só marcar `[x]` depois de verificar.
 

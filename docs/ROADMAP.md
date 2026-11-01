@@ -52,7 +52,7 @@
 
 **Etapa 7 — Metas** ([spec 006](specs/006-metas/tasks.md)): **pronta no código** (T1–T8; `0013` aplicada; revisões `security` aprovada e `qa` com as ressalvas corrigidas; CA1–CA8 conferidos no navegador com login real, nos dois temas, em 375 e 1440 px). Falta: a PR.
 
-**Etapa 8 — PWA** ([spec 007](specs/007-pwa/tasks.md)): T1–T5 feitas (ícones, manifest, `index.html`, service worker, instalável confirmado pelo Pedro). Faltam: o teste offline (CA6), aparelhos reais (T6), as revisões (T7) e a documentação (T8).
+**Etapa 8 — PWA** ([spec 009](specs/009-pwa/tasks.md)): T1–T5 feitas (ícones, manifest, `index.html`, service worker, instalável confirmado pelo Pedro). Faltam: o teste offline (CA6), aparelhos reais (T6), as revisões (T7) e a documentação (T8).
 
 **Etapa 4 — Contas e categorias** ([spec 002](specs/002-contas-e-categorias/tasks.md)): **pronta no código** (T1–T13, T15–T17). Faltam: **T14** (critérios de aceite com login real, IDOR com duas contas, CA6b/CA10 com movimentações por SQL e os testes de integração) e **T18** (PR para a `main`).
 
@@ -67,7 +67,13 @@
 | ~~5 — Transações~~ | ✅ no código; falta T10 e PR (ver acima) | 4 |
 | ~~6 — Dashboard~~ | ✅ pronta (barras sem Recharts, [ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)); CA1–CA7 conferidos; falta a PR | 5 |
 | ~~7 — Metas~~ | ✅ no código ([spec 006](specs/006-metas/spec.md)); falta a PR | 3 |
-| **8 — PWA** | 🟡 em andamento ([spec 007](specs/007-pwa/spec.md)) | 6 |
+| **8 — PWA** | 🟡 em andamento ([spec 009](specs/009-pwa/spec.md)) | 6 |
+
+### ⚠️ Decisão pendente: excluir conta ou arquivar?
+
+A [spec 007 — Fundação](specs/007-fundacao/spec.md), escrita em 19/10 a partir da [auditoria](audit/08-implementation-roadmap.md), registra a decisão **D2: arquivar conta e bloquear exclusão com movimentos**. Isso é o oposto do [ADR 0017](adr/0017-excluir-conta-apaga-movimentacoes.md), que é o que o código da Etapa 4 faz hoje (excluir apaga as movimentações, com aviso detalhado).
+
+As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pedro decide qual vale.** Até lá, o ADR 0017 é o que está no ar. O resto da spec 007 — Fundação já foi entregue por outros caminhos ou virou as pendências T15 e T16; o estado item a item está no topo daquela spec.
 
 **Antes do deploy em produção** (sem etapa própria ainda — **A DEFINIR** quando entra):
 - Escolher o host do app (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md); HTTPS/HSTS e connection string como variável de ambiente
@@ -76,7 +82,7 @@
 - Variáveis do host: `App__PublicOrigin=https://<domínio>`, `AllowedHosts=<domínio>`, `ConnectionStrings__Velos` com **`SSL Mode=VerifyFull`** e o certificado do Supabase (hoje `Require`, que cifra mas não valida o servidor)
 - `ForwardedHeaders` restrito ao proxy do host (`KnownProxies`/`KnownNetworks`), para o limite por IP ver o IP do cliente
 - Chaves do Data Protection persistidas (volume ou key vault): sem isso, reiniciar a API invalida os links de recuperação e o login com Google em andamento
-- Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`, e `worker-src 'self'` + `manifest-src 'self'` por causa do PWA da spec 007); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
+- Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`, e `worker-src 'self'` + `manifest-src 'self'` por causa do PWA da spec 009); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
 - Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}` (hoje monta `token_hash`, e o `/auth/confirm` só aceita `?code=` do PKCE) — junto com o C3
 
 ## Pendências técnicas
@@ -97,5 +103,7 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | ~~T10~~ | ~~Vermelho de despesa sobre o card escuro dava 3,71:1~~ | ✅ resolvida na T8 da spec 002 (`#F08084`: 4,68:1 no card; contrastes do card anotados em `globals.css`) | — |
 | ~~T11~~ | ✅ resolvida nas migrations `0009`/`0010` da spec 002. ~~FK `(category_id, user_id) on delete set null` da `0001` tentaria anular também o `user_id` (que é `not null`): apagar categoria com transações falha. Corrigir com `on delete set null (category_id)`~~ | migration nova | — |
 | T13 | `velos:last-account` e `velos:last-category:*` ficam no `localStorage` depois do "Sair" (o `useSignOut` faz `queryClient.clear()`, que não limpa o storage): num aparelho compartilhado o formulário do próximo usuário vem pré-preenchido com ids do anterior. Só GUIDs, sem dado financeiro, e a API rejeita — mas revela que existiu outra conta ali. Achado da revisão `security` da spec 006 | `web/src/lib/utils/last-used.ts`, `web/src/features/auth/api.ts` | `chore` ou quando mexer no logout |
+| T16 | **FI-07 da auditoria:** o teto de R$ 999.999.999,99 existe só no validator da API; o banco tem `> 0` mas não o limite superior | migration nova (0014+) | `chore` |
+| T15 | **FI-04 da auditoria:** `goal_contributions.date` ainda tem `default current_date` (que roda em UTC). A API sempre envia a data, então não machuca hoje | migration nova (0014+) | `chore` |
 | T14 | Saldo total **negativo** aparece no cartão de verde vivo (tema escuro) com o sinal "−", mas o verde ainda lê como "positivo" num relance. O DESIGN.md diz que verde vivo é *dinheiro*, não *positivo*, então não é violação — é uma escolha a confirmar. Visto ao conferir o CA2 da spec 005 | `web/src/features/dashboard/BalanceCards.tsx` | **A DEFINIR** pelo Pedro |
 | T12 | Detalhes da revisão `qa`: texto "10 minutos"/"5 senhas" fixo no front (`SignInForm`, `LockedNotice`) em vez de vir da API; checklist de senha marca ✕ em momentos diferentes no cadastro e na redefinição; `SignInForm.tsx` (157) e `SupabaseAuthClient.cs` (179) acima de ~150 linhas; `result.Error!` repetido; comentários sem acento | `web/src/features/auth/`, `api/` | `chore` ou quando mexer nos arquivos |

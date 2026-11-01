@@ -1,10 +1,11 @@
-# Spec 007 — PWA instalável
+# Spec 009 — PWA instalável
 
 > **O QUE** fazer e **como saber que está pronto.** Detalhe técnico vai no `plan.md` (depois da aprovação).
 
 - **Etapa do roadmap:** Etapa 8 — PWA
 - **Status:** Aprovada (Pedro, 2026-10-18, P1–P5 conforme a proposta; P1 detalhada no plan.md)
 - **Data:** 2026-10-18
+- **Numeração:** 009 (era 007). A [spec 007 — Fundação](../007-fundacao/spec.md), escrita no mesmo dia em outra linha de trabalho, também pegou o 007 e chegou antes na `main` (PR #4). Esta foi renumerada em 2026-11-01 para desfazer a colisão; os commits anteriores do PWA citam "spec 007".
 - **Decisão de base:** [ADR 0010](../../adr/0010-pwa-antes-de-app-nativo.md) — PWA **apenas instalável**, sem offline-first
 
 ## Problema
