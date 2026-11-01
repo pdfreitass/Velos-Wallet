@@ -7,6 +7,22 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L34 — Hover com opacidade derruba o contraste que o estado normal tinha
+*2026-11-01 · spec 006, T8*
+
+- **O que aconteceu:** o botão de confirmar exclusão virou cor sólida e passou a medir 5,69:1, mas o hover era `bg-destructive/80`: a opacidade deixa o fundo do cartão aparecer por baixo, o fundo clareia e o contraste cai para 4,22:1 (escuro) e 3,63:1 (claro).
+- **Por que:** medir só o estado de repouso. Um fundo com alfa não é uma cor: depende da superfície atrás dele, que muda entre cartão, popover e página.
+- **Como evitar:** ao mexer num componente de `ui/`, medir **repouso e hover**, nos dois temas. Para escurecer/clarear sem perder contraste, usar `color-mix(in oklch, <cor>, var(--foreground) N%)`, que o `secondary` já usava, em vez de reduzir a opacidade.
+- **Regra em:** `web/src/components/ui/button.tsx` (variante `destructive`) e os contrastes anotados em `web/src/styles/globals.css`.
+
+## L33 — Porcentagem arredondada mente nos extremos
+*2026-11-01 · spec 006, T8*
+
+- **O que aconteceu:** `Math.round(current / target * 100)` mostrava a barra cheia e "100%" ao lado de "Faltam R$ 10,00", e "0%" com barra vazia depois do primeiro aporte pequeno.
+- **Por que:** o arredondamento alcança os extremos antes do estado real: 99,5% vira 100 e 0,4% vira 0.
+- **Como evitar:** em barra de progresso, os extremos vêm do **estado** (atingida = 100, nada guardado = 0) e o arredondamento fica preso entre 1 e 99.
+- **Regra em:** `web/src/features/goals/GoalProgress.tsx` (`progressPercent`).
+
 ## L32 — Testes de integração em paralelo misturavam os totais do mesmo usuário
 *2026-10-18 · spec 005, T4*
 

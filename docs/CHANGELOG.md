@@ -6,6 +6,26 @@
 
 ## [Não lançado]
 
+### 2026-11-01 — Etapa 7: metas (spec 006)
+#### Adicionado
+- Telas das metas: `/metas` (lista em andamento e atingidas, na ordem da RN8), `/metas/nova`, `/metas/:id` (progresso, ritmo e aportes) e `/metas/:id/editar`, todas em `lazy()`.
+- Aportes: registrar, corrigir e excluir num diálogo, com hoje como data padrão. O aporte **não** altera nenhum saldo nem o resumo do mês (RN3), por isso as mutações invalidam só `["goals"]`.
+- `GoalProgress`: barra do domínio **atingir** do DESIGN.md (`muted` em zero, `primary` em andamento, `income` ao atingir — a cor nunca vem da porcentagem), com `X de Y` e o texto de estado em texto; a barra é `aria-hidden`.
+- Ritmo mensal da RN6 ("Guarde R$ X por mês até <mês/ano>") e "Prazo encerrado em <data>" quando o prazo passou.
+- Bloco "Metas" no Início: até 3 metas em andamento, convite quando não há nenhuma e "Todas as suas metas foram atingidas" quando só restam atingidas. Usa a mesma query da lista, então aportar atualiza os dois.
+- Excluir meta diz quantos aportes somem e quanto somam (RN7).
+- `components/ui/dialog.tsx` sobre o `@base-ui/react` já instalado (sem dependência nova): o `alert-dialog` é para confirmação, e um formulário dentro dele daria `role="alertdialog"`.
+- P1 da spec: **Metas entra no lugar de Categorias** na barra do celular; Contas ganha o atalho "Gerenciar categorias" e o desktop mantém os cinco itens no menu lateral.
+#### Corrigido
+- Revisão `qa`: a barra mostrava 100% com a meta ainda em andamento (R$ 7.990 de R$ 8.000 arredondava para 100) e 0% com um primeiro aporte pequeno — os extremos passam a vir do estado, não do arredondamento; "Prazo encerrado" deixou de usar `text-expense`, que é cor de dinheiro; alvo de 44 px no "Ver todas"; Esc e o clique no fundo não fecham mais o diálogo com o aporte sendo salvo; `max-h` no diálogo para 375×667 com o teclado aberto.
+- 404 numa mutação (meta excluída em outra aba) recarrega a lista, em vez de deixar o cache antigo atrás do diálogo.
+#### Segurança
+- Revisão `security`: aprovada, sem achados críticos ou altos. O front só fala com a API, ids com `encodeURIComponent`, 404 igual para meta inexistente, de outra pessoa ou id inválido (CA-seg).
+
+### 2026-11-01 — Contraste do botão de confirmar exclusão
+#### Corrigido
+- A variante `destructive` usava fundo tingido com o texto na mesma cor: 3,53:1 sobre o cartão do diálogo, abaixo dos 4,5:1 da regra. Passa a ser cor sólida com `--destructive-foreground` novo (5,69:1 no escuro, 4,95:1 no claro; 6,40 e 5,57 no hover). Vale para excluir conta, categoria, transação, meta e aporte.
+
 ### 2026-10-18 — Etapa 6: dashboard (spec 005)
 #### Adicionado
 - `GET /api/dashboard?month=yyyy-MM`: saldo total sem o cartão, dívida do cartão, receitas × despesas do mês e gastos por categoria, tudo somado no banco (ADR 0006).

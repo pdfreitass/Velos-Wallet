@@ -18,7 +18,7 @@
 - [x] **T7** — Front: navegação (P1: Metas no lugar de Categorias no celular, link "Gerenciar categorias" em Contas) e `GoalsHomeBlock` no `PanelPage` (relendo depois do commit da 2c)
   - Verificação: CA8; navegação nos dois tamanhos
 - [x] **T8** — Revisões `security` e `qa`; build, testes, typecheck, lint e build do `web`
-- [ ] **T9** — Resumo para a 2c atualizar ROADMAP, CHANGELOG, LICOES e ARQUITETURA
+- [x] **T9** — ROADMAP, CHANGELOG e LICOES atualizados (L33 e L34); pendência técnica T13 registrada
 
 ## Registro
 

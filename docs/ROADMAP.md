@@ -3,7 +3,7 @@
 > Leia no **início de cada sessão** para saber onde paramos.
 > Atualize **ao terminar cada feature** (junto com [CHANGELOG.md](CHANGELOG.md) e [LICOES.md](LICOES.md)).
 
-**Progresso do MVP: 3 de 8 etapas fechadas (38%); Etapas 4, 5 e 6 prontas no código; 7 (Metas) e 8 (PWA) em andamento** — atualizado em 2026-10-18.
+**Progresso do MVP: 3 de 8 etapas fechadas (38%); Etapas 4, 5, 6 e 7 prontas no código; 8 (PWA) quase lá** — atualizado em 2026-11-01.
 
 > **Numeração:** são 8 etapas, a mesma que os comentários do código já usam ("Etapa 2" = banco, "Etapa 3" = autenticação, "Etapa 6" = dashboard). A identidade visual faz parte da Etapa 1. O checklist antigo do `CLAUDE.md` tinha 9 itens porque contava a identidade visual à parte.
 
@@ -50,9 +50,9 @@
 
 **Etapa 6 — Dashboard** ([spec 005](specs/005-dashboard/tasks.md)): **pronta no código** (T1–T5; `0012` aplicada; revisões aprovadas; 289 testes passando). Falta: CA1–CA7 no navegador com login real e a PR.
 
-**Etapa 7 — Metas** ([spec 006](specs/006-metas/tasks.md)): spec e plano aprovados; `0013` escrita (aplicar com o Pedro); Domain pronto. Em execução pela sessão d2, cada task revisada pela 2c.
+**Etapa 7 — Metas** ([spec 006](specs/006-metas/tasks.md)): **pronta no código** (T1–T8; `0013` aplicada; revisões `security` aprovada e `qa` com as ressalvas corrigidas; CA1–CA8 conferidos no navegador com login real, nos dois temas, em 375 e 1440 px). Falta: a PR.
 
-**Etapa 8 — PWA** ([spec 007](specs/007-pwa/tasks.md)): spec e plano aprovados; ícones e manifest prontos. Em execução pela sessão 1c, cada task revisada pela 2c.
+**Etapa 8 — PWA** ([spec 007](specs/007-pwa/tasks.md)): T1–T5 feitas (ícones, manifest, `index.html`, service worker, instalável confirmado pelo Pedro). Faltam: o teste offline (CA6), aparelhos reais (T6), as revisões (T7) e a documentação (T8).
 
 **Etapa 4 — Contas e categorias** ([spec 002](specs/002-contas-e-categorias/tasks.md)): **pronta no código** (T1–T13, T15–T17). Faltam: **T14** (critérios de aceite com login real, IDOR com duas contas, CA6b/CA10 com movimentações por SQL e os testes de integração) e **T18** (PR para a `main`).
 
@@ -66,7 +66,7 @@
 | ~~4 — Contas e categorias~~ | ✅ no código; falta T14 e PR (ver acima) | 3 |
 | ~~5 — Transações~~ | ✅ no código; falta T10 e PR (ver acima) | 4 |
 | ~~6 — Dashboard~~ | ✅ no código (barras sem Recharts, [ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)); falta teste com login e PR | 5 |
-| **7 — Metas** | 🟡 em andamento ([spec 006](specs/006-metas/spec.md)) | 3 |
+| ~~7 — Metas~~ | ✅ no código ([spec 006](specs/006-metas/spec.md)); falta a PR | 3 |
 | **8 — PWA** | 🟡 em andamento ([spec 007](specs/007-pwa/spec.md)) | 6 |
 
 **Antes do deploy em produção** (sem etapa própria ainda — **A DEFINIR** quando entra):
@@ -85,7 +85,7 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 
 | # | Pendência | Onde | Quando |
 |---|---|---|---|
-| T1 | `goal_contributions` sem `updated_at` | resolvida na `0013` (spec 006), falta aplicar | Etapa 7 |
+| ~~T1~~ | ~~`goal_contributions` sem `updated_at`~~ | ✅ resolvida na `0013`, aplicada em 2026-10-18 | — |
 | ~~T2~~ | ~~`supabase/migrations/.gitkeep` gera o aviso "Skipping migration .gitkeep"~~ | ✅ arquivo removido na limpeza de 2026-10-15 | — |
 | ~~T3~~ | ~~Textos de UI sem acento~~ | ✅ resolvida na T10 da spec 001 (`web/index.html` e página provisória com acento) | — |
 | ~~T4~~ | ~~`hasSupabaseEnv()` do middleware~~ | ✅ obsoleta: o middleware do Next saiu na troca de stack (ADR 0013) | — |
@@ -96,4 +96,5 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | T9 | **CA7 da spec 001**: testar a recuperação de ponta a ponta (pedir o link, abrir, trocar a senha, entrar com ela, o link não funcionar de novo) com o email do Pedro | `/recuperar-senha` | quando o limite de email do Supabase permitir |
 | ~~T10~~ | ~~Vermelho de despesa sobre o card escuro dava 3,71:1~~ | ✅ resolvida na T8 da spec 002 (`#F08084`: 4,68:1 no card; contrastes do card anotados em `globals.css`) | — |
 | ~~T11~~ | ✅ resolvida nas migrations `0009`/`0010` da spec 002. ~~FK `(category_id, user_id) on delete set null` da `0001` tentaria anular também o `user_id` (que é `not null`): apagar categoria com transações falha. Corrigir com `on delete set null (category_id)`~~ | migration nova | — |
+| T13 | `velos:last-account` e `velos:last-category:*` ficam no `localStorage` depois do "Sair" (o `useSignOut` faz `queryClient.clear()`, que não limpa o storage): num aparelho compartilhado o formulário do próximo usuário vem pré-preenchido com ids do anterior. Só GUIDs, sem dado financeiro, e a API rejeita — mas revela que existiu outra conta ali. Achado da revisão `security` da spec 006 | `web/src/lib/utils/last-used.ts`, `web/src/features/auth/api.ts` | `chore` ou quando mexer no logout |
 | T12 | Detalhes da revisão `qa`: texto "10 minutos"/"5 senhas" fixo no front (`SignInForm`, `LockedNotice`) em vez de vir da API; checklist de senha marca ✕ em momentos diferentes no cadastro e na redefinição; `SignInForm.tsx` (157) e `SupabaseAuthClient.cs` (179) acima de ~150 linhas; `result.Error!` repetido; comentários sem acento | `web/src/features/auth/`, `api/` | `chore` ou quando mexer nos arquivos |
