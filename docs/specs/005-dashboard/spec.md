@@ -50,16 +50,16 @@ Todas em **375 px** e **1440 px**, temas **claro e escuro**. Textos em **portugu
 
 ## Critérios de aceite
 
-- [ ] **CA1** — Com Nubank (R$ 2.500,00), Reserva (R$ 10.000,00) e Cartão (dívida de R$ 640,90), o saldo total mostra **R$ 12.500,00** e a dívida do cartão **R$ 640,90**, em blocos separados.
-- [ ] **CA2** — Uma conta corrente no cheque especial reduz o saldo total (pode ficar negativo, com o sinal "−").
-- [ ] **CA3** — Com R$ 3.000,00 de receita e R$ 255,80 de despesa em outubro, o bloco do mês mostra **+R$ 3.000,00**, **−R$ 255,80** e o resultado **+R$ 2.744,20**. Uma transferência no mês não muda nenhum deles.
-- [ ] **CA4** — Os gastos por categoria listam só as despesas do mês, da maior para a menor, com valor e porcentagem; despesa "Sem categoria" aparece como tal.
-- [ ] **CA5** — ‹ › troca o mês do bloco do mês e dos gastos, e o endereço (`?mes=`); o saldo total e a dívida não mudam (são de hoje).
-- [ ] **CA6** — Sem nenhuma conta, o Início mostra os primeiros passos em vez de saldos zerados.
-- [ ] **CA7** — Lançar uma despesa e voltar ao Início mostra o saldo, o mês e os gastos já atualizados.
-- [ ] **CA-seg** — Os totais são só do usuário logado (RLS + filtro por `user_id`); revisão do agente `security` sem críticos ou altos.
-- [ ] **CA-a11y** — 375 px, dois temas; valores com sinal e ícone (nunca só a cor); as barras têm o valor e a porcentagem em texto; contraste ≥ 4,5:1.
-- [ ] **CA-build** — `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web` passam.
+- [x] **CA1** — Com Nubank (R$ 2.500,00), Reserva (R$ 10.000,00) e Cartão (dívida de R$ 640,90), o saldo total mostra **R$ 12.500,00** e a dívida do cartão **R$ 640,90**, em blocos separados.
+- [x] **CA2** — Uma conta corrente no cheque especial reduz o saldo total (pode ficar negativo, com o sinal "−").
+- [x] **CA3** — Com R$ 3.000,00 de receita e R$ 255,80 de despesa em outubro, o bloco do mês mostra **+R$ 3.000,00**, **−R$ 255,80** e o resultado **+R$ 2.744,20**. Uma transferência no mês não muda nenhum deles.
+- [x] **CA4** — Os gastos por categoria listam só as despesas do mês, da maior para a menor, com valor e porcentagem; despesa "Sem categoria" aparece como tal.
+- [x] **CA5** — ‹ › troca o mês do bloco do mês e dos gastos, e o endereço (`?mes=`); o saldo total e a dívida não mudam (são de hoje).
+- [x] **CA6** — Sem nenhuma conta, o Início mostra os primeiros passos em vez de saldos zerados.
+- [x] **CA7** — Lançar uma despesa e voltar ao Início mostra o saldo, o mês e os gastos já atualizados.
+- [x] **CA-seg** — Os totais são só do usuário logado (RLS + filtro por `user_id`); revisão do agente `security` sem críticos ou altos.
+- [x] **CA-a11y** — 375 px, dois temas; valores com sinal e ícone (nunca só a cor); as barras têm o valor e a porcentagem em texto; contraste ≥ 4,5:1.
+- [x] **CA-build** — `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web` passam.
 
 ## Perguntas em aberto
 

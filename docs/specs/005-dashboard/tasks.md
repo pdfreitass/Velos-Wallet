@@ -18,6 +18,7 @@
 | T0 | | Spec e plano aprovados por delegação do Pedro em 2026-10-17 |
 | T1 | 9704aae | `0012` aplicada pelo Pedro em 2026-10-18 |
 | T2 | ac31d53 | |
-| T3 | 6709f76 | CA no navegador com login real ainda a fazer |
+| T3 | 6709f76 | |
 | T4 | 5029685, b85cbc1 | `security` aprovada (2 baixos: teste soma = despesas; rate limit no dashboard); `qa` com 3 correções; testes de integração em sequência; 117 + 148 + 24 testes |
 | T5 | (este commit) | ROADMAP, CHANGELOG, LICOES (L31, L32) e ARQUITETURA |
+| T6 | (este) | **CA1–CA7 conferidos no navegador com login real em 2026-11-01**, numa conta de teste no localhost: CA1 Nubank R$ 2.500 + Reserva R$ 10.000 + Cartão R$ 640,90 → saldo R$ 12.500,00 e dívida em blocos separados; CA2 cheque especial baixou o total para R$ 7.500,00 e, levado a -R$ 10.500, para -R$ 500,00 com o sinal "−"; CA3 R$ 3.000,00 de receita e R$ 255,80 de despesa → +R$ 3.000,00 / -R$ 255,80 / +R$ 2.744,20, e a transferência de R$ 1.000,00 não entrou em nenhum; CA4 Transporte R$ 420,00 (44%) > Alimentação R$ 255,80 (27%) > Lazer R$ 180,50 (19%) > Sem categoria R$ 95,00 (10%), só despesas; CA5 ‹ levou a `?mes=2026-10` com o mês e os gastos zerados e o saldo e a dívida intactos; CA6 primeiros passos visto antes de cadastrar as contas; CA7 despesa de R$ 60,00 lançada pela interface → saldo R$ 14.488,70, despesas R$ 1.011,30, resultado R$ 1.988,70 e Alimentação em R$ 315,80. CA-a11y em 375 px nos dois temas. Falta só a PR (T7) |

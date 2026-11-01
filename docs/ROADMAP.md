@@ -3,7 +3,7 @@
 > Leia no **início de cada sessão** para saber onde paramos.
 > Atualize **ao terminar cada feature** (junto com [CHANGELOG.md](CHANGELOG.md) e [LICOES.md](LICOES.md)).
 
-**Progresso do MVP: 3 de 8 etapas fechadas (38%); Etapas 4, 5, 6 e 7 prontas no código; 8 (PWA) quase lá** — atualizado em 2026-11-01.
+**Progresso do MVP: 3 de 8 etapas fechadas (38%); Etapas 4, 5 e 7 prontas no código, 6 com os critérios já conferidos; 8 (PWA) quase lá. As quatro esperam PR** — atualizado em 2026-11-01.
 
 > **Numeração:** são 8 etapas, a mesma que os comentários do código já usam ("Etapa 2" = banco, "Etapa 3" = autenticação, "Etapa 6" = dashboard). A identidade visual faz parte da Etapa 1. O checklist antigo do `CLAUDE.md` tinha 9 itens porque contava a identidade visual à parte.
 
@@ -48,7 +48,7 @@
 
 **Etapa 5 — Transações** ([spec 004](specs/004-transacoes/tasks.md)): **pronta no código** (T1–T9, revisões `security`/`qa` na T11, migration `0011` aplicada). Falta: T10 (critérios de aceite com login real) e a PR.
 
-**Etapa 6 — Dashboard** ([spec 005](specs/005-dashboard/tasks.md)): **pronta no código** (T1–T5; `0012` aplicada; revisões aprovadas; 289 testes passando). Falta: CA1–CA7 no navegador com login real e a PR.
+**Etapa 6 — Dashboard** ([spec 005](specs/005-dashboard/tasks.md)): **pronta** (T1–T5; `0012` aplicada; revisões aprovadas). **CA1–CA7 conferidos no navegador com login real em 2026-11-01**, nos dois temas e em 375 px. Falta: a PR.
 
 **Etapa 7 — Metas** ([spec 006](specs/006-metas/tasks.md)): **pronta no código** (T1–T8; `0013` aplicada; revisões `security` aprovada e `qa` com as ressalvas corrigidas; CA1–CA8 conferidos no navegador com login real, nos dois temas, em 375 e 1440 px). Falta: a PR.
 
@@ -65,7 +65,7 @@
 |---|---|---|
 | ~~4 — Contas e categorias~~ | ✅ no código; falta T14 e PR (ver acima) | 3 |
 | ~~5 — Transações~~ | ✅ no código; falta T10 e PR (ver acima) | 4 |
-| ~~6 — Dashboard~~ | ✅ no código (barras sem Recharts, [ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)); falta teste com login e PR | 5 |
+| ~~6 — Dashboard~~ | ✅ pronta (barras sem Recharts, [ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)); CA1–CA7 conferidos; falta a PR | 5 |
 | ~~7 — Metas~~ | ✅ no código ([spec 006](specs/006-metas/spec.md)); falta a PR | 3 |
 | **8 — PWA** | 🟡 em andamento ([spec 007](specs/007-pwa/spec.md)) | 6 |
 
@@ -97,4 +97,5 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | ~~T10~~ | ~~Vermelho de despesa sobre o card escuro dava 3,71:1~~ | ✅ resolvida na T8 da spec 002 (`#F08084`: 4,68:1 no card; contrastes do card anotados em `globals.css`) | — |
 | ~~T11~~ | ✅ resolvida nas migrations `0009`/`0010` da spec 002. ~~FK `(category_id, user_id) on delete set null` da `0001` tentaria anular também o `user_id` (que é `not null`): apagar categoria com transações falha. Corrigir com `on delete set null (category_id)`~~ | migration nova | — |
 | T13 | `velos:last-account` e `velos:last-category:*` ficam no `localStorage` depois do "Sair" (o `useSignOut` faz `queryClient.clear()`, que não limpa o storage): num aparelho compartilhado o formulário do próximo usuário vem pré-preenchido com ids do anterior. Só GUIDs, sem dado financeiro, e a API rejeita — mas revela que existiu outra conta ali. Achado da revisão `security` da spec 006 | `web/src/lib/utils/last-used.ts`, `web/src/features/auth/api.ts` | `chore` ou quando mexer no logout |
+| T14 | Saldo total **negativo** aparece no cartão de verde vivo (tema escuro) com o sinal "−", mas o verde ainda lê como "positivo" num relance. O DESIGN.md diz que verde vivo é *dinheiro*, não *positivo*, então não é violação — é uma escolha a confirmar. Visto ao conferir o CA2 da spec 005 | `web/src/features/dashboard/BalanceCards.tsx` | **A DEFINIR** pelo Pedro |
 | T12 | Detalhes da revisão `qa`: texto "10 minutos"/"5 senhas" fixo no front (`SignInForm`, `LockedNotice`) em vez de vir da API; checklist de senha marca ✕ em momentos diferentes no cadastro e na redefinição; `SignInForm.tsx` (157) e `SupabaseAuthClient.cs` (179) acima de ~150 linhas; `result.Error!` repetido; comentários sem acento | `web/src/features/auth/`, `api/` | `chore` ou quando mexer nos arquivos |
