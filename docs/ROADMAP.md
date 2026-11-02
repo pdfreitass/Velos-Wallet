@@ -44,6 +44,14 @@
 - Telas do app em `lazy()`: pacote inicial 99 KB gzip; Lighthouse no celular 93–96 / acessibilidade 100
 - `DESIGN.md` do sistema visual (Impeccable)
 
+### Rosca de gastos por categoria ([spec 010](specs/010-rosca-de-categorias/spec.md))
+*2026-11-02 — revisão da Etapa 6*
+
+- O Início mostra os gastos do mês numa **rosca** acima da lista, com o **mesmo componente** da vitrine da página inicial: as duas deixaram de divergir.
+- No máximo **6 fatias** (as 5 maiores e "Outras"); a lista por baixo continua completa e clicável, e nenhuma linha se chama "Outras".
+- Sem dependência nova — `conic-gradient` em CSS ([ADR 0019](adr/0019-rosca-de-categorias-em-css.md), que revê o desenho do [0018](adr/0018-grafico-de-categorias-sem-biblioteca.md) e mantém a regra de não instalar biblioteca de gráfico).
+- **CA1–CA8, CA-a11y e CA-build conferidos**, incluindo o caminho do agrupamento, com despesas de sonda criadas e apagadas em novembro.
+
 ## 🟡 Em andamento
 
 **Etapa 8 — PWA** ([spec 009](specs/009-pwa/tasks.md)): T1–T5 feitas (ícones, manifest, `index.html`, service worker, instalável confirmado pelo Pedro). Faltam: o teste offline (CA6), aparelhos reais (T6), as revisões (T7) e a documentação (T8).
@@ -67,7 +75,7 @@ Os da Etapa 6 (CA1–CA7) e da Etapa 7 (CA1–CA8) **foram** conferidos no naveg
 |---|---|---|
 | ~~4 — Contas e categorias~~ | ✅ no código; falta T14 e PR (ver acima) | 3 |
 | ~~5 — Transações~~ | ✅ no código; falta T10 e PR (ver acima) | 4 |
-| ~~6 — Dashboard~~ | ✅ pronta (barras sem Recharts, [ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)); CA1–CA7 conferidos; falta a PR | 5 |
+| ~~6 — Dashboard~~ | ✅ pronta; CA1–CA7 conferidos; falta a PR. **Em 2026-11-02 o gráfico passou de barras a rosca** ([spec 010](specs/010-rosca-de-categorias/spec.md), [ADR 0019](adr/0019-rosca-de-categorias-em-css.md)), partilhada com a vitrine da página inicial — continua sem biblioteca | 5 |
 | ~~7 — Metas~~ | ✅ no código ([spec 006](specs/006-metas/spec.md)); falta a PR | 3 |
 | **8 — PWA** | 🟡 em andamento ([spec 009](specs/009-pwa/spec.md)) | 6 |
 

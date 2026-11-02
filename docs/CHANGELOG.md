@@ -6,6 +6,13 @@
 
 ## [Não lançado]
 
+### 2026-11-02 — Rosca de gastos por categoria (spec 010)
+#### Alterado
+- **O Início passou a mostrar os gastos do mês numa rosca**, acima da lista. A página inicial pública já mostrava a mesma informação assim, e o app mostrava barras: quem vinha de lá não reconhecia a tela. Agora as duas usam **o mesmo componente**, `CategoryDonut`.
+- A rosca mostra **no máximo 6 fatias** — as 5 maiores categorias e uma "Outras" com a soma do resto —, porque com 10 ou 15 fatias a cor deixa de significar. **A lista por baixo continua completa**, uma linha por categoria, e nenhuma linha se chama "Outras": a fatia agrupada existe só no gráfico.
+- A rosca é decorativa (`aria-hidden`): nome, valor e porcentagem continuam a ser texto, e cada linha continua a levar às transações daquela categoria.
+- Nenhuma dependência nova: `conic-gradient` em CSS, como manda o [ADR 0019](adr/0019-rosca-de-categorias-em-css.md), que revê o desenho do [0018](adr/0018-grafico-de-categorias-sem-biblioteca.md) e mantém a sua regra central. O `PanelPage` ficou em 4,14 KB gzip.
+
 ### 2026-11-02 — Domínio próprio e email de verdade (pré-deploy)
 #### Adicionado
 - **`veloswallet.com.br`** registrado no Registro.br (CPF, sem CNPJ), publicado, vencendo em 01/11/2027. O `velos.com.br` já tinha dono.

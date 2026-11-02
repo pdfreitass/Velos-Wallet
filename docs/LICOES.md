@@ -7,6 +7,14 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L41 — A vitrine de marketing cria expectativa de produto
+*2026-11-02 · spec 010*
+
+- **O que aconteceu:** a página inicial mostrava os gastos numa rosca e o app mostrava barras. O Pedro abriu o Início, não reconheceu o bloco e disse que "o dashboard não está ali", mandando como referência a tela da própria vitrine. Quando fui verificar, respondi que já estava feito — eu tinha olhado para o bloco, ele estava a falar do desenho.
+- **Por que:** a vitrine e o app desenhavam a mesma informação em dois sítios, de formas diferentes, sem nada a ligá-los. Cada um evoluiu por seu lado, e a divergência só aparece quando alguém compara.
+- **Como evitar:** o que a página inicial mostra é uma promessa. Telas de exemplo e telas reais da mesma informação partilham componente, ou a divergência volta. E antes de responder "já está", confirmar que é a **mesma coisa** que a pessoa está a pedir, não só o mesmo nome.
+- **Onde a regra mora:** [ADR 0019](adr/0019-rosca-de-categorias-em-css.md) e [spec 010](specs/010-rosca-de-categorias/spec.md).
+
 ## L40 — "O email chegou" não é o mesmo que "o email está certo"
 *2026-11-02 · pré-deploy, T9*
 

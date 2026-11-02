@@ -38,7 +38,8 @@ export function DashboardSkeleton() {
       <div className="space-y-3">
         <Skeleton className="h-14 rounded-xl" />
         <Skeleton className="h-44 rounded-2xl" />
-        <Skeleton className="h-56 rounded-2xl" />
+        {/* Alto o bastante para caber a rosca (spec 010) e a lista, para a tela não saltar. */}
+        <Skeleton className="h-96 rounded-2xl" />
       </div>
     </div>
   );

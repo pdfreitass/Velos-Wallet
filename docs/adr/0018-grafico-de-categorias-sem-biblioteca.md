@@ -1,6 +1,6 @@
 # ADR 0018 — Gráfico de gastos por categoria sem biblioteca
 
-- **Status:** Aceita
+- **Status:** Aceita · desenho revisto pelo [ADR 0019](0019-rosca-de-categorias-em-css.md) (rosca em CSS, 2026-11-02). A parte central — **nenhuma biblioteca de gráfico no MVP** — continua de pé
 - **Data:** 2026-10-17
 - **Contexto da decisão:** spec 005 (Dashboard), P1
 
