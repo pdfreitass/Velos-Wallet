@@ -6,18 +6,18 @@
 
 ## Stack
 
-Desde o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) (2026-10-12). Estado real: **em migração** (Etapa 3, Revisão 2 do plano da spec 001).
+Desde o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) (2026-10-12). Estado real (2026-10-17): **ativa**, com autenticação (spec 001) e contas e categorias (spec 002).
 
 | Camada | Tecnologia | Estado | ADR |
 |---|---|---|---|
-| API | ASP.NET Core **.NET 10**, Clean Architecture, Controllers | a criar (T11) | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
-| Acesso a dados | EF Core + Npgsql, **sem migrations** (só mapeia) | a criar (T13) | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
-| Validação (API) | FluentValidation na `Application` | a criar | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
-| Testes | xUnit (Domain e Application) | a criar | — |
-| Front | React 19 + **Vite** + TypeScript strict, React Router, TanStack Query | a criar (T10) | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
-| Estilo | Tailwind CSS **v4** (CSS-first) | migra do Next | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
-| Componentes | shadcn/ui (`base-nova`) sobre **`@base-ui/react`** + lucide-react | migra do Next | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
-| Validação (front) | Zod + React Hook Form (só experiência do usuário) | migra do Next | — |
+| API | ASP.NET Core **.NET 10**, Clean Architecture, Controllers | ativo | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Acesso a dados | EF Core + Npgsql, **sem migrations** (só mapeia); SQL interpolado (parametrizado) com `UserDbSession` | ativo | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Validação (API) | FluentValidation na `Application` | ativo | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Testes | xUnit: Domain, Application e integração com o banco real | ativo | — |
+| Front | React 19 + **Vite** + TypeScript strict, React Router, TanStack Query | ativo | [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
+| Estilo | Tailwind CSS **v4** (CSS-first) | ativo | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
+| Componentes | shadcn/ui (`base-nova`) sobre **`@base-ui/react`** + lucide-react | ativo | [0005](adr/0005-tailwind-v4-shadcn-base-ui.md) |
+| Validação (front) | Zod + React Hook Form (só experiência do usuário) | ativo | — |
 | Datas | date-fns 4 com `ptBR` (front) · `DateOnly` (C#) | — | — |
 | Gráficos | Recharts | planejado (Etapa 6) | — |
 | Banco e Auth | Supabase (Postgres 17, Auth, RLS), **chamado só pela API** | ativo | [0002](adr/0002-supabase-ssr-rls.md), [0013](adr/0013-api-aspnet-e-front-react-vite.md) |
@@ -38,9 +38,14 @@ api/
     Velos.Infrastructure/    # Supabase (GoTrue REST), Persistence (EF Core, UserDbSession)
     Velos.Api/               # Controllers, cookies de sessão, Program.cs; serve o SPA (wwwroot)
   tests/                     # Velos.Domain.Tests, Velos.Application.Tests, Velos.Infrastructure.IntegrationTests
-web/                         # SPA Vite: pages/, features/, components/ui|shared, lib/api|utils|validations
+web/src/
+  pages/                     # uma por rota, carregadas em lazy() pelo router.tsx
+  features/                  # auth, app-shell (AppLayout/AppNav), accounts, categories (api.ts, types.ts, telas), landing, showcase
+  components/ui/             # shadcn sobre @base-ui/react
+  components/shared/         # MoneyInput, CategoryBadge, FormField, FormAlert, FormPageShell, LoadError…
+  lib/                       # api (client, errors), auth (rotas), utils (currency, date), validations (Zod)
 supabase/
-  migrations/                # 0001–0008 aplicadas
+  migrations/                # 0001–0010 aplicadas
   templates/                 # modelos de email (T18)
 public/brand/ → web/public/brand/
 docs/                        # esta documentação (SDD)
@@ -83,7 +88,7 @@ Formulário React (RHF + zodResolver)  ── useMutation ──► POST/PUT/DEL
 3. Em toda request, o `TokenRefreshMiddleware` renova o token perto de vencer, e o `JwtBearer` valida o access token pela **chave pública ES256** do projeto (OpenID Discovery).
 4. Toda rota da API é privada por padrão (`FallbackPolicy`, [ADR 0015](adr/0015-rotas-privadas-por-padrao.md)). No front, `RequireAuth` só melhora a experiência (redireciona para `/entrar?next=`).
 5. Login por senha passa pelo bloqueio de tentativas ([ADR 0014](adr/0014-bloqueio-de-tentativas-de-login.md)): a tentativa é **reservada** no banco (`reserve_login_attempt`) antes de chamar o Supabase.
-6. As rotas de autenticação têm **limite por IP** na própria API (`RateLimitingSetup`): o Supabase, chamado servidor a servidor, só enxerga o IP da API.
+6. As rotas de autenticação têm **limite por IP** na própria API (`RateLimitingSetup`): o Supabase, chamado servidor a servidor, só enxerga o IP da API. As **tentativas de renovar a sessão** também (30/min por IP, dentro do `TokenRefreshMiddleware`), e um refresh recusado com 4xx apaga os cookies ([LICOES L27](LICOES.md)). Toda rota `/api` tem ainda um **teto geral de 300/min** por pessoa (ou por IP, sem sessão); o `UseRateLimiter` fica entre a autenticação e a autorização para contar também as requests anônimas.
 7. Os endereços de volta do Google e do email vêm de `App:PublicOrigin`, **nunca** do `Host` da request. Toda resposta leva `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff` e `Referrer-Policy`; HSTS fora de Development.
 
 ## Supabase
@@ -109,9 +114,9 @@ Todas em `public`, todas com RLS ligada. Valores de dinheiro em `bigint` de **ce
 | Tabela | Colunas principais | Regras no banco |
 |---|---|---|
 | `profiles` | `id` (= `auth.users.id`), `name`, `currency` (default `BRL`) | Criada pelo trigger `handle_new_user`. Sem policy de DELETE: morre em cascata com o usuário. |
-| `accounts` | `user_id`, `name`, `type`, `initial_balance_cents` | Só `credit_card` pode ter saldo inicial negativo. `UNIQUE (id, user_id)` para FKs compostas. |
+| `accounts` | `user_id`, `name`, `type`, `initial_balance_cents` | Saldo inicial com sinal: cartão ≤ 0 (dívida), conta corrente qualquer sinal (cheque especial, `0009`), poupança e dinheiro ≥ 0. Nome de 1 a 40 caracteres (check no banco). `UNIQUE (id, user_id)` para FKs compostas. |
 | `categories` | `user_id`, `name`, `type`, `color` (`#RRGGBB`), `icon` (nome lucide) | `type <> 'transfer'`. `UNIQUE (id, type)` e `UNIQUE (user_id, name, type)`. |
-| `transactions` | `user_id`, `account_id`, `category_id?`, `type`, `amount_cents`, `description?`, `date`, `transfer_account_id?` | `amount_cents > 0`. FK `(category_id, type)` impede despesa em categoria de receita. FKs `(account_id, user_id)` impedem usar conta alheia. CHECK de forma da transferência. |
+| `transactions` | `user_id`, `account_id`, `category_id?`, `type`, `amount_cents`, `description?`, `date`, `transfer_account_id?` | `amount_cents > 0`. Descrição até 100 caracteres (`0011`). FK `(category_id, type)` impede despesa em categoria de receita. FKs `(account_id, user_id)` impedem usar conta alheia. CHECK de forma da transferência. |
 | `goals` | `user_id`, `name`, `target_cents`, `deadline?` | `target_cents > 0`. Não guarda progresso. |
 | `goal_contributions` | `user_id`, `goal_id`, `amount_cents`, `date` | `amount_cents > 0`. ⚠️ **Sem `updated_at`** (ver [ROADMAP](ROADMAP.md#pendências-técnicas)). |
 
@@ -125,6 +130,7 @@ Todas com **`security_invoker = on`**: sem isso a view rodaria com as permissõe
 |---|---|
 | `account_balances` | `balance_cents` = saldo inicial + receitas − despesas − transferências de saída + transferências de entrada |
 | `monthly_summary` | `income_cents` e `expense_cents` por `user_id` e `month`, **excluindo transferências** |
+| `category_spending` | `expense_cents` por `user_id`, `month` e `category_id` (nulo = "Sem categoria"); só despesas (`0012`, dashboard) |
 | `goal_progress` | `current_cents` = soma dos aportes de cada meta |
 
 O "saldo total" do app soma apenas contas `checking`/`savings`/`cash`. O cartão de crédito aparece em card separado ([ADR 0007](adr/0007-transferencia-registro-unico-e-cartao.md)).
@@ -170,7 +176,9 @@ Todas as funções usam `set search_path = ''` e nomes totalmente qualificados (
 
 ## Identidade visual (tokens)
 
-Definidos em `web/src/styles/globals.css` (vindos do antigo `src/app/globals.css`), com o contraste medido em comentário ao lado de cada token.
+Definidos em `web/src/styles/globals.css` (vindos do antigo `src/app/globals.css`), com o contraste medido em comentário ao lado de cada token. **O arquivo é a fonte de verdade**: os valores da tabela abaixo são da Etapa 1 e alguns já mudaram (fundo claro `#ECF1EA`, receita `#197A50`, despesa `#C1393E` / `#F08084`).
+
+As **12 cores das categorias** (`--category-*`) têm um tom por tema, com o ícone ≥ 3:1 contra o card, o fundo e o círculo de 15% do `CategoryBadge`. O banco guarda o hex canônico; o front traduz com `categoryColorVar` (`features/categories/catalog.ts`), espelho do `CategoryCatalog` do C#.
 
 | Token | Claro | Escuro |
 |---|---|---|

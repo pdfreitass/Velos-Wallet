@@ -7,6 +7,63 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L34 — Hover com opacidade derruba o contraste que o estado normal tinha
+*2026-11-01 · spec 006, T8*
+
+- **O que aconteceu:** o botão de confirmar exclusão virou cor sólida e passou a medir 5,69:1, mas o hover era `bg-destructive/80`: a opacidade deixa o fundo do cartão aparecer por baixo, o fundo clareia e o contraste cai para 4,22:1 (escuro) e 3,63:1 (claro).
+- **Por que:** medir só o estado de repouso. Um fundo com alfa não é uma cor: depende da superfície atrás dele, que muda entre cartão, popover e página.
+- **Como evitar:** ao mexer num componente de `ui/`, medir **repouso e hover**, nos dois temas. Para escurecer/clarear sem perder contraste, usar `color-mix(in oklch, <cor>, var(--foreground) N%)`, que o `secondary` já usava, em vez de reduzir a opacidade.
+- **Regra em:** `web/src/components/ui/button.tsx` (variante `destructive`) e os contrastes anotados em `web/src/styles/globals.css`.
+
+## L33 — Porcentagem arredondada mente nos extremos
+*2026-11-01 · spec 006, T8*
+
+- **O que aconteceu:** `Math.round(current / target * 100)` mostrava a barra cheia e "100%" ao lado de "Faltam R$ 10,00", e "0%" com barra vazia depois do primeiro aporte pequeno.
+- **Por que:** o arredondamento alcança os extremos antes do estado real: 99,5% vira 100 e 0,4% vira 0.
+- **Como evitar:** em barra de progresso, os extremos vêm do **estado** (atingida = 100, nada guardado = 0) e o arredondamento fica preso entre 1 e 99.
+- **Regra em:** `web/src/features/goals/GoalProgress.tsx` (`progressPercent`).
+
+## L32 — Testes de integração em paralelo misturavam os totais do mesmo usuário
+*2026-10-18 · spec 005, T4*
+
+- **O que aconteceu:** `DashboardStoreTests` comparava a contagem de contas "antes/depois" e às vezes dava 0 em vez de 2: outras classes, rodando ao mesmo tempo com o mesmo usuário de teste, criavam e apagavam contas no meio.
+- **Por que:** o xUnit roda classes diferentes em paralelo por padrão, e o banco real é compartilhado.
+- **Como evitar:** testes de integração contra o banco real rodam em sequência.
+- **Regra em:** `api/tests/Velos.Infrastructure.IntegrationTests/AssemblyInfo.cs` (`DisableTestParallelization`).
+
+## L31 — Teste que depende de view nova falha até a migration ser aplicada
+*2026-10-18 · spec 005*
+
+- **O que aconteceu:** dois testes do dashboard falharam (`database_unavailable` e totais zerados) e pareciam bug, mas a view `category_spending` ainda não existia no banco.
+- **Como evitar:** antes de diagnosticar, rodar `npx supabase db push --dry-run`; se a migration da task está pendente, aplicar (com a aprovação do Pedro) e rodar `dotnet test` de novo. Em query de soma com `join` numa tabela de apoio, pôr `user_id` também na condição do `join`.
+
+## L30 — Mockup HTML com JavaScript não aparece inteiro no visualizador do celular
+*2026-10-17 · spec 002*
+
+- **O que aconteceu:** o `mockup.html` enviado ao celular apareceu sem ícones nem as grades de cor e ícone: o visualizador não roda os scripts nem o lucide do CDN.
+- **Como evitar:** para revisão no celular, mandar PNG de cada tela (Playwright, `locator.screenshot`); o HTML fica para abrir no navegador do PC.
+
+## L29 — Invalidar a lista depois de excluir também refaz o GET do item excluído
+*2026-10-17 · spec 002, T11*
+
+- **O que aconteceu:** `invalidateQueries(["accounts"])` também invalida `["accounts", id]`; com a tela de edição ainda montada, o React Query buscou a conta apagada e recebeu 404.
+- **Como evitar:** depois do `DELETE`, `removeQueries` no item e `invalidateQueries` com `predicate` (ou `exact: true`) que deixa o item de fora.
+- **Regra em:** `useDeleteAccount` e `useDeleteCategory` (`features/*/api.ts`).
+
+## L28 — Contraste "de antes" escrito de memória estava errado
+*2026-10-17 · spec 002, T9*
+
+- **O que aconteceu:** no comentário dos tokens das categorias, os valores do hex original ("2,67" e "1,87") foram escritos sem medir; os reais eram 2,53 e 1,81. A contagem de cores ajustadas também saiu errada (eram as 12, não 9).
+- **Como evitar:** todo número de contraste em comentário sai de um script de medição (luminância WCAG), inclusive o "antes"; contagens saem da tabela final, não de cabeça.
+
+## L27 — Cookie de refresh inventado fazia a API chamar o Supabase a cada request
+*2026-10-17 · spec 002, T15 (auditoria de segurança)*
+
+- **O que aconteceu:** o `TokenRefreshMiddleware` tentava renovar com qualquer `velos_rt`, inclusive inventado, em rotas sem rate limit. O GoTrue responde `validation_failed`, tratado como "indisponível", e o cookie nunca era apagado. Como o Supabase limita por IP — o da API —, isso esgotaria a cota de renovação de todos (a mesma raiz da L24).
+- **Como foi resolvido:** refresh recusado com 4xx (exceto 429) vira sessão encerrada; as tentativas de refresh têm limite de 30/min por IP no middleware.
+- **Como evitar:** toda chamada da API a um serviço externo disparada por dado do cliente (cookie, header, corpo) precisa de limite por cliente na API, inclusive as que acontecem em middleware, fora das rotas de auth.
+- **Regra em:** `RateLimitingSetup.CreateRefreshLimiter` e [ARQUITETURA → Sessão](ARQUITETURA.md#sessão).
+
 ## L26 — Código de erro novo na API sem mensagem no front vira "tente de novo"
 *2026-10-15 · spec 001, T23 (agente `qa`)*
 

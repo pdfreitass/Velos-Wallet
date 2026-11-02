@@ -9,3 +9,6 @@ remotion/out/
 *.mp4
 /*.png
 _validacao/
+
+# A trilha (4,7 MB) sai determinística de `npm run trilha --prefix remotion`.
+remotion/public/audio/

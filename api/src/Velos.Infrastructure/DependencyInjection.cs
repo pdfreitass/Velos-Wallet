@@ -22,6 +22,11 @@ public static class DependencyInjection
         services.AddScoped<UserDbSession>();
         services.AddScoped<ILoginLockout, LoginLockoutStore>();
         services.AddScoped<IProfileReader, ProfileReader>();
+        services.AddScoped<IAccountStore, AccountStore>();
+        services.AddScoped<ICategoryStore, CategoryStore>();
+        services.AddScoped<ITransactionStore, TransactionStore>();
+        services.AddScoped<IDashboardStore, DashboardStore>();
+        services.AddScoped<IGoalStore, GoalStore>();
 
         services.AddHttpClient<IIdentityProvider, SupabaseAuthClient>(client =>
         {

@@ -1,0 +1,31 @@
+GRAVAÇÕES DA LOCUÇÃO — Velos Wallet Reels
+==========================================
+
+Grave as sete falas no celular e salve CADA UMA como um arquivo separado
+NESTA PASTA, com estes nomes exatos (a extensão pode ser .m4a, .wav ou .mp3):
+
+  01  "Para onde foi seu dinheiro?"
+  02  "O Velos junta tudo num número só."
+  03  "E mostra o que sobrou no mês."
+  04  "Cada gasto no seu lugar."
+  05  "E quanto falta para a meta."
+  06  "Sem baixar nada, só você vê."
+  07  "Velos Wallet. Crie sua conta grátis."
+
+A lista oficial, sempre atualizada, está em ../LOCUCAO.md
+
+COMO GRAVAR
+-----------
+- Um arquivo por fala. Não precisa cortar o silêncio: o script corta sozinho.
+- Ambiente silencioso, celular a um palmo da boca, sem ventilador nem TV.
+- Tom: conversa calma com uma pessoa, não propaganda de varejo.
+- Pode gravar várias vezes e deixar só a melhor.
+- Esta pasta está dentro do OneDrive: salvando aqui pelo app do OneDrive
+  no celular, o arquivo chega sozinho no PC.
+
+DEPOIS
+------
+  npm run locucao:minha --prefix remotion
+
+O script converte, corta o silêncio das pontas, nivela o volume igual aos
+outros motores e avisa se alguma fala ficou mais longa do que o espaço dela.

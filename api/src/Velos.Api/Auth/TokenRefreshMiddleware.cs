@@ -1,4 +1,6 @@
+using System.Threading.RateLimiting;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Velos.Api.Configuration;
 using Velos.Application.Abstractions;
 using Velos.Application.Common;
 
@@ -8,16 +10,30 @@ namespace Velos.Api.Auth;
 /// Renova a sessão antes da autenticação: se o access token falta ou vence em menos de 1 minuto
 /// e existe refresh token, pede um novo par ao Supabase e regrava os cookies.
 /// </summary>
+/// <remarks>
+/// O cookie de refresh chega de qualquer um, inclusive inventado, em rotas sem rate limit. Cada
+/// tentativa é uma chamada da API ao Supabase, que limita por IP — o IP da API, igual para todos.
+/// Por isso as tentativas têm limite por IP aqui (achado SEC-001 da T15); acima dele a request
+/// segue sem renovar e, com o token vencido, cai em 401.
+/// </remarks>
 internal sealed class TokenRefreshMiddleware(RequestDelegate next)
 {
     private static readonly TimeSpan RefreshMargin = TimeSpan.FromMinutes(1);
     private static readonly JsonWebTokenHandler TokenReader = new();
+    private static readonly PartitionedRateLimiter<HttpContext> RefreshLimiter = RateLimitingSetup.CreateRefreshLimiter();
 
     public async Task InvokeAsync(HttpContext context, IIdentityProvider identity, TimeProvider time)
     {
         if (ShouldTryRefresh(context, time.GetUtcNow())
             && SessionCookies.ReadRefreshToken(context) is { Length: > 0 } refreshToken)
         {
+            using var lease = RefreshLimiter.AttemptAcquire(context);
+            if (!lease.IsAcquired)
+            {
+                await next(context);
+                return;
+            }
+
             var refreshed = await identity.RefreshAsync(refreshToken, context.RequestAborted);
             if (refreshed.IsSuccess)
             {

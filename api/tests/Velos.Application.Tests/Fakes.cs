@@ -89,6 +89,18 @@ internal sealed class FakeLoginLockout : ILoginLockout
     }
 }
 
+/// <summary>Usuário do JWT. Os handlers de dados só podem usar ESTE id (RN12 da spec 002).</summary>
+internal sealed class FakeUserContext : IUserContext
+{
+    public static readonly Guid DefaultUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+
+    public bool IsAuthenticated => true;
+
+    public Guid UserId { get; init; } = DefaultUserId;
+
+    public string? Email => "pedro@example.com";
+}
+
 internal static class Sessions
 {
     public static readonly AuthSession Valid = new(

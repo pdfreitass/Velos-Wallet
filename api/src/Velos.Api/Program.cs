@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Velos.Api.Auth;
@@ -10,7 +11,12 @@ using Velos.Infrastructure.Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+builder.Services.AddControllers()
+    // Enums como texto em camelCase ("creditCard", "expense"), nunca como número. Na entrada os
+    // controllers recebem string e convertem com ApiEnums (erro de campo em português).
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(ApiEnums.Naming, allowIntegerValues: false)))
+    .ConfigureApiBehaviorOptions(options =>
     // Corpo ilegível (JSON malformado): resposta genérica, sem repassar a mensagem interna do parser.
     // As regras de campo de verdade são do FluentValidation, com mensagens em português.
     options.InvalidModelStateResponseFactory = context =>
@@ -66,8 +72,10 @@ app.UseNoStoreForApi();
 app.UseMiddleware<CsrfHeaderMiddleware>();
 app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthentication();
-app.UseAuthorization();
+// Entre a autenticação e a autorização: o limite já enxerga a pessoa (sub do JWT) e também conta
+// as requests anônimas a rotas privadas, que a autorização recusaria antes de chegar aqui.
 app.UseRateLimiter();
+app.UseAuthorization();
 
 app.MapControllers();
 

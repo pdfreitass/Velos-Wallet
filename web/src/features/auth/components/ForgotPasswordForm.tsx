@@ -10,10 +10,9 @@ import { cn } from "cn";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRequestPasswordReset } from "@/features/auth/api";
-import { FormAlert } from "@/features/auth/components/FormAlert";
-import { FormField } from "@/features/auth/components/FormField";
-import { toAuthAlert, type AuthAlert } from "@/features/auth/errors";
-import { applyServerFieldErrors } from "@/features/auth/form-errors";
+import { FormAlert } from "@/components/shared/FormAlert";
+import { FormField } from "@/components/shared/FormField";
+import { applyServerFieldErrors, toErrorAlert, type ErrorAlert } from "@/lib/api/errors";
 import { ROUTES } from "@/lib/auth/routes";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations/auth";
 
@@ -28,7 +27,7 @@ const linkClass = "font-medium text-foreground underline hover:text-primary";
 export function ForgotPasswordForm() {
   const [params] = useSearchParams();
   const requestReset = useRequestPasswordReset();
-  const [alert, setAlert] = useState<AuthAlert | null>(null);
+  const [alert, setAlert] = useState<ErrorAlert | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
   // Veio de /auth/confirm com link velho, já usado ou aberto em outro navegador.
@@ -52,7 +51,7 @@ export function ForgotPasswordForm() {
       setSentTo(values.email);
     } catch (error) {
       if (applyServerFieldErrors(error, ["email"], setError)) return;
-      setAlert(toAuthAlert(error));
+      setAlert(toErrorAlert(error));
     }
   });
 

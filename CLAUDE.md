@@ -11,6 +11,7 @@ App de gestão financeira pessoal para pessoas físicas no Brasil. Tagline: *"Se
 | **Início de toda sessão** | [docs/ROADMAP.md](docs/ROADMAP.md): onde paramos e o que vem a seguir |
 | Antes de começar uma etapa ou feature | [docs/LICOES.md](docs/LICOES.md) + a spec em `docs/specs/NNN-*/` |
 | Decidir **se** algo entra no produto | [docs/VISAO.md](docs/VISAO.md) (público, objetivos, fora do escopo) |
+| Ideia solta do Pedro, para depois do MVP | [docs/IDEIAS.md](docs/IDEIAS.md) — nada ali está decidido; vira trabalho só como spec |
 | Escrever código, mexer no banco, adicionar dependência | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) (pastas, fluxo de dados, tabelas, RLS) |
 | Entender **por que** algo é como é, ou mudar uma decisão | [docs/adr/](docs/adr/) |
 | Ver o que já foi entregue | [docs/CHANGELOG.md](docs/CHANGELOG.md) |

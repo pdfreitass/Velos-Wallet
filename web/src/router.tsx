@@ -53,8 +53,61 @@ export const router = createBrowserRouter([
               },
             ],
           },
-          { path: "/painel", lazy: () => import("@/pages/PanelPage").then((m) => ({ Component: m.PanelPage })) },
-          { path: "*", lazy: () => import("@/pages/NotFoundPage").then((m) => ({ Component: m.NotFoundPage })) },
+          {
+            // Casca do app logado (spec 002, T10): navegação, tema e Sair. O "não encontrado" fica
+            // dentro dela para o menu continuar à mão (e Contas/Categorias caem aqui até a T11/T12).
+            lazy: () => import("@/features/app-shell/AppLayout").then((m) => ({ Component: m.AppLayout })),
+            children: [
+              { path: "/painel", lazy: () => import("@/pages/PanelPage").then((m) => ({ Component: m.PanelPage })) },
+              { path: "/contas", lazy: () => import("@/pages/AccountsPage").then((m) => ({ Component: m.AccountsPage })) },
+              {
+                path: "/contas/nova",
+                lazy: () => import("@/pages/AccountFormPage").then((m) => ({ Component: m.NewAccountPage })),
+              },
+              {
+                path: "/contas/:id",
+                lazy: () => import("@/pages/AccountFormPage").then((m) => ({ Component: m.EditAccountPage })),
+              },
+              {
+                path: "/categorias",
+                lazy: () => import("@/pages/CategoriesPage").then((m) => ({ Component: m.CategoriesPage })),
+              },
+              {
+                path: "/categorias/nova",
+                lazy: () => import("@/pages/CategoryFormPage").then((m) => ({ Component: m.NewCategoryPage })),
+              },
+              {
+                path: "/categorias/:id",
+                lazy: () => import("@/pages/CategoryFormPage").then((m) => ({ Component: m.EditCategoryPage })),
+              },
+              { path: "/metas", lazy: () => import("@/pages/GoalsPage").then((m) => ({ Component: m.GoalsPage })) },
+              {
+                path: "/metas/nova",
+                lazy: () => import("@/pages/GoalFormPage").then((m) => ({ Component: m.NewGoalPage })),
+              },
+              {
+                path: "/metas/:id",
+                lazy: () => import("@/pages/GoalDetailPage").then((m) => ({ Component: m.GoalDetailPage })),
+              },
+              {
+                path: "/metas/:id/editar",
+                lazy: () => import("@/pages/GoalFormPage").then((m) => ({ Component: m.EditGoalPage })),
+              },
+              {
+                path: "/transacoes",
+                lazy: () => import("@/pages/TransactionsPage").then((m) => ({ Component: m.TransactionsPage })),
+              },
+              {
+                path: "/transacoes/nova",
+                lazy: () => import("@/pages/TransactionFormPage").then((m) => ({ Component: m.NewTransactionPage })),
+              },
+              {
+                path: "/transacoes/:id",
+                lazy: () => import("@/pages/TransactionFormPage").then((m) => ({ Component: m.EditTransactionPage })),
+              },
+              { path: "*", lazy: () => import("@/pages/NotFoundPage").then((m) => ({ Component: m.NotFoundPage })) },
+            ],
+          },
         ],
       },
     ],

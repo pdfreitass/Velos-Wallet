@@ -45,6 +45,18 @@ export function parseCurrencyInput(input: string): number {
   return Number.parseInt(digits, 10);
 }
 
+/** Teto de qualquer valor digitado: R$ 999.999.999,99 (RN4 da spec 002). */
+export const MAX_MONEY_CENTS = 99_999_999_999;
+
+/**
+ * Próximo valor do MoneyInput a partir do texto do campo depois de uma tecla: os dígitos entram
+ * pela direita ("0,00" + "1" -> "0,01"). Acima do teto, a tecla é ignorada e o valor anterior fica.
+ */
+export function nextMoneyInputCents(raw: string, previousCents: number): number {
+  const cents = parseCurrencyInput(raw);
+  return cents > MAX_MONEY_CENTS ? previousCents : cents;
+}
+
 /**
  * Normaliza um valor de dinheiro vindo do banco.
  *

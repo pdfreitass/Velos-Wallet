@@ -1,0 +1,53 @@
+{
+  "falas": [
+    {
+      "id": "01",
+      "entra": 0.7,
+      "cabe": 2.6,
+      "texto": "Para onde foi seu dinheiro?",
+      "dura": 1.94
+    },
+    {
+      "id": "02",
+      "entra": 5.6,
+      "cabe": 3.2,
+      "texto": "O Velos junta tudo num número só.",
+      "dura": 2.25
+    },
+    {
+      "id": "03",
+      "entra": 9.4,
+      "cabe": 3.2,
+      "texto": "E mostra o que sobrou no mês.",
+      "dura": 1.97
+    },
+    {
+      "id": "04",
+      "entra": 13.2,
+      "cabe": 3.2,
+      "texto": "Cada gasto no seu lugar.",
+      "dura": 1.87
+    },
+    {
+      "id": "05",
+      "entra": 17,
+      "cabe": 3.2,
+      "texto": "E quanto falta para a meta.",
+      "dura": 1.94
+    },
+    {
+      "id": "06",
+      "entra": 20.8,
+      "cabe": 3.4,
+      "texto": "Sem baixar nada, só você vê.",
+      "dura": 2.37
+    },
+    {
+      "id": "07",
+      "entra": 24.7,
+      "cabe": 4.1,
+      "texto": "Velos Wallet. Crie sua conta grátis.",
+      "dura": 2.74
+    }
+  ]
+}

@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Contas e Categorias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --background:#ECF1EA; --foreground:#0A2E24; --card:#F5F8F3; --primary:#0A2E24; --primary-foreground:#F4F7F2;
+  --secondary:#E1E8E1; --muted:#E1E8E1; --muted-foreground:#576E66; --accent:#2ED38C; --destructive:#C1393E;
+  --border:#CDD6CF; --input:#738880; --ring:#197A50; --income:#197A50; --expense:#C1393E; --page:#DDE5DC;
+}
+:root[data-theme="dark"] {
+  --background:#0A2E24; --foreground:#F4F7F2; --card:#1A3C32; --primary:#2ED38C; --primary-foreground:#0A2E24;
+  --secondary:#26463D; --muted:#26463D; --muted-foreground:#A9B7B0; --accent:#2ED38C; --destructive:#E96368;
+  --border:#345249; --input:#5C7A70; --ring:#2ED38C; --income:#2ED38C; --expense:#E96368; --page:#06201A;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:"Geist",ui-sans-serif,system-ui,sans-serif; background:var(--page); color:var(--foreground); }
+.top { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+  padding:14px 24px; background:var(--background); border-bottom:1px solid var(--border); }
+.top h1 { font-size:1.05rem; margin:0; font-weight:600; }
+.top p { margin:2px 0 0; color:var(--muted-foreground); font-size:.85rem; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 16px; border-radius:10px;
+  font:inherit; font-weight:500; font-size:.95rem; border:1px solid transparent; cursor:pointer; }
+.btn svg { width:18px; height:18px; }
+.btn-primary { background:var(--primary); color:var(--primary-foreground); }
+.btn-outline { background:transparent; color:var(--foreground); border-color:var(--input); }
+.btn-ghost { background:transparent; color:var(--foreground); }
+.btn-destructive { background:var(--destructive); color:#fff; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-block { width:100%; }
+.gallery { display:flex; flex-wrap:wrap; gap:36px 28px; padding:28px 24px 60px; justify-content:center; }
+.shot { display:flex; flex-direction:column; gap:10px; align-items:center; }
+.shot-label { font-size:.85rem; font-weight:600; text-align:center; max-width:375px; }
+.shot-label small { display:block; font-weight:400; color:var(--muted-foreground); margin-top:2px; }
+.phone { width:375px; height:760px; border-radius:44px; padding:10px; background:#1b2220; border:1px solid #3a4643; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+.screen { position:relative; height:100%; border-radius:34px; overflow:hidden; background:var(--background); display:flex; flex-direction:column; }
+.status { height:40px; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; padding:0 26px; font-size:.8rem; font-weight:600; }
+.island { width:96px; height:26px; border-radius:20px; background:#000; }
+.appbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 16px 10px; }
+.appbar h2 { font-size:1.5rem; margin:0; font-weight:600; letter-spacing:-.01em; }
+.back { display:flex; align-items:center; gap:4px; color:var(--muted-foreground); font-size:.9rem; min-height:44px; }
+.content { flex:1; overflow:auto; padding:4px 16px 96px; }
+.section-title { font-size:.8rem; font-weight:600; color:var(--muted-foreground); text-transform:uppercase; letter-spacing:.04em; margin:18px 2px 8px; }
+.list { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+.row { display:flex; align-items:center; gap:12px; padding:12px 14px; min-height:60px; border-top:1px solid var(--border); }
+.row:first-child { border-top:0; }
+.row-icon { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; background:var(--secondary); flex-shrink:0; }
+.row-icon svg { width:20px; height:20px; }
+.row-main { flex:1; min-width:0; }
+.row-title { font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.row-sub { font-size:.8rem; color:var(--muted-foreground); }
+.money { font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; text-align:right; }
+.money small { display:block; font-weight:400; font-size:.75rem; color:var(--muted-foreground); }
+.neg { color:var(--expense); } .pos { color:var(--income); }
+.chev { color:var(--muted-foreground); width:18px; height:18px; }
+.nav { position:absolute; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(3,1fr); padding:4px 8px 22px;
+  background:var(--background); border-top:1px solid var(--border); }
+.nav a { position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; min-height:52px; justify-content:center;
+  font-size:.75rem; font-weight:500; color:var(--muted-foreground); text-decoration:none; }
+.nav a svg { width:20px; height:20px; }
+.nav a[aria-current="page"] { color:var(--foreground); }
+.nav a[aria-current="page"]::before { content:""; position:absolute; top:-5px; width:28px; height:2px; border-radius:2px; background:var(--foreground); }
+.hello { font-size:1.75rem; font-weight:600; margin:10px 0 4px; }
+.lead { color:var(--muted-foreground); margin:0 0 18px; line-height:1.45; }
+.shortcut { display:flex; align-items:center; gap:14px; padding:16px; background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:12px; }
+.shortcut .row-icon { width:44px; height:44px; }
+.field { margin-bottom:16px; }
+.field label, .legend { display:block; font-weight:500; font-size:.9rem; margin-bottom:6px; }
+.hint { font-size:.8rem; color:var(--muted-foreground); margin-top:6px; }
+.input { width:100%; height:44px; border-radius:10px; border:1px solid var(--input); background:transparent; color:var(--foreground); padding:0 12px; font:inherit; font-size:1rem; }
+.input:focus { outline:3px solid color-mix(in srgb, var(--ring) 50%, transparent); border-color:var(--ring); }
+.input.money-input { font-variant-numeric:tabular-nums; font-weight:600; }
+.types { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.type { display:flex; align-items:center; gap:8px; min-height:52px; padding:8px 10px; border-radius:10px; border:1px solid var(--input); background:transparent; color:var(--foreground); font:inherit; font-size:.88rem; cursor:pointer; text-align:left; }
+.type svg { width:18px; height:18px; flex-shrink:0; }
+.type[aria-checked="true"] { border-color:var(--ring); box-shadow:0 0 0 2px var(--ring) inset; font-weight:600; }
+.check { display:flex; align-items:flex-start; gap:10px; min-height:44px; padding:10px 12px; border-radius:10px; background:var(--secondary); cursor:pointer; font-size:.9rem; }
+.check input { width:20px; height:20px; margin:0; accent-color:var(--primary); flex-shrink:0; }
+.sticky-actions { position:absolute; left:0; right:0; bottom:0; padding:12px 16px 26px; background:var(--background); border-top:1px solid var(--border); display:flex; gap:8px; }
+.tabs { display:grid; grid-template-columns:1fr 1fr; background:var(--secondary); border-radius:12px; padding:4px; margin:4px 0 6px; }
+.tabs button { min-height:40px; border:0; border-radius:9px; background:transparent; font:inherit; font-weight:500; color:var(--muted-foreground); cursor:pointer; }
+.tabs button[aria-selected="true"] { background:var(--card); color:var(--foreground); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.badge-icon { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; flex-shrink:0; }
+.badge-icon svg { width:20px; height:20px; }
+.swatches { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
+.swatch { aspect-ratio:1; min-height:44px; border-radius:50%; border:2px solid transparent; cursor:pointer; display:grid; place-items:center; color:#fff; }
+.swatch[aria-pressed="true"] { outline:2px solid var(--foreground); outline-offset:2px; }
+.swatch svg { width:18px; height:18px; display:none; }
+.swatch[aria-pressed="true"] svg { display:block; }
+.icons { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.icon-btn { min-height:44px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--foreground); display:grid; place-items:center; cursor:pointer; }
+.icon-btn svg { width:20px; height:20px; }
+.icon-btn[aria-pressed="true"] { border-color:var(--ring); box-shadow:0 0 0 2px var(--ring) inset; }
+.preview { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px dashed var(--input); border-radius:14px; margin-bottom:16px; }
+.overlay { position:absolute; inset:0; background:rgba(4,20,16,.55); display:flex; align-items:flex-end; }
+.dialog { width:100%; background:var(--card); border-radius:24px 24px 0 0; padding:22px 18px 28px; }
+.dialog h3 { margin:0 0 8px; font-size:1.2rem; }
+.dialog p { margin:0 0 12px; color:var(--muted-foreground); font-size:.92rem; line-height:1.45; }
+.facts { list-style:none; padding:0; margin:0 0 14px; display:grid; gap:8px; }
+.facts li { display:flex; gap:10px; align-items:flex-start; font-size:.9rem; line-height:1.4; }
+.facts svg { width:18px; height:18px; flex-shrink:0; margin-top:1px; }
+.dialog-actions { display:grid; gap:8px; margin-top:14px; }
+.skel { background:linear-gradient(90deg, var(--secondary) 0%, var(--border) 50%, var(--secondary) 100%); background-size:200% 100%; animation:sh 1.4s infinite; border-radius:8px; }
+@keyframes sh { to { background-position:-200% 0; } }
+.empty { text-align:center; padding:48px 16px; }
+.empty .row-icon { margin:0 auto 14px; width:56px; height:56px; border-radius:16px; }
+.empty h3 { margin:0 0 6px; }
+.empty p { color:var(--muted-foreground); margin:0 0 18px; }
+.desk { width:1100px; max-width:calc(100vw - 48px); height:640px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:var(--background); display:grid; grid-template-columns:240px 1fr; box-shadow:0 20px 50px rgba(0,0,0,.2); }
+.side { border-right:1px solid var(--border); padding:18px 12px; display:flex; flex-direction:column; gap:4px; }
+.brand { display:flex; align-items:center; gap:8px; font-weight:600; padding:4px 10px 18px; }
+.brand-mark { width:26px; height:26px; border-radius:7px; background:var(--primary); color:var(--primary-foreground); display:grid; place-items:center; font-size:.8rem; font-weight:700; }
+.side a { display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border-radius:10px; color:var(--muted-foreground); text-decoration:none; font-weight:500; position:relative; }
+.side a svg { width:20px; height:20px; }
+.side a[aria-current="page"] { background:var(--secondary); color:var(--foreground); }
+.side a[aria-current="page"]::before { content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:3px; background:var(--foreground); }
+.desk-main { padding:26px 36px; overflow:auto; }
+.desk-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.note { max-width:880px; margin:0 auto; padding:0 24px 40px; color:var(--muted-foreground); font-size:.9rem; line-height:1.5; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Velos Wallet · Mockup das telas da Etapa 4 (spec 002)</h1>
+    <p>Rascunho para aprovação: cores, textos e regras reais da spec. Clique nos tipos, no cheque especial, nas cores, nos ícones e na caixa do diálogo.</p>
+  </div>
+  <button class="btn btn-outline" id="theme"><i data-lucide="moon"></i><span>Tema escuro</span></button>
+</header>
+
+<main class="gallery">
+
+  <!-- 1. Início -->
+  <section class="shot">
+    <div class="shot-label">1 · Início (/painel)<small>"Olá" + atalhos até o dashboard da Etapa 6 (P4)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><div class="brand" style="padding:0"><span class="brand-mark">V</span>Velos Wallet</div>
+        <button class="btn btn-ghost" aria-label="Sair"><i data-lucide="log-out"></i></button></div>
+      <div class="content">
+        <div class="hello">Olá, Pedro</div>
+        <p class="lead">Comece cadastrando suas contas e ajustando as categorias. O resumo do mês chega em breve.</p>
+        <div class="shortcut"><span class="row-icon"><i data-lucide="wallet"></i></span>
+          <div class="row-main"><div class="row-title">Contas</div><div class="row-sub">4 contas · saldo de cada uma</div></div><i data-lucide="chevron-right" class="chev"></i></div>
+        <div class="shortcut"><span class="row-icon"><i data-lucide="tags"></i></span>
+          <div class="row-main"><div class="row-title">Categorias</div><div class="row-sub">10 categorias · cor e ícone</div></div><i data-lucide="chevron-right" class="chev"></i></div>
+      </div>
+      <nav class="nav"><a aria-current="page"><i data-lucide="house"></i>Início</a><a><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <!-- 2. Contas -->
+  <section class="shot">
+    <div class="shot-label">2 · Contas (/contas)<small>Saldo atual por conta; cartões numa seção à parte (RN5)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><h2>Contas</h2><button class="btn btn-primary"><i data-lucide="plus"></i>Adicionar</button></div>
+      <div class="content">
+        <div class="section-title">Contas</div>
+        <div class="list">
+          <div class="row"><span class="row-icon"><i data-lucide="landmark"></i></span><div class="row-main"><div class="row-title">Nubank</div><div class="row-sub">Conta corrente</div></div><div class="money">R$ 1.234,56</div></div>
+          <div class="row"><span class="row-icon"><i data-lucide="landmark"></i></span><div class="row-main"><div class="row-title">Itaú</div><div class="row-sub">Conta corrente · cheque especial</div></div><div class="money neg">−R$ 350,00</div></div>
+          <div class="row"><span class="row-icon"><i data-lucide="piggy-bank"></i></span><div class="row-main"><div class="row-title">Reserva</div><div class="row-sub">Poupança</div></div><div class="money">R$ 8.120,45</div></div>
+          <div class="row"><span class="row-icon"><i data-lucide="banknote"></i></span><div class="row-main"><div class="row-title">Carteira</div><div class="row-sub">Dinheiro</div></div><div class="money">R$ 180,00</div></div>
+        </div>
+        <div class="section-title">Cartões de crédito</div>
+        <div class="list">
+          <div class="row"><span class="row-icon"><i data-lucide="credit-card"></i></span><div class="row-main"><div class="row-title">Inter</div><div class="row-sub">Cartão de crédito</div></div><div class="money neg">−R$ 640,90<small>Fatura atual</small></div></div>
+        </div>
+      </div>
+      <nav class="nav"><a><i data-lucide="house"></i>Início</a><a aria-current="page"><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <!-- 3. Nova conta -->
+  <section class="shot">
+    <div class="shot-label">3 · Nova conta (/contas/nova)<small>O texto do valor muda por tipo; cheque especial só na corrente (RN3)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Contas</span></div>
+      <div class="content">
+        <h2 style="margin:0 0 16px;font-size:1.5rem">Nova conta</h2>
+        <div class="field"><span class="legend">Tipo</span>
+          <div class="types" role="radiogroup" id="types">
+            <button class="type" role="radio" aria-checked="true" data-type="checking"><i data-lucide="landmark"></i>Conta corrente</button>
+            <button class="type" role="radio" aria-checked="false" data-type="savings"><i data-lucide="piggy-bank"></i>Poupança</button>
+            <button class="type" role="radio" aria-checked="false" data-type="cash"><i data-lucide="banknote"></i>Dinheiro</button>
+            <button class="type" role="radio" aria-checked="false" data-type="card"><i data-lucide="credit-card"></i>Cartão de crédito</button>
+          </div>
+          <div class="hint">O tipo não pode ser trocado depois.</div></div>
+        <div class="field"><label for="n">Nome</label><input id="n" class="input" value="Nubank" maxlength="40"><div class="hint">Até 40 caracteres.</div></div>
+        <div class="field"><label for="v" id="vlabel">Quanto tem nesta conta hoje?</label><input id="v" class="input money-input" value="R$ 1.234,56" inputmode="numeric"></div>
+        <label class="check" id="overdraft"><input type="checkbox" id="od"><span>Estou no negativo (cheque especial)</span></label>
+        <div class="hint" id="vhint" style="margin-top:10px">Vai aparecer como <strong class="money">R$ 1.234,56</strong> na lista.</div>
+      </div>
+      <div class="sticky-actions"><button class="btn btn-outline" style="flex:1">Cancelar</button><button class="btn btn-primary" style="flex:2">Salvar conta</button></div>
+    </div></div>
+  </section>
+
+  <!-- 4. Excluir conta -->
+  <section class="shot">
+    <div class="shot-label">4 · Excluir conta com movimentações<small>Diálogo detalhado; o botão só ativa depois de marcar (RN6)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Contas</span></div>
+      <div class="content"><h2 style="margin:0;font-size:1.5rem">Nubank</h2></div>
+      <div class="overlay"><div class="dialog" role="alertdialog" aria-labelledby="dt">
+        <h3 id="dt">Excluir “Nubank”?</h3>
+        <p>A conta e todas as movimentações dela serão apagadas:</p>
+        <ul class="facts">
+          <li><i data-lucide="arrow-down-left" class="pos"></i><span><strong>3 receitas</strong> e <strong>8 despesas</strong></span></li>
+          <li><i data-lucide="arrow-left-right"></i><span><strong>1 transferência</strong> com <strong>Reserva</strong>. O saldo da Reserva vai mudar.</span></li>
+          <li><i data-lucide="target"></i><span>Suas metas não são afetadas.</span></li>
+          <li><i data-lucide="triangle-alert" class="neg"></i><span>Não dá para desfazer.</span></li>
+        </ul>
+        <label class="check"><input type="checkbox" id="ack"><span>Entendi que isso não pode ser desfeito</span></label>
+        <div class="dialog-actions">
+          <button class="btn btn-destructive" id="del" disabled>Excluir conta e 12 movimentações</button>
+          <button class="btn btn-outline" autofocus>Cancelar</button>
+        </div>
+      </div></div>
+    </div></div>
+  </section>
+
+  <!-- 5. Categorias -->
+  <section class="shot">
+    <div class="shot-label">5 · Categorias (/categorias)<small>Despesas e Receitas; ícone na cor da categoria, nome na cor do texto (RN10)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><h2>Categorias</h2><button class="btn btn-primary"><i data-lucide="plus"></i>Adicionar</button></div>
+      <div class="content">
+        <div class="tabs" role="tablist" id="ctabs"><button role="tab" aria-selected="true" data-k="expense">Despesas · 7</button><button role="tab" aria-selected="false" data-k="income">Receitas · 3</button></div>
+        <div class="list" id="clist"></div>
+      </div>
+      <nav class="nav"><a><i data-lucide="house"></i>Início</a><a><i data-lucide="wallet"></i>Contas</a><a aria-current="page"><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <!-- 6. Nova categoria -->
+  <section class="shot">
+    <div class="shot-label">6 · Nova categoria (/categorias/nova)<small>12 cores e 30 ícones fixos, com pré-visualização</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Categorias</span></div>
+      <div class="content">
+        <h2 style="margin:0 0 12px;font-size:1.5rem">Nova categoria</h2>
+        <div class="preview" aria-live="polite"><span class="badge-icon" id="pv-icon"></span><div class="row-main"><div class="row-title" id="pv-name">Pets</div><div class="row-sub">Despesa · pré-visualização</div></div></div>
+        <div class="field"><span class="legend">Tipo</span><div class="tabs" style="margin:0"><button aria-selected="true">Despesa</button><button aria-selected="false">Receita</button></div></div>
+        <div class="field"><label for="cn">Nome</label><input id="cn" class="input" value="Pets" maxlength="30"></div>
+        <div class="field"><span class="legend">Cor</span><div class="swatches" id="swatches"></div></div>
+        <div class="field"><span class="legend">Ícone</span><div class="icons" id="icons"></div></div>
+      </div>
+      <div class="sticky-actions"><button class="btn btn-outline" style="flex:1">Cancelar</button><button class="btn btn-primary" style="flex:2">Salvar categoria</button></div>
+    </div></div>
+  </section>
+
+  <!-- 7. Estados -->
+  <section class="shot">
+    <div class="shot-label">7 · Estados da lista<small>Carregando (skeleton) e vazio; o erro segue o mesmo molde com "Tentar de novo"</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><h2>Contas</h2></div>
+      <div class="content">
+        <div class="section-title">Carregando</div>
+        <div class="list">
+          <div class="row"><span class="row-icon skel"></span><div class="row-main"><div class="skel" style="height:14px;width:60%"></div><div class="skel" style="height:11px;width:35%;margin-top:6px"></div></div><div class="skel" style="height:14px;width:70px"></div></div>
+          <div class="row"><span class="row-icon skel"></span><div class="row-main"><div class="skel" style="height:14px;width:50%"></div><div class="skel" style="height:11px;width:30%;margin-top:6px"></div></div><div class="skel" style="height:14px;width:60px"></div></div>
+        </div>
+        <div class="section-title">Vazio</div>
+        <div class="list empty"><span class="row-icon"><i data-lucide="wallet"></i></span><h3>Você ainda não tem contas</h3><p>Cadastre a primeira com o saldo de hoje.</p><button class="btn btn-primary"><i data-lucide="plus"></i>Adicionar conta</button></div>
+      </div>
+      <nav class="nav"><a><i data-lucide="house"></i>Início</a><a aria-current="page"><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <!-- 9. Editar conta -->
+  <section class="shot">
+    <div class="shot-label">9 · Editar conta (/contas/:id) · NOVA<small>Tipo só para leitura (RN1); botão "Excluir conta" no fim</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Contas</span></div>
+      <div class="content">
+        <h2 style="margin:0 0 16px;font-size:1.5rem">Editar conta</h2>
+        <div class="field"><span class="legend">Tipo</span>
+          <div class="row" style="border:1px solid var(--border);border-radius:10px;background:var(--card)"><span class="row-icon"><i data-lucide="credit-card"></i></span><div class="row-main"><div class="row-title">Cartão de crédito</div><div class="row-sub">O tipo não muda depois de criada</div></div><i data-lucide="lock" class="chev"></i></div></div>
+        <div class="field"><label for="en">Nome</label><input id="en" class="input" value="Inter"></div>
+        <div class="field"><label for="ev">Quanto você deve hoje neste cartão?</label><input id="ev" class="input money-input" value="R$ 640,90"><div class="hint">Vai aparecer como <strong class="money neg">−R$ 640,90</strong>, com o rótulo “Fatura atual”.</div></div>
+        <div class="field"><label for="ex">Exemplo de erro no campo</label><input id="ex" class="input" value="" aria-invalid="true" style="border-color:var(--destructive)"><div class="hint" style="color:var(--destructive);display:flex;gap:6px;align-items:center"><i data-lucide="circle-alert" style="width:14px;height:14px"></i>Informe o nome da conta</div></div>
+        <button class="btn btn-ghost btn-block" style="color:var(--destructive);margin-top:8px"><i data-lucide="trash-2"></i>Excluir conta</button>
+      </div>
+      <div class="sticky-actions"><button class="btn btn-outline" style="flex:1">Cancelar</button><button class="btn btn-primary" style="flex:2">Salvar alterações</button></div>
+    </div></div>
+  </section>
+
+  <!-- 10. Excluir conta sem movimentações -->
+  <section class="shot">
+    <div class="shot-label">10 · Excluir conta sem movimentações · NOVA<small>Diálogo curto, sem caixa de confirmação (RN6)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Contas</span></div>
+      <div class="content"><h2 style="margin:0;font-size:1.5rem">Carteira</h2></div>
+      <div class="overlay"><div class="dialog" role="alertdialog">
+        <h3>Excluir “Carteira”?</h3>
+        <p>Essa conta não tem movimentações. Não dá para desfazer.</p>
+        <div class="dialog-actions"><button class="btn btn-destructive">Excluir conta</button><button class="btn btn-outline">Cancelar</button></div>
+      </div></div>
+    </div></div>
+  </section>
+
+  <!-- 11. Excluir categoria -->
+  <section class="shot">
+    <div class="shot-label">11 · Excluir categoria · NOVA<small>As movimentações ficam como "Sem categoria" (RN11)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><span class="back"><i data-lucide="chevron-left"></i>Categorias</span></div>
+      <div class="content"><h2 style="margin:0;font-size:1.5rem">Editar categoria</h2></div>
+      <div class="overlay"><div class="dialog" role="alertdialog">
+        <h3>Excluir “Lazer”?</h3>
+        <ul class="facts">
+          <li><i data-lucide="receipt"></i><span><strong>14 movimentações</strong> usam essa categoria. Elas continuam existindo e passam a aparecer como <strong>“Sem categoria”</strong>.</span></li>
+          <li><i data-lucide="triangle-alert" class="neg"></i><span>Não dá para desfazer.</span></li>
+        </ul>
+        <div class="dialog-actions"><button class="btn btn-destructive">Excluir categoria</button><button class="btn btn-outline">Cancelar</button></div>
+      </div></div>
+    </div></div>
+  </section>
+
+  <!-- 12. Erro e não encontrado -->
+  <section class="shot">
+    <div class="shot-label">12 · Erro e “não encontrado” · NOVA<small>Lista que não carregou; endereço de conta inexistente ou de outra pessoa (CA11)</small></div>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span class="island"></span><span>●●●</span></div>
+      <div class="appbar"><h2>Contas</h2></div>
+      <div class="content">
+        <div class="section-title">Erro ao carregar</div>
+        <div class="list empty" style="padding:28px 16px"><span class="row-icon" style="color:var(--destructive)"><i data-lucide="cloud-off"></i></span><h3>Não foi possível carregar suas contas</h3><p>Verifique sua conexão e tente de novo.</p><button class="btn btn-outline"><i data-lucide="rotate-ccw"></i>Tentar de novo</button></div>
+        <div class="section-title">Não encontrado (/contas/…)</div>
+        <div class="list empty" style="padding:28px 16px"><span class="row-icon"><i data-lucide="search-x"></i></span><h3>Conta não encontrada</h3><p>Ela pode ter sido excluída ou o endereço está errado.</p><button class="btn btn-primary"><i data-lucide="wallet"></i>Ver minhas contas</button></div>
+      </div>
+      <nav class="nav"><a><i data-lucide="house"></i>Início</a><a aria-current="page"><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a></nav>
+    </div></div>
+  </section>
+
+  <!-- 8. Desktop -->
+  <section class="shot" style="width:100%">
+    <div class="shot-label">8 · Desktop (1440 px): menu lateral no lugar da barra inferior</div>
+    <div class="desk">
+      <aside class="side">
+        <div class="brand"><span class="brand-mark">V</span>Velos Wallet</div>
+        <a><i data-lucide="house"></i>Início</a><a aria-current="page"><i data-lucide="wallet"></i>Contas</a><a><i data-lucide="tags"></i>Categorias</a>
+        <div style="flex:1"></div><a><i data-lucide="log-out"></i>Sair</a>
+      </aside>
+      <div class="desk-main">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0;font-size:1.75rem">Contas</h2><button class="btn btn-primary"><i data-lucide="plus"></i>Adicionar conta</button></div>
+        <div class="desk-grid">
+          <div><div class="section-title">Contas</div><div class="list">
+            <div class="row"><span class="row-icon"><i data-lucide="landmark"></i></span><div class="row-main"><div class="row-title">Nubank</div><div class="row-sub">Conta corrente</div></div><div class="money">R$ 1.234,56</div><i data-lucide="chevron-right" class="chev"></i></div>
+            <div class="row"><span class="row-icon"><i data-lucide="landmark"></i></span><div class="row-main"><div class="row-title">Itaú</div><div class="row-sub">Conta corrente · cheque especial</div></div><div class="money neg">−R$ 350,00</div><i data-lucide="chevron-right" class="chev"></i></div>
+            <div class="row"><span class="row-icon"><i data-lucide="piggy-bank"></i></span><div class="row-main"><div class="row-title">Reserva</div><div class="row-sub">Poupança</div></div><div class="money">R$ 8.120,45</div><i data-lucide="chevron-right" class="chev"></i></div>
+            <div class="row"><span class="row-icon"><i data-lucide="banknote"></i></span><div class="row-main"><div class="row-title">Carteira</div><div class="row-sub">Dinheiro</div></div><div class="money">R$ 180,00</div><i data-lucide="chevron-right" class="chev"></i></div>
+          </div></div>
+          <div><div class="section-title">Cartões de crédito</div><div class="list">
+            <div class="row"><span class="row-icon"><i data-lucide="credit-card"></i></span><div class="row-main"><div class="row-title">Inter</div><div class="row-sub">Cartão de crédito</div></div><div class="money neg">−R$ 640,90<small>Fatura atual</small></div><i data-lucide="chevron-right" class="chev"></i></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<p class="note">Observações: o “saldo total” e o card da dívida do cartão ficam para o dashboard (Etapa 6), por isso não aparecem aqui. Os valores são de exemplo. Os tons das cores das categorias no tema escuro ainda vão ser medidos (contraste ≥ 3:1) na T9.</p>
+
+<script>
+const COLORS = ["#E8833A","#4F8DF7","#7C5CF5","#E05260","#D94FA8","#2F9BB8","#6B8075","#1C7F54","#2ED38C","#4FA37A","#C7A23A","#8A6A4F"];
+const ICONS = ["utensils-crossed","house","car","heart-pulse","gamepad-2","graduation-cap","circle-dashed","wallet","briefcase","tag","shopping-cart","shopping-bag","coffee","plane","bus","fuel","shirt","gift","baby","paw-print","dumbbell","film","smartphone","zap","droplet","receipt","piggy-bank","trending-up","hand-coins","pill"];
+const CATS = {
+  expense: [["Alimentação","#E8833A","utensils-crossed"],["Educação","#2F9BB8","graduation-cap"],["Lazer","#D94FA8","gamepad-2"],["Moradia","#4F8DF7","house"],["Outros","#6B8075","circle-dashed"],["Saúde","#E05260","heart-pulse"],["Transporte","#7C5CF5","car"]],
+  income: [["Freelance","#2ED38C","briefcase"],["Outros","#4FA37A","circle-dashed"],["Salário","#1C7F54","wallet"]],
+};
+const tint = c => `color-mix(in srgb, ${c} 16%, transparent)`;
+const icon = n => `<i data-lucide="${n}"></i>`;
+
+function renderCats(kind) {
+  document.getElementById("clist").innerHTML = CATS[kind].map(([n,c,i]) =>
+    `<div class="row"><span class="badge-icon" style="background:${tint(c)};color:${c}">${icon(i)}</span><div class="row-main"><div class="row-title">${n}</div></div><i data-lucide="chevron-right" class="chev"></i></div>`).join("");
+  lucide.createIcons();
+}
+document.querySelectorAll("#ctabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#ctabs button").forEach(x => x.setAttribute("aria-selected", x === b));
+  renderCats(b.dataset.k);
+});
+
+let color = "#8A6A4F", ic = "paw-print";
+function renderPicker() {
+  document.getElementById("swatches").innerHTML = COLORS.map(c =>
+    `<button class="swatch" style="background:${c}" aria-pressed="${c===color}" aria-label="Cor ${c}" data-c="${c}">${icon("check")}</button>`).join("");
+  document.getElementById("icons").innerHTML = ICONS.map(i =>
+    `<button class="icon-btn" aria-pressed="${i===ic}" aria-label="${i}" data-i="${i}" style="${i===ic?`color:${color}`:""}">${icon(i)}</button>`).join("");
+  const pv = document.getElementById("pv-icon");
+  pv.style.background = tint(color); pv.style.color = color; pv.innerHTML = icon(ic);
+  lucide.createIcons();
+  document.querySelectorAll(".swatch").forEach(b => b.onclick = () => { color = b.dataset.c; renderPicker(); });
+  document.querySelectorAll(".icon-btn").forEach(b => b.onclick = () => { ic = b.dataset.i; renderPicker(); });
+}
+document.getElementById("cn").oninput = e => document.getElementById("pv-name").textContent = e.target.value || "Nome da categoria";
+
+const LABEL = { checking:"Quanto tem nesta conta hoje?", savings:"Quanto tem nesta conta hoje?", cash:"Quanto tem nesta conta hoje?", card:"Quanto você deve hoje neste cartão?" };
+let type = "checking";
+function renderType() {
+  document.querySelectorAll("#types .type").forEach(b => b.setAttribute("aria-checked", b.dataset.type === type));
+  document.getElementById("vlabel").textContent = LABEL[type];
+  document.getElementById("overdraft").style.display = type === "checking" ? "flex" : "none";
+  const negative = type === "card" || (type === "checking" && document.getElementById("od").checked);
+  document.getElementById("vhint").innerHTML = `Vai aparecer como <strong class="money ${negative ? "neg" : ""}">${negative ? "−" : ""}R$ 1.234,56</strong> na lista${type === "card" ? ", com o rótulo “Fatura atual”" : ""}.`;
+}
+document.querySelectorAll("#types .type").forEach(b => b.onclick = () => { type = b.dataset.type; renderType(); });
+document.getElementById("od").onchange = renderType;
+
+document.getElementById("ack").onchange = e => document.getElementById("del").disabled = !e.target.checked;
+
+document.getElementById("theme").onclick = () => {
+  const dark = document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  document.querySelector("#theme span").textContent = dark ? "Tema claro" : "Tema escuro";
+};
+
+renderCats("expense"); renderPicker(); renderType(); lucide.createIcons();
+</script>
+</body>
+</html>

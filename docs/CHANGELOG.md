@@ -6,6 +6,63 @@
 
 ## [Não lançado]
 
+### 2026-11-01 — Etapa 7: metas (spec 006)
+#### Adicionado
+- Telas das metas: `/metas` (lista em andamento e atingidas, na ordem da RN8), `/metas/nova`, `/metas/:id` (progresso, ritmo e aportes) e `/metas/:id/editar`, todas em `lazy()`.
+- Aportes: registrar, corrigir e excluir num diálogo, com hoje como data padrão. O aporte **não** altera nenhum saldo nem o resumo do mês (RN3), por isso as mutações invalidam só `["goals"]`.
+- `GoalProgress`: barra do domínio **atingir** do DESIGN.md (`muted` em zero, `primary` em andamento, `income` ao atingir — a cor nunca vem da porcentagem), com `X de Y` e o texto de estado em texto; a barra é `aria-hidden`.
+- Ritmo mensal da RN6 ("Guarde R$ X por mês até <mês/ano>") e "Prazo encerrado em <data>" quando o prazo passou.
+- Bloco "Metas" no Início: até 3 metas em andamento, convite quando não há nenhuma e "Todas as suas metas foram atingidas" quando só restam atingidas. Usa a mesma query da lista, então aportar atualiza os dois.
+- Excluir meta diz quantos aportes somem e quanto somam (RN7).
+- `components/ui/dialog.tsx` sobre o `@base-ui/react` já instalado (sem dependência nova): o `alert-dialog` é para confirmação, e um formulário dentro dele daria `role="alertdialog"`.
+- P1 da spec: **Metas entra no lugar de Categorias** na barra do celular; Contas ganha o atalho "Gerenciar categorias" e o desktop mantém os cinco itens no menu lateral.
+#### Corrigido
+- Revisão `qa`: a barra mostrava 100% com a meta ainda em andamento (R$ 7.990 de R$ 8.000 arredondava para 100) e 0% com um primeiro aporte pequeno — os extremos passam a vir do estado, não do arredondamento; "Prazo encerrado" deixou de usar `text-expense`, que é cor de dinheiro; alvo de 44 px no "Ver todas"; Esc e o clique no fundo não fecham mais o diálogo com o aporte sendo salvo; `max-h` no diálogo para 375×667 com o teclado aberto.
+- 404 numa mutação (meta excluída em outra aba) recarrega a lista, em vez de deixar o cache antigo atrás do diálogo.
+#### Segurança
+- Revisão `security`: aprovada, sem achados críticos ou altos. O front só fala com a API, ids com `encodeURIComponent`, 404 igual para meta inexistente, de outra pessoa ou id inválido (CA-seg).
+
+### 2026-11-01 — Contraste do botão de confirmar exclusão
+#### Corrigido
+- A variante `destructive` usava fundo tingido com o texto na mesma cor: 3,53:1 sobre o cartão do diálogo, abaixo dos 4,5:1 da regra. Passa a ser cor sólida com `--destructive-foreground` novo (5,69:1 no escuro, 4,95:1 no claro; 6,40 e 5,57 no hover). Vale para excluir conta, categoria, transação, meta e aporte.
+
+### 2026-10-18 — Etapa 6: dashboard (spec 005)
+#### Adicionado
+- `GET /api/dashboard?month=yyyy-MM`: saldo total sem o cartão, dívida do cartão, receitas × despesas do mês e gastos por categoria, tudo somado no banco (ADR 0006).
+- Migration `0012`: view `category_spending` (`security_invoker = on`), despesas por categoria e mês, com "Sem categoria" para a categoria excluída.
+- Início vira o dashboard: cards de saldo e dívida, seletor de mês (`?mes=`), resultado do mês e barras de gastos por categoria em HTML/CSS, sem biblioteca de gráfico ([ADR 0018](adr/0018-grafico-de-categorias-sem-biblioteca.md)). Cada categoria leva à lista de transações já filtrada. Primeiros passos para quem ainda não tem conta.
+- `MonthKey` compartilhado entre transações e dashboard (2000 a 2100, mês atual de São Paulo como padrão).
+#### Corrigido
+- Revisão `qa` (T4): o seletor de mês continua na tela quando um mês falha ao carregar; o título não mostra "Olá, " sem nome; categoria abaixo de 0,5% aparece como "<1%".
+- Testes de integração rodam em sequência: todas as classes usam o mesmo usuário de teste, e em paralelo uma estragava o "antes/depois" da outra.
+#### Segurança
+- Revisão `security`: aprovada, sem achados críticos, altos ou médios. O `join` com `categories` também filtra por `user_id` (defesa além da RLS).
+
+### 2026-10-17 — Etapa 5: transações (spec 004)
+#### Adicionado
+- API de transações (`/api/transactions`): criar, editar, excluir e listar o mês com totais da `monthly_summary`; conta, conta de destino e categoria conferidas como da própria pessoa (id alheio = 404).
+- Regras no `Domain` com o "hoje" de São Paulo: valor > 0 até R$ 999.999.999,99, data entre 01/01/2000 e hoje, descrição até 100 caracteres (check no banco pela `0011`), tipo trocado só entre despesa e receita na edição.
+- Telas: lista do mês com totais, filtro por categoria (`?categoria=`) e agrupamento por dia; formulário com lançamento em 3 toques, última conta e categoria usadas já sugeridas, edição e exclusão com confirmação curta.
+- "Transações" na navegação e botão "Nova transação" na barra, no menu e no Início.
+- Lista do mês limitada no servidor (`MaxMonthItems`) e categoria do filtro validada como UUID no front.
+
+### 2026-10-17 — Etapa 4: contas e categorias (spec 002)
+#### Adicionado
+- API de contas e categorias (`/api/accounts`, `/api/categories`), com handlers na `Application` (FluentValidation), stores com RLS e filtro por `user_id`, e o impacto da exclusão (`deletion-impact`). Saldo atual somado no SQL (`account_balances`).
+- Migrations `0009` e `0010`: cheque especial na conta corrente, limites de nome no banco, nome de categoria único por tipo sem diferenciar maiúsculas e `on delete set null (category_id)` nas transações.
+- Navegação do app logado: barra inferior no celular e menu lateral de 240 px no desktop, item atual marcado além da cor, "Pular para o conteúdo"; Início com atalhos para Contas e Categorias.
+- Telas de contas: lista com contas e cartões em seções ("Fatura atual"), formulário com o texto do valor por tipo e a opção de cheque especial, tipo travado na edição, exclusão com o detalhe da RN6 (receitas, despesas, transferências, contas afetadas) e o botão só ativo depois de "Entendi".
+- Telas de categorias: abas Despesas e Receitas (aba no endereço), 12 cores e 30 ícones com pré-visualização, exclusão avisando quantas movimentações passam a "Sem categoria".
+- Componentes reutilizáveis: `MoneyInput` (centavos, dígitos pela direita, teto de R$ 999.999.999,99), `CategoryBadge`, `LoadError`, `FormPageShell`; base shadcn `alert-dialog`, `checkbox`, `radio-group` e `skeleton`.
+- Paleta das categorias com um tom por tema e o ícone ≥ 3:1 (contraste medido em `globals.css`); o banco guarda o hex canônico.
+- "Conta/Categoria não encontrada" para id inexistente, de outra pessoa ou inválido (o mesmo 404).
+- [ADR 0017](adr/0017-excluir-conta-apaga-movimentacoes.md): excluir conta apaga as movimentações.
+#### Corrigido
+- Botões de 32–40 px passam a ter alvo de toque de 44 px (pendência T8) e o vermelho de despesa no card escuro passa de 3,71:1 para 4,68:1 (pendência T10).
+- Apagar categoria com transações falhava pela FK composta (pendência T11).
+#### Segurança
+- Auditoria completa (T15): nenhum achado crítico ou alto. Corrigido o SEC-001: um cookie de refresh inventado fazia a API chamar o Supabase a cada request; agora o refresh recusado encerra a sessão e as tentativas têm limite de 30 por minuto por IP.
+
 ### 2026-10-15 — Etapa 3 concluída: autenticação (spec 001)
 #### Adicionado
 - API ASP.NET Core (.NET 10, Clean Architecture) e front React + Vite em `web/`, na mesma origem ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)); o Next.js saiu.

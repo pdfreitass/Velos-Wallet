@@ -46,3 +46,66 @@ export function formatMonthLabel(value: string | Date): string {
 export function toMonthKey(date: Date): string {
   return format(date, "yyyy-MM");
 }
+
+/** "en-CA" formata como "2026-10-17": o mesmo formato da coluna `date`. */
+const saoPauloDate = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Sao_Paulo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/**
+ * "Hoje" em São Paulo, como "yyyy-MM-dd", qualquer que seja o fuso do aparelho. É o mesmo "hoje"
+ * da API (RN4 da spec 004): a data da transação nunca passa dele.
+ */
+export function todayInSaoPaulo(now: Date = new Date()): string {
+  return saoPauloDate.format(now);
+}
+
+/** Mês atual em São Paulo ("2026-10"). */
+export function currentMonthKey(now: Date = new Date()): string {
+  return todayInSaoPaulo(now).slice(0, 7);
+}
+
+const MONTH_KEY = /^(\d{4})-(0[1-9]|1[0-2])$/;
+
+/** "2026-10" válido (o mesmo intervalo de anos que a API aceita). */
+export function isMonthKey(value: string | null): value is string {
+  const match = value ? MONTH_KEY.exec(value) : null;
+  if (!match) return false;
+  const year = Number(match[1]);
+  return year >= 2000 && year <= 2100;
+}
+
+/** "2026-01" + (-1) -> "2025-12". Só aritmética de inteiros, sem Date. */
+export function shiftMonth(monthKey: string, delta: number): string {
+  const [year, month] = monthKey.split("-").map(Number);
+  const index = year * 12 + (month - 1) + delta;
+  const nextYear = Math.floor(index / 12);
+  const nextMonth = (index % 12) + 1;
+  return `${nextYear}-${String(nextMonth).padStart(2, "0")}`;
+}
+
+/** "2026-10" -> "outubro de 2026" (minúsculo, para o meio de uma frase). */
+export function formatMonthName(monthKey: string): string {
+  return format(parseDbDate(`${monthKey}-01`), "MMMM 'de' yyyy", { locale: ptBR });
+}
+
+/**
+ * Cabeçalho de um dia na lista: "Hoje", "Ontem" ou "sexta, 10 de outubro" (o "-feira" sai para
+ * caber no celular). `today` é o de São Paulo.
+ */
+export function formatDayHeading(value: string, today: string): string {
+  if (value === today) return "Hoje";
+  if (value === toDbDate(addDaysToDb(today, -1))) return "Ontem";
+
+  const label = format(parseDbDate(value), "EEEE, d 'de' MMMM", { locale: ptBR }).replace("-feira", "");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function addDaysToDb(value: string, days: number): Date {
+  const date = parseDbDate(value);
+  date.setDate(date.getDate() + days);
+  return date;
+}

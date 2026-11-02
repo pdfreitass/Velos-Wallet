@@ -265,6 +265,16 @@ Firmes e quietos: cor sólida, sem sombra, um leve afundar de 1 px ao clicar.
 - **Border:** 1 px `border`; no destaque, `accent`.
 - **Internal Padding:** 16 px (20 px no desktop).
 
+### Barras de progresso (metas e limites)
+A cor de uma barra **não depende da porcentagem**, e sim de o objetivo ser **atingir** ou **limitar**. O mesmo componente segue duas regras:
+- **Atingir** (meta de economia, aportes): `muted` em zero, `primary` em progresso, `income` ao atingir.
+- **Limitar** (teto de gastos, se um dia existir): `income` longe do teto, âmbar ao se aproximar (token ainda não existe: criar e medir o contraste junto), `expense` ao ultrapassar.
+- **Texto, não porcentagem:** o rótulo é `X de Y` (`600,00 de 700,00`), que diz quanto ainda falta; a porcentagem, se aparecer, é secundária.
+- **Nunca só a cor:** toda barra tem texto de estado ("Faltam R$ 100,00", "Meta atingida", "R$ 50,00 acima do limite"); a barra em si é `aria-hidden`.
+- Trilho em `muted`, preenchimento totalmente redondo.
+
+> Origem: estudo do Organizze (2026-10-18), que usa `X de Y` e inverte a semântica entre limite de gastos e meta de receitas.
+
 ### Inputs / Fields
 - **Style:** fundo transparente (input a 30% no escuro), borda 1 px `input`, cantos de 10 px, altura de 44 px e texto de 1rem nos formulários.
 - **Focus:** borda `ring` + anel de 3 px em `ring` a 50%; cursor em `ring`.
@@ -298,6 +308,7 @@ Uma curva só (`cubic-bezier(0.16, 1, 0.3, 1)`) para entradas: linhas do saldo q
 - **Don't** use verde vivo como botão principal, texto ou anel de foco no tema claro (1,80:1 sobre o off-white).
 - **Don't** use paletas soltas do Tailwind (`emerald`, `red`, `green`) para dinheiro ou estado.
 - **Don't** dependa só da cor para receita, despesa, dívida ou validação.
+- **Don't** dê o nome "saldo" a dois números diferentes. Existe **um** saldo (o "Saldo total" do Início, sem o cartão); qualquer outro valor tem nome próprio ("Resultado do mês", "Resultado do dia", "Saldo em 1º de outubro"). O Organizze precisou de dois artigos de ajuda para explicar dois saldos com o mesmo nome.
 - **Don't** use caixa alta, tracking positivo ou rótulos-kicker acima dos títulos.
 - **Don't** dê sombra a botões, campos ou linhas; sombra é só para objetos flutuantes no palco.
 - **Don't** anime sem a guarda de "reduzir movimento" nem esconda conteúdo até a animação rodar.
