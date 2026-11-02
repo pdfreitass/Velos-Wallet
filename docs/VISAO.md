@@ -102,3 +102,5 @@ As metas são pontos de partida. Revise após o primeiro mês com dados reais.
 **Decisão atual:** gratuito durante o MVP e a validação. O foco agora é divulgar a marca e medir interesse.
 
 **Como decidir o modelo definitivo:** quando a lista de espera passar de 200 pessoas, perguntar se pagariam por um plano (ex.: R$ 9,90/mês). Se poucos aceitarem, seguir gratuito para ganhar usuários e testar um plano pago depois. Se a adesão for boa, avaliar freemium: o essencial grátis e recursos avançados no plano pago.
+
+> **Proposta em aberto:** a ideia [I2](IDEIAS.md) (assinatura mensal com 7 dias grátis) antecipa a cobrança para antes da validação, o que conflita com a decisão acima e com as métricas de ativação e hábito. Nada mudou aqui; a discussão está em [IDEIAS.md](IDEIAS.md).
