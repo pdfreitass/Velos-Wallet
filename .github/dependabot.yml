@@ -1,0 +1,67 @@
+# Dependabot (achado da auditoria de 2026-10-17, junto com o secret scanning).
+#
+# O repositório é público e o app mexe com dinheiro: uma dependência com falha conhecida precisa
+# aparecer como PR, não ser descoberta depois. As PRs passam pelo mesmo CI de sempre
+# (.github/workflows/ci.yml), então uma atualização que quebre build ou teste fica vermelha.
+#
+# Agrupado de propósito: uma PR por ecossistema por semana, em vez de uma por pacote. O projeto tem
+# um revisor só, e dez PRs soltas numa segunda-feira viram ruído que ninguém lê.
+version: 2
+updates:
+  # Front (Vite, React, Tailwind, Base UI…)
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      producao:
+        dependency-type: production
+        update-types: [minor, patch]
+      desenvolvimento:
+        dependency-type: development
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+
+  # API (.NET 10)
+  - package-ecosystem: nuget
+    directory: /api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      nuget:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+
+  # As próprias actions do CI: versão presa a tag que envelhece sem ninguém notar.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      timezone: America/Sao_Paulo
+    commit-message:
+      prefix: "ci(deps)"
+
+  # O vídeo de lançamento tem o seu próprio package.json (Remotion). Mensal: não vai a produção.
+  - package-ecosystem: npm
+    directory: /media/video-lancamento/remotion
+    schedule:
+      interval: monthly
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 2
+    groups:
+      remotion:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
