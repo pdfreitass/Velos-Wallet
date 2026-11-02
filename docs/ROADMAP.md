@@ -83,7 +83,7 @@ As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pe
 - `ForwardedHeaders` restrito ao proxy do host (`KnownProxies`/`KnownNetworks`), para o limite por IP ver o IP do cliente
 - Chaves do Data Protection persistidas (volume ou key vault): sem isso, reiniciar a API invalida os links de recuperação e o login com Google em andamento
 - Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** revogar `execute` de `anon`/`authenticated` em `reserve_login_attempt` (e conferir a Data API desligada no painel); **SEC-004** CSP completa (`script-src` com o hash do script de tema do `index.html`, e `worker-src 'self'` + `manifest-src 'self'` por causa do PWA da spec 009); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; e ligar Dependabot + secret scanning no GitHub (repositório público)
-- Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}` (hoje monta `token_hash`, e o `/auth/confirm` só aceita `?code=` do PKCE) — junto com o C3
+- ~~Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}`~~ ✅ corrigido em 2026-11-01: o modelo montava `token_hash`, que o `/auth/confirm` ignora (ele lê só `?code=` do PKCE), então **todo link de recuperação caía no erro**. Falta só o teste de ponta a ponta (T9), que depende do Resend. O `confirmation.html` segue com `token_hash` de propósito — rever no C1, quando a confirmação de email voltar
 
 ## Pendências técnicas
 

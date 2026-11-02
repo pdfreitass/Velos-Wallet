@@ -12,17 +12,35 @@ HTML na mão (passo **C3** do [plan.md](../../docs/specs/001-autenticacao/plan.m
 O de confirmação fica escrito e parado: a confirmação de email está desligada (Revisão 1 da
 spec, passo C1) e só volta com o Resend + domínio próprio, antes do deploy.
 
-## Por que o link não usa `{{ .ConfirmationURL }}`
+## O link do `recovery.html` (corrigido em 2026-11-01)
 
-O modelo padrão do Supabase entrega o token no **`#fragmento`** da URL, que o navegador nunca
-envia ao servidor — e quem precisa dele aqui é a API. Por isso os dois modelos montam o
-endereço à mão:
+Hoje o modelo usa **`{{ .ConfirmationURL }}`**. Este texto explica por que ele já não monta o
+endereço à mão, porque a explicação anterior ficou obsoleta e virou uma armadilha.
 
-```
-{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery
-```
+**O que dizia antes:** que o padrão do Supabase entrega o token no `#fragmento` da URL, que o
+navegador nunca manda ao servidor, e por isso o modelo tinha de montar
+`{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery` à mão — trocar isso
+quebraria a recuperação (T19).
 
-Trocar isso pelo padrão **quebra a recuperação de senha** (T19).
+**Por que isso deixou de valer:** aquilo descrevia o fluxo **implícito**. A recuperação passou a
+usar **PKCE** (`SupabaseAuthClient.RequestPasswordReset` manda `code_challenge` e
+`code_challenge_method`), e no PKCE o Supabase devolve o código em **`?code=` na query**, não no
+fragmento. O `redirect_to` enviado é `/auth/confirm` (`AuthController`), então o
+`{{ .ConfirmationURL }}` chega como `https://<domínio>/auth/confirm?code=...`.
+
+**E o modelo à mão estava quebrado:** ele mandava `token_hash`, e o
+`AuthCallbackController.Confirm` lê **só** `[FromQuery] string? code`. O `token_hash` era ignorado,
+o `code` chegava vazio e todo link caía no `/recuperar-senha?erro=link`.
+
+> **Ainda não foi testado de ponta a ponta** (pendência T9): o servidor de email padrão do Supabase
+> não permite. Confirmar no primeiro teste real com o Resend, pedindo o link, abrindo, trocando a
+> senha e conferindo que o link não funciona de novo.
+
+### E o `confirmation.html`?
+
+Continua montando o endereço à mão com `token_hash`, e **não foi mexido**: o fluxo de confirmação de
+cadastro está desligado e nunca foi implementado com PKCE, então não dá para afirmar que o
+`{{ .ConfirmationURL }}` serve lá. Rever junto com o passo C1, quando a confirmação de email voltar.
 
 > Cuidado ao comentar os modelos: o Supabase processa as variáveis **até dentro de comentário
 > HTML**, e todo comentário viaja junto no email enviado. Por isso os cabeçalhos dos dois
