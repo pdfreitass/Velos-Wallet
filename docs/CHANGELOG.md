@@ -16,7 +16,10 @@
 - **Fly.io `gru`** como host ([ADR 0020](adr/0020-host-fly-io-gru.md)), fechando o buraco que o ADR 0013 tinha deixado. O Azure faria o mesmo com muito mais cerimônia para um app de um processo e um usuário.
 - Só o **domínio nu**: `www` fica de fora.
 #### Em aberto
-- **Nada está no ar ainda.** Falta conta no Fly.io e o `flyctl` instalado, que são do Pedro. A imagem também ainda não foi construída localmente: o Docker Desktop não estava a correr, então o `Dockerfile` está escrito mas não provado.
+- **Nada está no ar ainda.** Falta conta no Fly.io e o `flyctl` instalado, que são do Pedro.
+#### Corrigido
+- **A imagem foi construída e provada** (196 MB): health, SPA, 404 da API, usuário sem privilégio, CSP com o hash certo, e as **chaves do Data Protection sobrevivendo a recriar o container** — que é o que garante não deslogar ninguém a cada publicação.
+- **O health check do Fly teria falhado no primeiro deploy.** Com o `AllowedHosts` restrito ao domínio, o check chega pela rede interna com o Host do IP da máquina e leva **400** — a máquina nunca ficaria saudável. O `fly.toml` passou a mandar `Host = "veloswallet.com.br"` no check.
 
 ### 2026-11-02 — Emails com a cara do Velos (passo C3)
 #### Alterado

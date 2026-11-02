@@ -20,10 +20,26 @@
 
 ## Por fazer
 
-- [ ] **T5 — Construir a imagem localmente**
-  `docker build -t velos-wallet:test .` e subir o container apontando para o Supabase, para provar o Dockerfile antes de gastar um deploy.
-  **Bloqueado:** o Docker Desktop não estava a correr (o cliente responde, o daemon não).
-  *Pronto quando:* a imagem constrói e o container responde em `/api/health`.
+- [x] **T5 — Construir a imagem localmente** ✅ 2026-11-02
+  Imagem de **196 MB**, container a falar com o Supabase real. O que ficou provado:
+
+  | Prova | Resultado |
+  |---|---|
+  | `/api/health` | `{"status":"ok"}` |
+  | `/` | o SPA, servido da mesma origem |
+  | `/api/naoexiste` | **401** (rota privada por padrão), não o `index.html` |
+  | Usuário do processo (RN8) | `uid=1654(app)`, não root |
+  | Chaves no volume (RN3) | `key-1e49….xml`, dono `app`, modo `-rw-------` |
+  | **Recriar o container** (RN3/CA3) | **a mesma chave é reutilizada** — o redeploy não desloga ninguém |
+  | `AllowedHosts` restrito (RN5/CA7) | Host do domínio → 200; `site-falso.com`, `localhost` e sem Host → **400** |
+  | Segredos na imagem (RN7) | nenhum `appsettings` com senha |
+  | CSP | completa, com o hash do script de tema tirado do `index.html` servido |
+  | Login com senha errada | **400**, resposta de domínio — não 500 de infraestrutura |
+
+  **Achado que teria quebrado o primeiro deploy:** com o `AllowedHosts` restrito ao domínio, o
+  health check do Fly — que chega pela rede interna, com o Host do IP da máquina — levaria **400**,
+  e a máquina nunca ficaria saudável. Resolvido no `fly.toml` com `[checks.health.headers]`
+  mandando `Host = "veloswallet.com.br"`.
 
 - [ ] **T6 — Conta e `flyctl`** *(do Pedro)*
   Criar conta no Fly.io (pede cartão, mesmo no plano gratuito) e instalar o `flyctl` — **não está** nesta máquina.
