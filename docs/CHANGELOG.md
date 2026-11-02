@@ -6,6 +6,14 @@
 
 ## [Não lançado]
 
+### 2026-11-02 — Emails com a cara do Velos (passo C3)
+#### Alterado
+- **O email de redefinição de senha passou a ser o nosso**, publicado no painel do Supabase: assunto `Redefinição de senha — Velos Wallet`, logo no topo, texto em português e botão em **verde profundo** (a marca, nunca o verde vivo). Até aqui saía o modelo padrão do Supabase, em inglês — o SMTP próprio é que destravou a edição.
+- Conferido com um email de verdade no Gmail: assunto, logo, botão, o preheader ao lado do assunto e o link do PKCE, todos certos.
+#### Em aberto
+- **O `confirmation.html` não foi publicado, e não é esquecimento.** Ele aponta para `/auth/confirm?token_hash=…`: esse endpoint lê só `?code=` **e** é a rota da redefinição de senha, não da confirmação de cadastro. Não existe rota que confirme cadastro. O passo **C1** tem de construir o fluxo antes de o modelo fazer sentido.
+- As abas *Invite user*, *Magic link*, *Change email* e *Reauthentication* ficam no padrão: o app não usa nenhum desses fluxos.
+
 ### 2026-11-02 — Rosca de gastos por categoria (spec 010)
 #### Alterado
 - **O Início passou a mostrar os gastos do mês numa rosca**, acima da lista. A página inicial pública já mostrava a mesma informação assim, e o app mostrava barras: quem vinha de lá não reconhecia a tela. Agora as duas usam **o mesmo componente**, `CategoryDonut`.
