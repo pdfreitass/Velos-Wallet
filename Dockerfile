@@ -49,6 +49,13 @@ RUN mkdir -p /data/keys && chown -R app:app /data
 
 COPY --from=api --chown=app:app /app ./
 
+# Certificado raiz do Supabase (publico, versionado em api/src/Velos.Api/certs/).
+# E necessario para o `SSL Mode=VerifyFull` da connection string: o certificado do pooler e
+# emitido pela "Supabase Intermediate 2021 CA", que NAO esta nas CAs publicas do sistema, entao
+# sem esta raiz o VerifyFull recusa a ligacao. Conferido com openssl em 2026-11-02:
+# `Verification: OK` contra este arquivo.
+COPY --chown=app:app api/src/Velos.Api/certs/supabase-prod-ca-2021.crt /app/certs/
+
 USER app
 
 # O Fly manda tudo para esta porta (fly.toml -> internal_port).

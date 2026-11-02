@@ -41,10 +41,10 @@
   e a máquina nunca ficaria saudável. Resolvido no `fly.toml` com `[checks.health.headers]`
   mandando `Host = "veloswallet.com.br"`.
 
-- [ ] **T6 — Conta e `flyctl`** *(do Pedro)*
+- [x] **T6 — Conta e `flyctl`** *(do Pedro)*
   Criar conta no Fly.io (pede cartão, mesmo no plano gratuito) e instalar o `flyctl` — **não está** nesta máquina.
 
-- [ ] **T7 — Criar o app, o volume e os segredos**
+- [x] **T7 — Criar o app, o volume e os segredos**
   ```bash
   fly auth login
   fly launch --no-deploy
@@ -53,11 +53,21 @@
   ```
   A connection string é a de dev com **`SSL Mode=VerifyFull`** (RN2), nunca `Require`.
 
-- [ ] **T8 — Primeiro deploy**
+- [x] **T8 — Primeiro deploy**
   `fly deploy`. *Pronto quando:* o health check fica verde e a URL do Fly abre o app.
 
-- [ ] **T9 — Domínio e certificado**
-  `fly certs add veloswallet.com.br` e os registros A/AAAA no Registro.br — **nos servidores reais da delegação** (`a.sec.dns.br` / `c.sec.dns.br`), não em `a.auto.dns.br` (lição [L38](../../LICOES.md)). Só o domínio nu; `www` ficou de fora.
+- [x] **T9a — Certificado e registros DNS** ✅ 2026-11-02
+  `flyctl certs add veloswallet.com.br` feito; na zona do Registro.br entraram, **sem tocar nos três do Resend**:
+
+  | Tipo | Nome | Dados |
+  |---|---|---|
+  | A | `veloswallet.com.br` | `66.241.124.195` (IPv4 partilhado) |
+  | AAAA | `veloswallet.com.br` | `2a09:8280:1::1e0:9be2:0` (IPv6 dedicado) |
+
+  O painel confirmou *"Zona DNS atualizada com sucesso!"*, mas a zona **ainda não publicou** — igual ao que aconteceu com os registros do Resend. Conferir nos **NS reais** (`a.sec.dns.br`), não em `a.auto.dns.br` (lição [L38](../../LICOES.md)).
+
+- [ ] **T9b — Esperar a publicação e validar o certificado**
+  `flyctl certs check veloswallet.com.br` até validar.
   *Pronto quando:* **CA1** — `https://veloswallet.com.br` abre com certificado válido.
 
 - [ ] **T10 — Supabase e Google**
