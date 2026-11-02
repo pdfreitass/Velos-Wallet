@@ -66,16 +66,29 @@
 
   O painel confirmou *"Zona DNS atualizada com sucesso!"*, mas a zona **ainda não publicou** — igual ao que aconteceu com os registros do Resend. Conferir nos **NS reais** (`a.sec.dns.br`), não em `a.auto.dns.br` (lição [L38](../../LICOES.md)).
 
-- [ ] **T9b — Esperar a publicação e validar o certificado**
-  `flyctl certs check veloswallet.com.br` até validar.
-  *Pronto quando:* **CA1** — `https://veloswallet.com.br` abre com certificado válido.
+- [x] **T9b — Publicação e certificado** ✅ 2026-11-02
+  A zona publicou e o `flyctl certs check` devolveu **`Status = Issued`**, CA **Let's Encrypt**, rsa+ecdsa.
+  **CA1 fechado:** `https://veloswallet.com.br` responde **200**, com `ssl_verify_result=0`, servido pelo IPv6 do Fly. O `http://` redireciona com **301**.
 
-- [ ] **T10 — Supabase e Google**
-  URLs de redirect no Supabase Auth: `https://veloswallet.com.br/auth/confirm` e `/auth/callback**`, **exatas, sem curinga de host**. Google OAuth fora do modo *Teste* — depende das páginas de política e termos (item **L1**), fora desta spec.
-  *Pronto quando:* **CA4** e **CA5**.
+- [x] **T10a — Supabase** ✅ 2026-11-02
+  *Site URL* passou a `https://veloswallet.com.br`. Nas *Redirect URLs* entraram `https://veloswallet.com.br/auth/confirm` e `https://veloswallet.com.br/auth/callback**`; o `http://localhost:3000/**` **ficou**, para o desenvolvimento continuar a funcionar.
+  **CA4 confirmado:** pedido de recuperação feito contra o domínio devolveu **202**, e o email que chegou traz `redirect_to=https://veloswallet.com.br/auth/confirm`. O fluxo completo já tinha sido validado hoje em localhost (T9 da spec 001); o link deste teste não foi consumido.
 
-- [ ] **T11 — Aceite**
-  **CA1 a CA9**. O **CA3** (continuar logado depois de um redeploy) é o que prova a RN3, e só se vê fazendo `fly deploy` duas vezes. O **CA6** (PWA) tem de ser no Chrome de verdade, não no navegador embutido.
+- [ ] **T10b — Google OAuth** *(bloqueado)*
+  Sair do modo *Teste* depende das páginas de política de privacidade e termos (item **L1** da auditoria), que estão fora desta spec. Até lá o login com Google só funciona para os *test users*, e o **CA5** fica por fechar.
+
+- [ ] **T11 — Aceite** *(parcial)*
+  | | |
+  |---|---|
+  | **CA1** certificado válido | ✅ |
+  | **CA2** entrar e ver os dados | ⏳ precisa do Pedro |
+  | **CA3** continuar logado após redeploy | ⏳ o mecanismo foi provado na T5 (mesma chave no volume); falta no ar |
+  | **CA4** recuperação com link do domínio | ✅ |
+  | **CA5** login com Google | ⛔ bloqueado pela T10b |
+  | **CA6** PWA instalável | ✅ service worker **`activated`** em `https://veloswallet.com.br/`, manifest em 200 — **destrava a Etapa 8** |
+  | **CA7** Host de outro domínio recusado | ✅ provado na T5 e no ar (`velos-wallet.fly.dev` → 400) |
+  | **CA8** sem segredos na imagem, sem root | ✅ provado na T5 |
+  | **CA9** limite por IP vê o IP do cliente | ⏳ por conferir no ar |
 
 - [ ] **T12 — Documentação**
   [ROADMAP](../../ROADMAP.md), [CHANGELOG](../../CHANGELOG.md), [LICOES](../../LICOES.md). Decidir o que fazer com a **Vercel**, que continua ligada ao repositório e não roda .NET.

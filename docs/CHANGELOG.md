@@ -6,6 +6,20 @@
 
 ## [Não lançado]
 
+### 2026-11-02 — 🚀 No ar em veloswallet.com.br
+#### Adicionado
+- **O Velos Wallet está publicado**: https://veloswallet.com.br, no Fly.io região `gru` (São Paulo), uma máquina, imagem de 55 MB, com volume para as chaves do Data Protection.
+- Certificado **Let's Encrypt** emitido e ativo; `http://` redireciona para `https://` com 301.
+- Registros **A** e **AAAA** na zona do Registro.br, apontando para o Fly, sem tocar nos três do Resend.
+- No Supabase, *Site URL* passou ao domínio e as *Redirect URLs* de produção entraram — mantendo o `localhost:3000` para desenvolvimento.
+- **A connection string de produção usa `SSL Mode=VerifyFull`**, com o certificado raiz do Supabase embarcado na imagem. O `Require` de antes cifrava mas não validava o servidor.
+#### Corrigido
+- **O PWA funciona.** Com HTTPS de verdade, o service worker fica `activated` e o manifest responde 200 — era o que faltava para a Etapa 8 sair do lugar.
+- **A recuperação de senha aponta para o domínio**: o email traz `redirect_to=https://veloswallet.com.br/auth/confirm`.
+#### Em aberto
+- **Login com Google** continua restrito aos *test users*: sair do modo *Teste* depende das páginas de política e termos (item **L1**).
+- Falta conferir no ar: entrar com a conta real, continuar logado depois de um redeploy, e o limite por IP enxergar o IP do cliente.
+
 ### 2026-11-02 — Host escolhido e deploy preparado (spec 011)
 #### Adicionado
 - **`Dockerfile`** de três estágios: build do front, build da API, imagem final enxuta. O `dist/` do Vite entra como `wwwroot`, para API e SPA viverem na mesma origem ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)). Roda como usuário sem privilégio.
