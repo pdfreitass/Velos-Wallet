@@ -12,8 +12,13 @@
 - Domínio adicionado ao **Resend** na região **São Paulo (`sa-east-1`)**, com **click tracking desligado** (ligado por padrão, reescreveria o link de uso único da recuperação de senha).
 - Três registros na zona DNS: o TXT do DKIM e os CNAME `rsend` e `send`. O `MX` de *receiving* ficou de fora de propósito — o app só envia, e um MX na raiz impediria uma caixa de email de verdade no domínio depois.
 - Chave de API do Resend com permissão **Sending access**, não Full access.
+- **Domínio verificado no Resend** e **email de verdade a sair** do `veloswallet.com.br`. A zona já estava publicada desde o início — quem dizia o contrário era a nossa conferência, feita contra `a.auto.dns.br` quando a delegação real é `a.sec.dns.br` / `c.sec.dns.br`. Faltava só clicar em *Verify DNS records*: publicar o DNS não verifica sozinho, e até o clique o Resend recusa todo envio com `550 domain is not verified`.
+- Com o SMTP próprio, o limite de email do Supabase subiu de `2/1h` para **30**.
+#### Corrigido
+- **T9 / CA7 da spec 001 validado**, aberto desde a Etapa 3 e nunca testado por limite de email. Os cinco passos passaram: email na caixa de entrada → link abre `/redefinir-senha` → `PUT /user` troca a senha → login com `grant_type: password` → o mesmo link devolve **403 `One-time token not found`**, e o app mostra *"Este link não é mais válido…"*. Com isso fica **validada a correção do `recovery.html`** de 2026-11-01 (o modelo montava `token_hash`; o `/auth/confirm` lê só `?code=`).
 #### Em aberto
-- A zona **ainda não publicou** no DNS; a verificação no Resend e o teste de ponta a ponta da recuperação de senha (T9) dependem disso.
+- **O email de auth sai com o template padrão do Supabase, em inglês.** Os modelos de `supabase/templates/` nunca foram publicados no painel (passo C3) — agora é possível, porque o Supabase exigia SMTP próprio. O `confirmation.html` ainda monta `token_hash` e precisa de revisão antes de ser publicado.
+- **Um link de recuperação foi consumido 54 s após o envio**, do IP do Pedro, antes de alguém o abrir. Suspeita de scanner de links (antivírus ou varredura do Gmail na entrega); uma única ocorrência, o link seguinte sobreviveu. Não está estabelecido — vigiar.
 
 ### 2026-11-01 — Segurança do pré-deploy
 #### Adicionado

@@ -36,7 +36,7 @@
 - Toda rota privada por padrão ([ADR 0015](adr/0015-rotas-privadas-por-padrao.md)), CSRF por header, limite por IP nas rotas de auth, cabeçalhos de segurança, redirect só para dentro do app
 - Revisões `security` e `qa` aprovadas com ressalvas; as ressalvas da etapa foram corrigidas, as de deploy estão na lista abaixo
 - 120 testes (Domain, Application, integração com o banco)
-- **Pendência conhecida:** CA7 (recuperação de ponta a ponta, com o email chegando) não foi testado, por causa do limite de email do servidor padrão do Supabase. O servidor já recusa a troca sem o link. Testar quando o limite permitir (pendência T9)
+- ~~**Pendência conhecida:** CA7 (recuperação de ponta a ponta)~~ ✅ **validado em 2026-11-02** (pendência T9), assim que o Resend passou a enviar: email na caixa de entrada → link abre `/redefinir-senha` → senha trocada → login com a senha nova → o mesmo link devolve 403
 
 ### Página inicial ([spec 003](specs/003-pagina-inicial/tasks.md))
 - Página pública em `/` (composição "Tudo converge"): as contas ligadas por fios ao iPhone desenhado em código, 4 telas trocáveis, seções com o iPhone fixo no desktop, faixa "Privado por padrão", fechamento "Sem loja de apps."
@@ -84,10 +84,10 @@ As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pe
 | O quê | Estado |
 |---|---|
 | **Domínio** | ✅ **`veloswallet.com.br`**, pago, no Registro.br, publicado, vence 01/11/2027. Registrado com CPF — não precisou de CNPJ. O `velos.com.br` já tinha dono |
-| **DNS** | Servidores do próprio Registro.br (`a.auto.dns.br` / `b.auto.dns.br`), em **modo avançado** |
+| **DNS** | Servidores do próprio Registro.br, em **modo avançado**. A delegação real é **`a.sec.dns.br` / `c.sec.dns.br`** — o painel menciona `a.auto.dns.br`, que *não* serve a zona (ver abaixo) |
 | **Resend** | ✅ Domínio adicionado, região **São Paulo (`sa-east-1`)**, **click tracking desligado** |
 | **Chave de API** | ✅ Criada com permissão **Sending access** (não Full access), colada por ti no SMTP do Supabase |
-| **Registros DNS** | ✅ Criados e salvos · ⏳ **ainda não publicaram** (ver abaixo) |
+| **Registros DNS** | ✅ Criados, salvos e **publicados** (conferido em 2026-11-02 nos NS reais e no `8.8.8.8`) |
 
 **Os três registros criados na zona** (conferidos valor a valor antes de salvar):
 
@@ -99,19 +99,40 @@ As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pe
 
 **O `MX @ → receive-sae1.forge.rmta.net` foi deixado de fora de propósito.** Ele pertence à seção *Enable receiving* do Resend, e o Velos só **envia**. Criá-lo faria todo email destinado a `@veloswallet.com.br` cair no Resend, impedindo uma caixa de verdade (Google Workspace, Zoho) nesse domínio depois.
 
-> ⏳ **Onde parou em 2026-11-02:** os três registros estão salvos e persistem no painel, mas **o DNS ainda não responde** — `nslookup` contra `a.auto.dns.br` devolve *Non-existent domain* depois de ~10 min de verificação. O Registro.br publica a zona em lotes. **Ao retomar: conferir primeiro se publicou**, antes de mexer em qualquer coisa:
+> ✅ **O DNS publicou** — conferido em 2026-11-02. A nota anterior dizia o contrário por **consultar os servidores errados**: o `veloswallet.com.br` está delegado a **`a.sec.dns.br` / `c.sec.dns.br`**, não a `a.auto.dns.br`. O `a.auto.dns.br` responde SOA para o domínio (dizendo `NS = a.auto/b.auto`), mas não serve a zona publicada — e devolve *Non-existent domain* para tudo, o que é indistinguível de "ainda não publicou".
+>
+> **Ao conferir DNS, descobrir a delegação primeiro:**
 > ```
-> nslookup -type=CNAME send.veloswallet.com.br a.auto.dns.br
-> nslookup -type=TXT resend._domainkey.veloswallet.com.br a.auto.dns.br
+> nslookup -type=NS veloswallet.com.br 8.8.8.8
+> nslookup -type=CNAME send.veloswallet.com.br a.sec.dns.br
+> nslookup -type=TXT resend._domainkey.veloswallet.com.br a.sec.dns.br
 > ```
-> Se continuar sem publicar depois de algumas horas, reabrir a zona no painel e conferir se os registros seguem lá.
+> Os três registros (`resend._domainkey`, `send`, `rsend`) respondem nos NS reais **e** no `8.8.8.8` público.
 
 ### O que falta, na ordem
 
-1. **Esperar a zona publicar** e então **verificar o domínio no Resend** (botão *I've added the records*).
-2. **Testar a recuperação de senha de ponta a ponta** — a pendência **T9**, aberta desde a Etapa 3 e nunca feita por limite de email do Supabase. É também o primeiro teste real da correção do `recovery.html` (2026-11-01). Pedir o link, abrir, trocar a senha, entrar com ela, e conferir que o link **não funciona de novo**.
-3. **Religar a confirmação de email** (Revisão 1 da spec 001) e publicar **os modelos** de `supabase/templates/` (passo C3) — desde 2026-10-13 o Supabase exige SMTP próprio para editar modelo. Rever o `confirmation.html`, que ainda monta `token_hash` à mão.
-4. **Escolher o host** (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md). **É o nó que falta**: sem ele não há endereço para apontar o domínio, nem `App__PublicOrigin`, nem como publicar o OAuth do Google.
+1. ~~**Verificar o domínio no Resend**~~ ✅ **feito em 2026-11-02, 11:22**. O domínio está **Verified**, região São Paulo, e o `POST /auth/v1/recover` passou a devolver **200** — o email sai.
+   > O botão *Verify DNS records* fica no **canto superior direito da página do domínio**, não na lista. Publicar o DNS **não** verifica sozinho: sem o clique o domínio fica em `Not Started` para sempre, e o Resend recusa todo envio com `550 "The veloswallet.com.br domain is not verified"`. Antes do clique, o T9 falhava com **500 `unexpected_failure`** no `/recover` e *"Não foi possível falar com o servidor de autenticação"* no front — a causa só aparecia nos **auth logs do Supabase** (lição [L39](LICOES.md)).
+   >
+   > Ao verificar, o **Resend Forge** passou sozinho de `Disabled` a `Enabled`. O *tracking metrics* segue **desconfigurado** (só o botão *Configure*), que é como tem de ficar: com click tracking o Resend reescreve os links e quebra o link de uso único ([L37](LICOES.md)).
+2. ~~**Testar a recuperação de senha de ponta a ponta** (**T9**)~~ ✅ **feito em 2026-11-02**. Aberta desde a Etapa 3, e o primeiro teste real da correção do `recovery.html` (2026-11-01) — que fica **validada**. Timeline dos auth logs:
+   >
+   > | Hora (UTC) | Evento | Resultado |
+   > |---|---|---|
+   > | 14:29:06 | `POST /recover` | **200** — email enviado |
+   > | 14:30:07 | `GET /verify` | **303**, token trocado por `?code=<uuid>` |
+   > | 14:30:14 | `POST /token` | **200**, `grant_type: pkce`, `provider_type: recovery` |
+   > | 14:31:13 | `PUT /user` | **200**, `user_modified` — senha trocada |
+   > | 14:31:28 | `GET /verify` (reuso) | **403** `One-time token not found` |
+   > | 14:33:33 | `POST /token` | **200**, `grant_type: password` — entrou com a senha nova |
+   >
+   > O email chegou na **caixa de entrada** (não spam), de `Velos Wallet <nao-responda@veloswallet.com.br>`. No reuso, o app encaminha para `/recuperar-senha?erro=link` e mostra *"Este link não é mais válido…"* (`ForgotPasswordForm.tsx:94`). O limite de email do Supabase subiu de `2/1h` para **30** quando o SMTP próprio entrou — era isso que mantinha o T9 parado.
+
+3. ⚠️ **O email de auth sai com o template padrão do Supabase, em inglês** (*"Reset your password"*). Os modelos de `supabase/templates/` nunca foram publicados no painel — é o passo **C3**, que até agora estava bloqueado porque o Supabase exigia SMTP próprio. O link funciona, mas o idioma contraria a regra do `CLAUDE.md`. Publicar o `recovery.html` (já corrigido); o `confirmation.html` **ainda monta `token_hash`** e precisa de revisão antes.
+
+4. 🔍 **Um link de recuperação foi consumido 54 s depois do envio**, a partir do IP do Pedro, antes de alguém o abrir (`/verify` 303 com `action: login` às 14:25:10, para um email de 14:24:16). Suspeita de scanner de links — antivírus na máquina ou varredura do Gmail na entrega. **Uma única ocorrência**, e o link seguinte sobreviveu 59 s, então não está estabelecido. Se voltar a acontecer é sério: queima o link antes de o usuário clicar, e a recuperação falha sem explicação para quem tiver o mesmo antivírus.
+5. **Religar a confirmação de email** (Revisão 1 da spec 001) e publicar **os modelos** de `supabase/templates/` (passo C3) — desde 2026-10-13 o Supabase exige SMTP próprio para editar modelo. Rever o `confirmation.html`, que ainda monta `token_hash` à mão.
+6. **Escolher o host** (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md). **É o nó que falta**: sem ele não há endereço para apontar o domínio, nem `App__PublicOrigin`, nem como publicar o OAuth do Google.
 
 > ⚠️ **A Vercel está ligada ao repositório** e gera preview em cada PR, mas o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) diz que **ela não roda .NET**: o preview é só o front, sem API, e não loga. Decidir se desliga.
 
@@ -127,7 +148,7 @@ Projeto `peak-responder-474615-i4`, cliente "Velos Wallet (web)". Status **Testa
 - `ForwardedHeaders` restrito ao proxy do host (`KnownProxies`/`KnownNetworks`), para o limite por IP ver o IP do cliente
 - Chaves do Data Protection persistidas (volume ou key vault): sem isso, reiniciar a API invalida os links de recuperação e o login com Google em andamento
 - Achados da auditoria de 2026-10-17 (T15 da spec 002): **SEC-002** ⚠️ **revisado em 2026-11-01: revogar de `anon` QUEBRA O LOGIN** — o `LoginLockoutStore` chama `reserve_login_attempt` com `AsAnonAsync`, antes de o usuário se autenticar. O que protege é **conferir a Data API desligada** no painel (sem ela, a chave publicável não alcança a função por HTTP); revogar só de `authenticated` é seguro e reduz superfície; ~~**SEC-004** CSP completa~~ ✅ **feita em 2026-11-01** (`ContentSecurityPolicy.cs`: o hash do script de tema sai do `index.html` servido, no arranque, nunca escrito à mão — o repo guarda LF e o Windows traz CRLF, e os hashes diferem); **SEC-005** ligar a proteção contra senhas vazadas no Supabase; ~~ligar Dependabot~~ ✅ `.github/dependabot.yml` em 2026-11-01 (npm do `web`, NuGet da `api`, actions do CI e o Remotion do vídeo; agrupado por ecossistema para não encher de PR); falta **ligar o secret scanning** no GitHub (*Settings → Code security*), que é do Pedro
-- ~~Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}`~~ ✅ corrigido em 2026-11-01: o modelo montava `token_hash`, que o `/auth/confirm` ignora (ele lê só `?code=` do PKCE), então **todo link de recuperação caía no erro**. Falta só o teste de ponta a ponta (T9), que depende do Resend. O `confirmation.html` segue com `token_hash` de propósito — rever no C1, quando a confirmação de email voltar
+- ~~Modelo `supabase/templates/recovery.html` com `{{ .ConfirmationURL }}`~~ ✅ corrigido em 2026-11-01: o modelo montava `token_hash`, que o `/auth/confirm` ignora (ele lê só `?code=` do PKCE), então **todo link de recuperação caía no erro**. O teste de ponta a ponta (T9) **validou a correção em 2026-11-02**. O `confirmation.html` segue com `token_hash` de propósito — rever no C1, quando a confirmação de email voltar
 
 ## Pendências técnicas
 
@@ -143,7 +164,7 @@ Coisas pequenas encontradas pelo caminho. Resolver na etapa indicada ou numa PR 
 | T7 | Fios das seções da página inicial apontam para o iPhone fixo, mas não chegam à linha exata da tela (revisor de acabamento: "parcial") | `web/src/features/landing/StepArtifacts.tsx` | **A DEFINIR** pelo Pedro |
 | ~~T8~~ | ~~Botões de 32–40 px abaixo do alvo de 44 px~~ | ✅ resolvida na T8 da spec 002 (Button com 44 px ou área estendida; `--sidebar-ring` já era #197A50) | — |
 | ~~T6~~ | ~~Logos originais duplicados na raiz~~ | ✅ movidos para `media/brand/` na limpeza de 2026-10-15 (`web/public/brand/` segue sendo o que o app usa) | — |
-| T9 | **CA7 da spec 001**: testar a recuperação de ponta a ponta (pedir o link, abrir, trocar a senha, entrar com ela, o link não funcionar de novo) com o email do Pedro | `/recuperar-senha` | quando o limite de email do Supabase permitir |
+| ~~T9~~ | ~~**CA7 da spec 001**: testar a recuperação de ponta a ponta~~ ✅ validado em 2026-11-02, com o Resend a enviar: os cinco passos passaram (ver a seção do pré-deploy) | `/recuperar-senha` | — |
 | ~~T10~~ | ~~Vermelho de despesa sobre o card escuro dava 3,71:1~~ | ✅ resolvida na T8 da spec 002 (`#F08084`: 4,68:1 no card; contrastes do card anotados em `globals.css`) | — |
 | ~~T11~~ | ✅ resolvida nas migrations `0009`/`0010` da spec 002. ~~FK `(category_id, user_id) on delete set null` da `0001` tentaria anular também o `user_id` (que é `not null`): apagar categoria com transações falha. Corrigir com `on delete set null (category_id)`~~ | migration nova | — |
 | T13 | `velos:last-account` e `velos:last-category:*` ficam no `localStorage` depois do "Sair" (o `useSignOut` faz `queryClient.clear()`, que não limpa o storage): num aparelho compartilhado o formulário do próximo usuário vem pré-preenchido com ids do anterior. Só GUIDs, sem dado financeiro, e a API rejeita — mas revela que existiu outra conta ali. Achado da revisão `security` da spec 006 | `web/src/lib/utils/last-used.ts`, `web/src/features/auth/api.ts` | `chore` ou quando mexer no logout |
