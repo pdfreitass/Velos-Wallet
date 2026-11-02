@@ -56,7 +56,13 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
-app.UseSecurityHeaders();
+
+// CSP montada uma vez, do index.html que será servido: o hash do script do tema sai do arquivo,
+// nunca de um valor escrito à mão (ver ContentSecurityPolicy). Em Development não há SPA em
+// wwwroot — quem serve o front é o Vite — e a política fica sem hash, o que basta para o JSON.
+var indexHtmlPath = Path.Combine(app.Environment.WebRootPath ?? string.Empty, "index.html");
+var indexHtml = File.Exists(indexHtmlPath) ? File.ReadAllText(indexHtmlPath) : null;
+app.UseSecurityHeaders(ContentSecurityPolicy.Build(indexHtml));
 if (!app.Environment.IsDevelopment())
 {
     // Só em produção: em localhost o HSTS grudaria no navegador e quebraria o http://localhost.
