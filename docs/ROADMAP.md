@@ -3,7 +3,7 @@
 > Leia no **início de cada sessão** para saber onde paramos.
 > Atualize **ao terminar cada feature** (junto com [CHANGELOG.md](CHANGELOG.md) e [LICOES.md](LICOES.md)).
 
-**Progresso do MVP: 3 de 8 etapas fechadas (38%); Etapas 4, 5 e 7 prontas no código, 6 com os critérios já conferidos; 8 (PWA) quase lá. As quatro esperam PR** — atualizado em 2026-11-01.
+**Progresso do MVP: 7 de 8 etapas fechadas (88%). As Etapas 4 a 7 entraram na `main` pelo [PR #5](https://github.com/pdfreitass/Velos-Wallet/pull/5) em 2026-11-01, com o CI verde. Falta a Etapa 8 (PWA) e o pré-deploy** — atualizado em 2026-11-02.
 
 > **Numeração:** são 8 etapas, a mesma que os comentários do código já usam ("Etapa 2" = banco, "Etapa 3" = autenticação, "Etapa 6" = dashboard). A identidade visual faz parte da Etapa 1. O checklist antigo do `CLAUDE.md` tinha 9 itens porque contava a identidade visual à parte.
 
@@ -46,18 +46,20 @@
 
 ## 🟡 Em andamento
 
-**Etapa 5 — Transações** ([spec 004](specs/004-transacoes/tasks.md)): **pronta no código** (T1–T9, revisões `security`/`qa` na T11, migration `0011` aplicada). Falta: T10 (critérios de aceite com login real) e a PR.
-
-**Etapa 6 — Dashboard** ([spec 005](specs/005-dashboard/tasks.md)): **pronta** (T1–T5; `0012` aplicada; revisões aprovadas). **CA1–CA7 conferidos no navegador com login real em 2026-11-01**, nos dois temas e em 375 px. Falta: a PR.
-
-**Etapa 7 — Metas** ([spec 006](specs/006-metas/tasks.md)): **pronta no código** (T1–T8; `0013` aplicada; revisões `security` aprovada e `qa` com as ressalvas corrigidas; CA1–CA8 conferidos no navegador com login real, nos dois temas, em 375 e 1440 px). Falta: a PR.
-
 **Etapa 8 — PWA** ([spec 009](specs/009-pwa/tasks.md)): T1–T5 feitas (ícones, manifest, `index.html`, service worker, instalável confirmado pelo Pedro). Faltam: o teste offline (CA6), aparelhos reais (T6), as revisões (T7) e a documentação (T8).
 
-**Etapa 4 — Contas e categorias** ([spec 002](specs/002-contas-e-categorias/tasks.md)): **pronta no código** (T1–T13, T15–T17). Faltam: **T14** (critérios de aceite com login real, IDOR com duas contas, CA6b/CA10 com movimentações por SQL e os testes de integração) e **T18** (PR para a `main`).
+> **Atenção ao testar o PWA:** o navegador embutido do Claude **não registra service worker** — falha sempre com *"An unknown error occurred when fetching the script"*. Testar no Chrome de verdade. Confirmado em 2026-11-01: lá o SW chega a `activated` normalmente, com a CSP completa em toda resposta.
 
-- API de contas e categorias com RLS e filtro por `user_id`; navegação do app (barra inferior / menu lateral); telas de contas e categorias com os estados de carregando, vazio e erro; `MoneyInput`, `CategoryBadge` e a paleta com contraste medido nos dois temas; [ADR 0017](adr/0017-excluir-conta-apaga-movimentacoes.md)
-- Auditoria de segurança (T15): nenhum crítico ou alto; SEC-001 e SEC-003 corrigidos; SEC-002, SEC-004 e SEC-005 na lista de deploy abaixo
+**Pré-deploy** (ver a seção abaixo): o domínio foi comprado e o Resend está configurado. O que falta é a **escolha do host** (Azure *Brazil South* ou Fly.io `gru`), que destrava o resto.
+
+### Critérios de aceite que nunca foram rodados
+
+Entraram na `main` sem esse passo. Não bloqueiam nada hoje, mas são dívida:
+
+- **T14 da [spec 002](specs/002-contas-e-categorias/tasks.md)** (Etapa 4): aceite com login real, IDOR com duas contas, CA6b/CA10 com movimentações por SQL.
+- **T10 da [spec 004](specs/004-transacoes/tasks.md)** (Etapa 5): aceite com login real.
+
+Os da Etapa 6 (CA1–CA7) e da Etapa 7 (CA1–CA8) **foram** conferidos no navegador em 2026-11-01, nos dois temas e em 375 px.
 
 ## ⬜ Pendente
 
@@ -76,8 +78,50 @@ A [spec 007 — Fundação](specs/007-fundacao/spec.md), escrita em 19/10 a part
 As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pedro decide qual vale.** Até lá, o ADR 0017 é o que está no ar. O resto da spec 007 — Fundação já foi entregue por outros caminhos ou virou as pendências T15 e T16; o estado item a item está no topo daquela spec.
 
 **Antes do deploy em produção** (sem etapa própria ainda — **A DEFINIR** quando entra):
-- Escolher o host do app (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md); HTTPS/HSTS e connection string como variável de ambiente
-- Resend + domínio próprio e **religar a confirmação de email** (Revisão 1 da spec 001). Junto com o Resend vão **os modelos de email** de `supabase/templates/` (passo C3): desde 2026-10-13 o Supabase exige SMTP próprio para editar modelo, então até lá o email de recuperação sai no padrão dele, em inglês e sem logo
+
+### Infraestrutura já contratada (2026-11-01/02)
+
+| O quê | Estado |
+|---|---|
+| **Domínio** | ✅ **`veloswallet.com.br`**, pago, no Registro.br, publicado, vence 01/11/2027. Registrado com CPF — não precisou de CNPJ. O `velos.com.br` já tinha dono |
+| **DNS** | Servidores do próprio Registro.br (`a.auto.dns.br` / `b.auto.dns.br`), em **modo avançado** |
+| **Resend** | ✅ Domínio adicionado, região **São Paulo (`sa-east-1`)**, **click tracking desligado** |
+| **Chave de API** | ✅ Criada com permissão **Sending access** (não Full access), colada por ti no SMTP do Supabase |
+| **Registros DNS** | ✅ Criados e salvos · ⏳ **ainda não publicaram** (ver abaixo) |
+
+**Os três registros criados na zona** (conferidos valor a valor antes de salvar):
+
+| Tipo | Nome | Conteúdo |
+|---|---|---|
+| TXT | `resend._domainkey` | a chave DKIM (219 caracteres; o Registro.br põe as aspas sozinho) |
+| CNAME | `rsend` | `rsend-sae1.forge.rmta.net` |
+| CNAME | `send` | `send.forge.rmta.net` |
+
+**O `MX @ → receive-sae1.forge.rmta.net` foi deixado de fora de propósito.** Ele pertence à seção *Enable receiving* do Resend, e o Velos só **envia**. Criá-lo faria todo email destinado a `@veloswallet.com.br` cair no Resend, impedindo uma caixa de verdade (Google Workspace, Zoho) nesse domínio depois.
+
+> ⏳ **Onde parou em 2026-11-02:** os três registros estão salvos e persistem no painel, mas **o DNS ainda não responde** — `nslookup` contra `a.auto.dns.br` devolve *Non-existent domain* depois de ~10 min de verificação. O Registro.br publica a zona em lotes. **Ao retomar: conferir primeiro se publicou**, antes de mexer em qualquer coisa:
+> ```
+> nslookup -type=CNAME send.veloswallet.com.br a.auto.dns.br
+> nslookup -type=TXT resend._domainkey.veloswallet.com.br a.auto.dns.br
+> ```
+> Se continuar sem publicar depois de algumas horas, reabrir a zona no painel e conferir se os registros seguem lá.
+
+### O que falta, na ordem
+
+1. **Esperar a zona publicar** e então **verificar o domínio no Resend** (botão *I've added the records*).
+2. **Testar a recuperação de senha de ponta a ponta** — a pendência **T9**, aberta desde a Etapa 3 e nunca feita por limite de email do Supabase. É também o primeiro teste real da correção do `recovery.html` (2026-11-01). Pedir o link, abrir, trocar a senha, entrar com ela, e conferir que o link **não funciona de novo**.
+3. **Religar a confirmação de email** (Revisão 1 da spec 001) e publicar **os modelos** de `supabase/templates/` (passo C3) — desde 2026-10-13 o Supabase exige SMTP próprio para editar modelo. Rever o `confirmation.html`, que ainda monta `token_hash` à mão.
+4. **Escolher o host** (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md). **É o nó que falta**: sem ele não há endereço para apontar o domínio, nem `App__PublicOrigin`, nem como publicar o OAuth do Google.
+
+> ⚠️ **A Vercel está ligada ao repositório** e gera preview em cada PR, mas o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) diz que **ela não roda .NET**: o preview é só o front, sem API, e não loga. Decidir se desliga.
+
+### Google OAuth — conferido em 2026-11-01
+
+Projeto `peak-responder-474615-i4`, cliente "Velos Wallet (web)". Status **Testando**, tipo Externo.
+
+- **Escopos sensíveis e restritos: zero.** O Supabase usa só `openid`, `email` e `profile`. O próprio painel diz: *"A verificação não é necessária porque seu app está no Status de teste."* **Não há verificação de semanas** — publicar é imediato.
+- **Enquanto estiver em Testando, só os emails cadastrados como test users entram com Google** — e o contador mostra **0**. Vale conferir se o botão funciona para alguém além do dono.
+- **O botão "Publicar app" está bloqueado** por três campos vazios no *Branding*: página inicial, política de privacidade e termos de serviço. Os três dependem do **domínio no ar** e das páginas, que são o item **L1 (LGPD)** da auditoria.
 - URLs de redirect do Supabase Auth para o domínio final, **exatas e sem curinga de host** (`https://<domínio>/auth/confirm` e `https://<domínio>/auth/callback**`); Google OAuth fora do modo *Teste*
 - Variáveis do host: `App__PublicOrigin=https://<domínio>`, `AllowedHosts=<domínio>`, `ConnectionStrings__Velos` com **`SSL Mode=VerifyFull`** e o certificado do Supabase (hoje `Require`, que cifra mas não valida o servidor)
 - `ForwardedHeaders` restrito ao proxy do host (`KnownProxies`/`KnownNetworks`), para o limite por IP ver o IP do cliente

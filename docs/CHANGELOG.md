@@ -6,6 +6,23 @@
 
 ## [Não lançado]
 
+### 2026-11-02 — Domínio próprio e email de verdade (pré-deploy)
+#### Adicionado
+- **`veloswallet.com.br`** registrado no Registro.br (CPF, sem CNPJ), publicado, vencendo em 01/11/2027. O `velos.com.br` já tinha dono.
+- Domínio adicionado ao **Resend** na região **São Paulo (`sa-east-1`)**, com **click tracking desligado** (ligado por padrão, reescreveria o link de uso único da recuperação de senha).
+- Três registros na zona DNS: o TXT do DKIM e os CNAME `rsend` e `send`. O `MX` de *receiving* ficou de fora de propósito — o app só envia, e um MX na raiz impediria uma caixa de email de verdade no domínio depois.
+- Chave de API do Resend com permissão **Sending access**, não Full access.
+#### Em aberto
+- A zona **ainda não publicou** no DNS; a verificação no Resend e o teste de ponta a ponta da recuperação de senha (T9) dependem disso.
+
+### 2026-11-01 — Segurança do pré-deploy
+#### Adicionado
+- **CSP completa** (SEC-004), com o hash do script de tema calculado no arranque a partir do `index.html` servido. Escrevê-lo à mão quebraria em produção: o repositório guarda LF, o Windows traz CRLF, e os hashes diferem — e o navegador normaliza CRLF para LF ao parsear, então o hash é sempre o do texto com LF. 12 testes novos.
+- **Dependabot** nos quatro manifestos (npm do `web`, NuGet da `api`, actions do CI e o Remotion do vídeo), agrupado por ecossistema.
+#### Corrigido
+- **O link de recuperação de senha estava quebrado.** O modelo montava `?token_hash=`, e o `/auth/confirm` lê só `?code=` do PKCE: todo link caía em `/recuperar-senha?erro=link`. Passou a usar `{{ .ConfirmationURL }}`. O README da pasta afirmava que isso quebraria a recuperação — a afirmação descrevia o fluxo implícito e tinha caducado.
+- **SEC-002 estava escrito de um jeito que derrubaria o login.** Revogar `execute` de `anon` em `reserve_login_attempt` quebra o fluxo: o `LoginLockoutStore` chama a função como `anon`, antes de o usuário se autenticar. O que protege é a Data API desligada.
+
 ### 2026-11-01 — Etapa 7: metas (spec 006)
 #### Adicionado
 - Telas das metas: `/metas` (lista em andamento e atingidas, na ordem da RN8), `/metas/nova`, `/metas/:id` (progresso, ritmo e aportes) e `/metas/:id/editar`, todas em `lazy()`.

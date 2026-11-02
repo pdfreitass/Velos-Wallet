@@ -7,6 +7,30 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L37 — Rastreamento de cliques quebra link de uso único
+*2026-11-02 · pré-deploy, Resend*
+
+- **O que aconteceu:** ao adicionar o domínio no Resend, o **click tracking vinha ligado por padrão**. Ele reescreve todo link do email para passar por um domínio de rastreio antes de redirecionar.
+- **Por que importa aqui:** o link de recuperação de senha é **de uso único**. Qualquer scanner de email corporativo, antivírus ou preview de link que siga o endereço **consome o código** — e o clique da pessoa falha. É uma das causas clássicas de "o link não funciona". Fora que coletar cliques contraria o princípio *"Privado por padrão"* da [VISAO](VISAO.md).
+- **Como evitar:** em email transacional, click tracking e open tracking **desligados**. Conferir na criação do domínio, não depois.
+- **Regra em:** painel do Resend, domínio `veloswallet.com.br` → *Advanced options*.
+
+## L36 — O navegador embutido do Claude não registra service worker
+*2026-11-01 · spec 009 (PWA) e SEC-004*
+
+- **O que aconteceu:** depois de ligar a CSP completa, o service worker parou de registrar com *"An unknown error occurred when fetching the script"*. Culpei a CSP e mudei o middleware para mandar a política só no HTML.
+- **Por que:** era falso. No **Chrome de verdade** o SW registra normalmente, **com** a CSP em toda resposta — o navegador embutido simplesmente não suporta service worker. A mudança foi revertida.
+- **Como evitar:** PWA e service worker se testam no Chrome, nunca no painel embutido. E mudança de comportamento justificada por hipótese não confirmada **se reverte**, não se mantém "porque também é defensável".
+- **Regra em:** `api/src/Velos.Api/Configuration/SecurityHeadersMiddleware.cs` (a CSP vai em toda resposta, como a revisão de segurança anterior exigia).
+
+## L35 — Modo avançado do Registro.br tem dois pedágios
+*2026-11-01/02 · pré-deploy, DNS*
+
+- **O que aconteceu:** criar TXT e CNAME exige o **modo avançado** da zona. Ao ligar, (a) a volta ao modo básico fica **travada por 2 horas** e (b) o domínio entra em **"em transição"** e recusa registros por alguns minutos.
+- **E depois:** salvar **não é** publicar. Os registros persistem no painel na hora, mas o DNS só responde quando o Registro.br publica a zona, em lotes.
+- **Como evitar:** conferir no servidor autoritativo, não no resolver local — `nslookup -type=TXT <nome> a.auto.dns.br`. E conferir os valores no DOM antes de salvar: a chave DKIM aparece truncada na tela, e é onde um erro passa despercebido.
+- **Regra em:** [ROADMAP](ROADMAP.md), seção "Antes do deploy em produção".
+
 ## L34 — Hover com opacidade derruba o contraste que o estado normal tinha
 *2026-11-01 · spec 006, T8*
 
