@@ -6,6 +6,18 @@
 
 ## [Não lançado]
 
+### 2026-11-02 — Host escolhido e deploy preparado (spec 011)
+#### Adicionado
+- **`Dockerfile`** de três estágios: build do front, build da API, imagem final enxuta. O `dist/` do Vite entra como `wwwroot`, para API e SPA viverem na mesma origem ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)). Roda como usuário sem privilégio.
+- **`.dockerignore`** que, além de acelerar o build, é rede de segurança: o que não entra no contexto não pode acabar dentro da imagem.
+- **`fly.toml`** para a região `gru` (São Paulo), com volume para as chaves do Data Protection e health check em `/api/health` — não em `/health`, que cai no fallback do SPA e devolveria 200 mesmo com a API quebrada.
+- **`ProductionSetup.cs`**: chaves do Data Protection persistidas com nome de aplicação fixo, e `ForwardedHeaders` aceito **só** da rede privada do Fly. Sem configuração nenhum dos dois faz nada, então dev e testes seguem iguais.
+#### Decidido
+- **Fly.io `gru`** como host ([ADR 0020](adr/0020-host-fly-io-gru.md)), fechando o buraco que o ADR 0013 tinha deixado. O Azure faria o mesmo com muito mais cerimônia para um app de um processo e um usuário.
+- Só o **domínio nu**: `www` fica de fora.
+#### Em aberto
+- **Nada está no ar ainda.** Falta conta no Fly.io e o `flyctl` instalado, que são do Pedro. A imagem também ainda não foi construída localmente: o Docker Desktop não estava a correr, então o `Dockerfile` está escrito mas não provado.
+
 ### 2026-11-02 — Emails com a cara do Velos (passo C3)
 #### Alterado
 - **O email de redefinição de senha passou a ser o nosso**, publicado no painel do Supabase: assunto `Redefinição de senha — Velos Wallet`, logo no topo, texto em português e botão em **verde profundo** (a marca, nunca o verde vivo). Até aqui saía o modelo padrão do Supabase, em inglês — o SMTP próprio é que destravou a edição.

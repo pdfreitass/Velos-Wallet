@@ -31,6 +31,10 @@ builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = 
     context.ProblemDetails.Extensions.TryAdd("code", ApiProblems.DefaultCode(context.ProblemDetails.Status)));
 builder.Services.AddVelosAuthentication(builder.Configuration);
 builder.Services.AddVelosRateLimiting();
+// Produção (spec 011): chaves do cookie num volume, para o redeploy não deslogar ninguém, e
+// cabeçalhos de proxy aceitos só do proxy do host. Sem a configuração, nenhum dos dois faz nada.
+builder.Services.AddVelosDataProtection(builder.Configuration);
+builder.Services.AddVelosForwardedHeaders();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, HttpUserContext>();
@@ -53,6 +57,11 @@ var supabase = new SupabaseSettings(
 builder.Services.AddInfrastructure(connectionString, supabase);
 
 var app = builder.Build();
+
+// Primeiro de todos: o resto do pipeline (limite por IP, HSTS, links absolutos) tem de enxergar o
+// IP e o esquema do cliente, não os do proxy. Em dev não há proxy, e os cabeçalhos de um
+// atacante não vêm da rede conhecida, então isto fica sem efeito.
+app.UseForwardedHeaders();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();

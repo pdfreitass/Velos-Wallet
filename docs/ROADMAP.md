@@ -143,7 +143,9 @@ As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pe
    > **Só a aba *Reset password* entrou**, e de propósito. As de *Invite*, *Magic link*, *Change email* e *Reauthentication* o app não usa. A de *Confirm signup* fica para o C1 — ver o item seguinte.
 
 6. ⚠️ **Religar a confirmação de email** (Revisão 1 da spec 001, passo **C1**). **Não é só ligar um interruptor:** o `confirmation.html` aponta para `/auth/confirm?token_hash=…`, e isso falha por duas razões — esse endpoint lê **só** `?code=`, e além disso **é a rota da redefinição de senha** (lê o `resetVerifier`, manda para `/redefinir-senha`). Não existe hoje rota nenhuma que confirme um cadastro. O C1 tem de **construir o fluxo** (rota própria, PKCE, destino depois de confirmar) e só então ajustar o modelo.
-7. **Escolher o host** (API + SPA num processo só) em São Paulo: Azure *Brazil South* ou Fly.io `gru` — [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md). **É o nó que falta**: sem ele não há endereço para apontar o domínio, nem `App__PublicOrigin`, nem como publicar o OAuth do Google.
+7. 🟡 ~~**Escolher o host**~~ ✅ decidido em 2026-11-02: **Fly.io `gru`** ([ADR 0020](adr/0020-host-fly-io-gru.md)). O deploy em si é a [spec 011](specs/011-deploy/spec.md), **em andamento**: `Dockerfile`, `.dockerignore`, `fly.toml` e os ajustes de produção da API (chaves do Data Protection persistidas, `ForwardedHeaders` restrito ao proxy) estão **prontos e commitados**.
+   > **Falta o que depende do Pedro:** criar conta no Fly (pede cartão, mesmo no plano gratuito) e instalar o `flyctl`, que não está na máquina. Depois: `fly launch`, volume, segredos, `fly deploy`, certificado e os registros A/AAAA. Só o domínio nu — `www` ficou de fora.
+   > A imagem ainda **não foi construída localmente** (o Docker Desktop não estava a correr), então o `Dockerfile` está escrito mas não provado.
 
 > ⚠️ **A Vercel está ligada ao repositório** e gera preview em cada PR, mas o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) diz que **ela não roda .NET**: o preview é só o front, sem API, e não loga. Decidir se desliga.
 
