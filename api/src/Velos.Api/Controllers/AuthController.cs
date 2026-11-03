@@ -17,6 +17,8 @@ namespace Velos.Api.Controllers;
 
 public sealed record SignUpRequest(string? Name, string? Email, string? Password, string? ConfirmPassword);
 
+public sealed record ResendSignUpConfirmationRequest(string? Email);
+
 public sealed record SignInRequest(string? Email, string? Password);
 
 public sealed record PasswordResetRequest(string? Email);
@@ -64,6 +66,39 @@ public sealed class AuthController : ControllerBase
         return StatusCode(StatusCodes.Status201Created);
     }
 
+    /// <summary>
+    /// Reenvia o email de confirmação de cadastro (spec 013, RN4). Resposta NEUTRA: 202 tanto para
+    /// cadastro pendente quanto para email sem cadastro — e o verifier novo substitui o anterior no
+    /// cookie httpOnly, então o link antigo morre (RN2). Exceção à neutralidade: limite de envios e
+    /// Supabase fora do ar sobem como erro, porque fingir "enviamos" com o serviço fora seria mentir.
+    /// </summary>
+    [HttpPost("sign-up/resend")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
+    public async Task<IActionResult> ResendSignUpConfirmation(
+        ResendSignUpConfirmationRequest request,
+        [FromServices] RequestSignUpConfirmationHandler handler,
+        [FromServices] AuthFlowCookies cookies,
+        [FromServices] PublicOrigin origin,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Da configuração, nunca do Host da request (ver PublicOrigin).
+        var redirectTo = origin.Url("/auth/confirmar-cadastro");
+
+        var result = await handler.HandleAsync(
+            new RequestSignUpConfirmationCommand(request.Email ?? ""), redirectTo, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return this.ToProblem(result.Error!);
+        }
+
+        cookies.WriteSignupVerifier(HttpContext, result.Value.CodeVerifier);
+        return Accepted();
+    }
+
     [HttpPost("sign-in")]
     [AllowAnonymous]
     [EnableRateLimiting(RateLimitingSetup.Auth)]
@@ -100,6 +135,7 @@ public sealed class AuthController : ControllerBase
         cookies.ClearTicket(HttpContext);
         cookies.ClearResetVerifier(HttpContext);
         cookies.ClearOAuthVerifier(HttpContext);
+        cookies.ClearSignupVerifier(HttpContext);
         return NoContent();
     }
 

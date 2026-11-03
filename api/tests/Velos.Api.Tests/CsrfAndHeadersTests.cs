@@ -9,6 +9,7 @@ public sealed class CsrfAndHeadersTests(ApiFactory factory) : IClassFixture<ApiF
 {
     [Theory]
     [InlineData("POST", "/api/auth/sign-in")]
+    [InlineData("POST", "/api/auth/sign-up/resend")]
     [InlineData("PUT", "/api/auth/password")]
     [InlineData("DELETE", "/api/qualquer-coisa")]
     public async Task Mutation_without_the_csrf_header_is_refused(string method, string path)

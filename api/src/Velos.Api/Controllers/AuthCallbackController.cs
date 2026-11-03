@@ -5,6 +5,7 @@ using Velos.Api.Auth;
 using Velos.Api.Configuration;
 using Velos.Application.Auth.Google;
 using Velos.Application.Auth.PasswordReset;
+using Velos.Application.Auth.SignUp;
 using Velos.Application.Common;
 
 namespace Velos.Api.Controllers;
@@ -25,6 +26,12 @@ public sealed class AuthCallbackController : ControllerBase
 
     /// <summary>Google cancelado ou recusado.</summary>
     private const string GoogleErrorPage = "/auth/erro?motivo=google";
+
+    /// <summary>Cadastro confirmado: quem clicou no link já volta logado (RN3 da spec 013).</summary>
+    private const string SignUpConfirmedPage = "/painel";
+
+    /// <summary>Link de cadastro velho, já usado ou aberto em outro navegador: pedir outro, com o aviso na tela.</summary>
+    private const string SignUpRetryPage = "/entrar?erro=confirmacao";
 
     [HttpGet("confirm")]
     [AllowAnonymous]
@@ -49,6 +56,36 @@ public sealed class AuthCallbackController : ControllerBase
         SessionCookies.Write(HttpContext, result.Value);
         cookies.WriteTicket(HttpContext, result.Value.User.Id);
         return Redirect(ResetPage);
+    }
+
+    /// <summary>
+    /// Volta do link do email de confirmação de cadastro (spec 013). Mesmo molde do reset: lê o
+    /// <c>code</c> da query e o verifier do cookie PRÓPRIO do cadastro, consome o verifier sempre
+    /// (link de uso único, dê certo ou não) e troca pela sessão. Sucesso: já logado em /painel.
+    /// Falha (link velho, usado, aberto em outro navegador): /entrar?erro=confirmacao.
+    /// </summary>
+    [HttpGet("confirmar-cadastro")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingSetup.Auth)]
+    public async Task<IActionResult> ConfirmSignUp(
+        [FromQuery] string? code,
+        [FromServices] ConfirmSignUpHandler handler,
+        [FromServices] AuthFlowCookies cookies,
+        CancellationToken cancellationToken)
+    {
+        var verifier = cookies.ReadSignupVerifier(HttpContext);
+
+        // Uso único: o verifier cai aqui, dê certo ou não. Um link reaberto não tenta de novo.
+        cookies.ClearSignupVerifier(HttpContext);
+
+        var result = await handler.HandleAsync(code, verifier, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return Redirect(SignUpRetryPage);
+        }
+
+        SessionCookies.Write(HttpContext, result.Value);
+        return Redirect(SignUpConfirmedPage);
     }
 
     /// <summary>

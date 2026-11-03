@@ -30,6 +30,8 @@ public static class DependencyInjection
         services.AddScoped<RequestPasswordResetHandler>();
         services.AddScoped<ConfirmPasswordResetHandler>();
         services.AddScoped<ChangePasswordHandler>();
+        services.AddScoped<RequestSignUpConfirmationHandler>();
+        services.AddScoped<ConfirmSignUpHandler>();
         services.AddScoped<StartGoogleSignInHandler>();
         services.AddScoped<CompleteGoogleSignInHandler>();
 
