@@ -6,6 +6,16 @@
 
 ## [Não lançado]
 
+### 2026-11-03 — E2E com Playwright + correção do offline (ADR 0022)
+#### Adicionado
+- **Suíte E2E** em `web/e2e/` com Playwright ([ADR 0022](adr/0022-testes-e2e-com-playwright.md)), em dois projetos: **`readonly`** (manifest, `sw.js`, ícones, service worker sem cache e instalabilidade — roda em todo CI contra a produção) e **`probe`** (conta descartável: CA9 da spec 012, `aria-live` estrutural e o CA6 offline, com limpeza dos dados de sonda no fim; roda sob demanda).
+- Scripts `test:e2e`, `test:e2e:readonly` e `test:e2e:probe`; job **`e2e`** no CI (só leitura, com artefato do relatório em falha).
+#### Corrigido
+- **CA6 da spec 009 (offline)**: sem internet, toda tela nova ficava presa em "Carregando…" para sempre — o TanStack Query no padrão `online` pausa qualquer query nova quando `navigator.onLine` é falso. `networkMode: "always"` em queries e mutações; agora a tela falha rápido e mostra o estado de erro com "Tentar de novo". Preso por teste de unidade.
+#### Pendente
+- O E2E `probe` do CA6 fica verde **depois do deploy** dessa correção (a produção ainda serve o código antigo).
+- Aparelhos reais (CA3–CA5) e **ouvir** o `aria-live` num leitor de tela continuam manuais.
+
 ### 2026-11-03 — Backup do banco (ADR 0021)
 #### Adicionado
 - Workflow **`backup.yml`**: todo dia às **03:00 UTC (00:00 em São Paulo)** e sob demanda, o banco é despejado com `pg_dump` pelo pooler de sessão, o arquivo é conferido e **cifrado com GPG (AES256)** antes de virar artefato do Actions.

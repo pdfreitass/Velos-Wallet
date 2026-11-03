@@ -80,7 +80,7 @@ rodando em 375 px, com dados semeados nos três cenários numa conta de teste, d
 - [x] **CA8** — Um corte de 100% é aceito; um de 0% não, com mensagem em português. · *testes dos dois lados; na tela o `input[type=range]` não deixa chegar a 0*
 - [x] **CA9** — A categoria "Sem categoria" pode ser simulada (RN9). · *navegador + teste* — conferido em 2026-11-03 com 3 meses de despesa numa categoria apagada depois dos lançamentos, em 375 px e nos dois temas: a tela mostra o rótulo com o círculo "?" e simula (média de R$ 400,00 → 20% = +R$ 80,00/mês)
 - [x] **CA-seg** — Um usuário não consegue simular sobre dados de outro: a média vem de view com `security_invoker` e a query filtra pelo usuário autenticado (RLS). · *teste de integração com dois usuários reais*
-- [x] **CA-a11y** — Funciona em 375 px, nos dois temas, nenhuma informação depende só da cor, e o resultado é anunciado a leitor de tela quando muda. · *375 px e os dois temas vistos; o `aria-live` está no código mas **não foi ouvido num leitor de tela***
+- [x] **CA-a11y** — Funciona em 375 px, nos dois temas, nenhuma informação depende só da cor, e o resultado é anunciado a leitor de tela quando muda. · *375 px e os dois temas vistos; o `aria-live` está no código mas **não foi ouvido num leitor de tela**. Em 2026-11-03 a parte estrutural passou a ser presa pelo E2E `probe` ([ADR 0022](../../adr/0022-testes-e2e-com-playwright.md)): a região `aria-live="polite"` muda junto com o corte (20% → 30%), sem ida à rede. O "ouvido" continua manual*
 - [x] **CA-build** — `dotnet build api`, `dotnet test api`, `npm run typecheck`, `npm run lint` e `npm run build` passam. · *386 testes na API, 58 no front, 0 falhas*
 
 ## Perguntas em aberto
