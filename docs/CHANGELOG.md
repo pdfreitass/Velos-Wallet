@@ -6,6 +6,24 @@
 
 ## [Não lançado]
 
+### 2026-11-03 — "E se você não tivesse gastado?" (spec 012)
+#### Adicionado
+- **Simulação de corte** em `/simular`: escolher uma categoria, cortar 10%, 20%, 30% ou um percentual livre, e ver quanto sobraria por mês, em 6 e em 12 meses. Primeira ideia a sair do [caderno](IDEIAS.md) (era a **I5**).
+- **Botão "Transformar em meta"**, que abre `/metas/nova` já preenchida com nome, valor e prazo de 12 meses — e **não salva nada** até a pessoa confirmar ali. O `/metas/nova` passou a aceitar `?nome=` e `?valor=`; sem eles, nada muda.
+- Entrada pelo bloco "Gastos por categoria" do Início, ligando o que o app já mostra ao que ele passa a sugerir.
+- `GET /api/simulation/base`: a média mensal de despesa por categoria, somada no banco.
+
+#### Decisões que valem relembrar
+- **A base é a média dos 3 meses completos anteriores**, não o mês corrente — que está incompleto e puxaria a média para baixo todo dia 1º.
+- **Sem dado, sem número.** Com zero meses completos a tela diz que ainda não dá para simular; com 1 ou 2, simula e avisa em quantos meses a média se apoia. Hoje o estado normal é o primeiro.
+- **Projeção não é promessa**: os valores de 6 e 12 meses vêm sempre com o "se" visível.
+- **Sem migration e sem dependência nova** (nem NuGet nem npm). A janela de meses depende de "hoje em São Paulo", e esse fuso já tem fonte única no `TransactionRules` — uma view teria de repetir `America/Sao_Paulo` no SQL.
+
+#### Em aberto
+- **CA9 não foi conferido na tela**: "Sem categoria" é tratada no código e nos testes, mas não houve despesa sem categoria nos dados semeados.
+- O `aria-live` do resultado está no código, mas não foi ouvido num leitor de tela.
+- A janela de 3 meses é um palpite informado. Só se calibra com uso real.
+
 ### 2026-11-02 — 🚀 No ar em veloswallet.com.br
 #### Adicionado
 - **O Velos Wallet está publicado**: https://veloswallet.com.br, no Fly.io região `gru` (São Paulo), uma máquina, imagem de 55 MB, com volume para as chaves do Data Protection.

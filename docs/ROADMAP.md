@@ -52,6 +52,15 @@
 - Sem dependência nova — `conic-gradient` em CSS ([ADR 0019](adr/0019-rosca-de-categorias-em-css.md), que revê o desenho do [0018](adr/0018-grafico-de-categorias-sem-biblioteca.md) e mantém a regra de não instalar biblioteca de gráfico).
 - **CA1–CA8, CA-a11y e CA-build conferidos**, incluindo o caminho do agrupamento, com despesas de sonda criadas e apagadas em novembro.
 
+### Simulação de corte ([spec 012](specs/012-simulacao-de-corte/spec.md))
+*2026-11-03 — primeira ideia a sair do [caderno](IDEIAS.md) (era a I5)*
+
+- `/simular`: escolher a categoria, cortar 10/20/30% ou livre, e ver quanto sobraria **por mês, em 6 e em 12 meses**. O resultado muda em memória, sem ir à rede.
+- **"Transformar em meta"** abre `/metas/nova` preenchida — e não salva nada até a pessoa confirmar.
+- A base é a **média dos 3 meses completos anteriores** (o mês corrente fica fora). Sem mês completo, a tela diz que ainda não dá para simular, em vez de mostrar número fraco; com 1 ou 2, avisa em quantos meses a média se apoia.
+- **Sem migration e sem dependência nova.** A média é somada no banco; a janela vem do `TransactionRules`, que continua a ser a única fonte do fuso de São Paulo.
+- **Conferido no navegador** em 375 px, nos dois temas, com três meses semeados numa conta de teste depois apagada. **Falta o CA9** ("Sem categoria" na tela) e ouvir o `aria-live` num leitor de tela.
+
 ## 🟡 Em andamento
 
 **Etapa 8 — PWA** ([spec 009](specs/009-pwa/tasks.md)): T1–T5 feitas (ícones, manifest, `index.html`, service worker, instalável confirmado pelo Pedro). Faltam: o teste offline (CA6), aparelhos reais (T6), as revisões (T7) e a documentação (T8).

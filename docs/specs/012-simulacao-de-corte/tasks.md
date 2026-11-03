@@ -1,5 +1,8 @@
 # Tasks — Spec 012: "E se você não tivesse gastado?"
 
+> **Todas feitas em 2026-11-03.** Ver os critérios de aceite na [spec](spec.md),
+> com a nota de como cada um foi verificado.
+
 > Uma task por vez. Ao terminar cada uma: parar, mostrar, e só então seguir.
 > `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web` têm de passar antes de fechar qualquer task que mexa em código.
 

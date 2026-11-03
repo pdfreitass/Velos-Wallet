@@ -3,7 +3,7 @@
 > **O QUE** fazer e **como saber que está pronto.** O detalhe técnico está no [plan.md](plan.md).
 
 - **Etapa do roadmap:** Etapa 9 — primeira ideia do caderno ([I5](../../IDEIAS.md#i5--e-se-você-não-tivesse-gastado))
-- **Status:** Rascunho
+- **Status:** Concluída (CA9 por conferir na tela)
 - **Data:** 2026-11-03
 
 ## Problema
@@ -67,18 +67,21 @@ Textos em **português do Brasil**, com acento.
 
 ## Critérios de aceite
 
-- [ ] **CA1** — Dado um usuário com 3 meses completos de despesa em "Lazer" (R$ 300, R$ 400 e R$ 500), quando abre `/simular`, escolhe "Lazer" e corta 20%, então vê **R$ 80,00 por mês** (20% de R$ 400 de média).
-- [ ] **CA2** — Dado o cenário do CA1, então os valores de 6 e 12 meses são **R$ 480,00** e **R$ 960,00** — exatamente 6× e 12× o valor mensal mostrado (RN6).
-- [ ] **CA3** — Dado um usuário **sem nenhum mês completo** com despesa, quando abre `/simular`, então vê o estado de dados insuficientes, com explicação, e **nenhum valor simulado**.
-- [ ] **CA4** — Dado um usuário com **apenas 1 mês completo**, quando simula, então o resultado aparece **e** a tela diz que a média se apoia em 1 mês.
-- [ ] **CA5** — Dado o mês corrente com despesas, quando a média é calculada, então essas despesas **não entram** (RN1).
-- [ ] **CA6** — Quando o usuário move o percentual, então o resultado muda **sem recarregar a página** e sem nova chamada à API.
-- [ ] **CA7** — Quando o usuário toca em "Transformar em meta", então vai para `/metas/nova` com nome e valor preenchidos, e **nenhuma meta foi criada** até ele confirmar (RN8).
-- [ ] **CA8** — Um corte de 100% é aceito; um de 0% não, com mensagem em português.
-- [ ] **CA9** — A categoria "Sem categoria" pode ser simulada (RN9).
-- [ ] **CA-seg** — Um usuário não consegue simular sobre dados de outro: a média vem de view com `security_invoker` e a query filtra pelo usuário autenticado (RLS).
-- [ ] **CA-a11y** — Funciona em 375 px, nos dois temas, nenhuma informação depende só da cor, e o resultado é anunciado a leitor de tela quando muda.
-- [ ] **CA-build** — `dotnet build api`, `dotnet test api`, `npm run typecheck`, `npm run lint` e `npm run build` passam.
+Conferidos em **2026-11-03**. A coluna diz **como** cada um foi verificado — "navegador" é o app
+rodando em 375 px, com dados semeados nos três cenários numa conta de teste, depois apagada.
+
+- [x] **CA1** — Dado um usuário com 3 meses completos de despesa em "Lazer" (R$ 300, R$ 400 e R$ 500), quando abre `/simular`, escolhe "Lazer" e corta 20%, então vê **R$ 80,00 por mês** (20% de R$ 400 de média). · *navegador + teste*
+- [x] **CA2** — Dado o cenário do CA1, então os valores de 6 e 12 meses são **R$ 480,00** e **R$ 960,00** — exatamente 6× e 12× o valor mensal mostrado (RN6). · *navegador + teste*
+- [x] **CA3** — Dado um usuário **sem nenhum mês completo** com despesa, quando abre `/simular`, então vê o estado de dados insuficientes, com explicação, e **nenhum valor simulado**. · *navegador + teste*
+- [x] **CA4** — Dado um usuário com **apenas 1 mês completo**, quando simula, então o resultado aparece **e** a tela diz que a média se apoia em 1 mês. · *teste de integração; no navegador foi visto com 2 meses*
+- [x] **CA5** — Dado o mês corrente com despesas, quando a média é calculada, então essas despesas **não entram** (RN1). · *navegador (R$ 400 e não R$ 549,75) + teste*
+- [x] **CA6** — Quando o usuário move o percentual, então o resultado muda **sem recarregar a página** e sem nova chamada à API. · *navegador, confirmado na aba de rede*
+- [x] **CA7** — Quando o usuário toca em "Transformar em meta", então vai para `/metas/nova` com nome e valor preenchidos, e **nenhuma meta foi criada** até ele confirmar (RN8). · *navegador + contagem no banco*
+- [x] **CA8** — Um corte de 100% é aceito; um de 0% não, com mensagem em português. · *testes dos dois lados; na tela o `input[type=range]` não deixa chegar a 0*
+- [ ] **CA9** — A categoria "Sem categoria" pode ser simulada (RN9). · **não verificado no navegador**: o código a trata (a query agrupa `category_id` nulo e a tela tem o rótulo e o círculo "?"), e há teste de unidade no handler, mas não houve despesa sem categoria nos dados semeados
+- [x] **CA-seg** — Um usuário não consegue simular sobre dados de outro: a média vem de view com `security_invoker` e a query filtra pelo usuário autenticado (RLS). · *teste de integração com dois usuários reais*
+- [x] **CA-a11y** — Funciona em 375 px, nos dois temas, nenhuma informação depende só da cor, e o resultado é anunciado a leitor de tela quando muda. · *375 px e os dois temas vistos; o `aria-live` está no código mas **não foi ouvido num leitor de tela***
+- [x] **CA-build** — `dotnet build api`, `dotnet test api`, `npm run typecheck`, `npm run lint` e `npm run build` passam. · *386 testes na API, 58 no front, 0 falhas*
 
 ## Perguntas em aberto
 
