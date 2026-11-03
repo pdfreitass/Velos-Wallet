@@ -11,9 +11,9 @@
 - [x] **T4** — `web/public/sw.js` + registro em `web/src/main.tsx` só em produção (**avisar antes**)
   - Verificação: `typecheck` e `lint`; em `npm run dev` nenhum SW registrado
 - [x] **T5** — (offline ainda por conferir no DevTools) Verificação com a API servindo o build (passos 1–5 do plano): `Content-Type` do manifest, instalável no Chrome do PC, logado/deslogado, offline, sem *Cache Storage*
-- [ ] **T6** — Aparelhos reais (CA3–CA5) se houver; senão registrar "a validar no deploy". Login com Google no iPhone (P3)
+- [ ] **T6** — Aparelhos reais (CA3–CA5) se houver; senão registrar "a validar no deploy". Login com Google no iPhone (P3) — **parcial em 2026-11-03: o Pedro confirmou que usa o app no iPhone e funciona (CA4/CA5 por email)**; faltam o Android (CA3) e o Google no iPhone (P3)
 - [x] **T7** — Revisões `security` e `qa`; `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web` — 2026-11-03: revisão dos arquivos sem achados; bateria verde (API 354 ✓ + 32 de integração pulados sem banco; web 59 ✓). O PR fica aberto para a revisão do Pedro
-- [ ] **T8** — ROADMAP, CHANGELOG, LICOES, ARQUITETURA e a nota no SEC-004 (`worker-src 'self'`, `manifest-src 'self'`)
+- [x] **T8** — ROADMAP, CHANGELOG, LICOES, ARQUITETURA e a nota no SEC-004 (`worker-src 'self'`, `manifest-src 'self'`) — 2026-11-03, junto com o ADR 0022
 
 > Até 2026-10-18 havia três sessões em paralelo, com a `velos-wallet-2c` revisando cada task (T1–T4 aprovadas por ela). Desde então, uma sessão só; commit com a autorização do Pedro.
 
