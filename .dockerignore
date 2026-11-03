@@ -1,0 +1,41 @@
+# O que NAO entra no contexto do build (spec 011).
+# Alem de deixar o build mais rapido, isto e uma rede de seguranca: o que nao chega ao contexto
+# nao pode acabar dentro da imagem por engano.
+
+# Dependencias e saidas de build: a imagem refaz tudo do zero.
+node_modules/
+web/node_modules/
+web/dist/
+web/.preview-emails/
+**/bin/
+**/obj/
+
+# Git e tooling.
+.git/
+.github/
+.vscode/
+.claude/
+
+# Documentacao e material que nao vai para producao.
+docs/
+media/
+scripts/
+supabase/
+*.md
+
+# Testes: a imagem final nao os roda (o CI roda).
+api/tests/
+
+# Segredos e configuracao local — nunca deviam estar no repositorio, mas por garantia (RN1, RN7).
+**/appsettings.Development.json
+**/appsettings.*.Local.json
+.env
+.env.*
+*.pfx
+*.p12
+*.key
+
+# Proprio Docker.
+Dockerfile
+.dockerignore
+fly.toml

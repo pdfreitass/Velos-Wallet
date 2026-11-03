@@ -7,6 +7,62 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L41 — A vitrine de marketing cria expectativa de produto
+*2026-11-02 · spec 010*
+
+- **O que aconteceu:** a página inicial mostrava os gastos numa rosca e o app mostrava barras. O Pedro abriu o Início, não reconheceu o bloco e disse que "o dashboard não está ali", mandando como referência a tela da própria vitrine. Quando fui verificar, respondi que já estava feito — eu tinha olhado para o bloco, ele estava a falar do desenho.
+- **Por que:** a vitrine e o app desenhavam a mesma informação em dois sítios, de formas diferentes, sem nada a ligá-los. Cada um evoluiu por seu lado, e a divergência só aparece quando alguém compara.
+- **Como evitar:** o que a página inicial mostra é uma promessa. Telas de exemplo e telas reais da mesma informação partilham componente, ou a divergência volta. E antes de responder "já está", confirmar que é a **mesma coisa** que a pessoa está a pedir, não só o mesmo nome.
+- **Onde a regra mora:** [ADR 0019](adr/0019-rosca-de-categorias-em-css.md) e [spec 010](specs/010-rosca-de-categorias/spec.md).
+
+## L40 — "O email chegou" não é o mesmo que "o email está certo"
+*2026-11-02 · pré-deploy, T9*
+
+- **O que aconteceu:** com o Resend verificado, o email de recuperação passou a chegar — remetente certo, caixa de entrada, link funcionando. Tudo parecia pronto. Mas o corpo estava **em inglês**: *"Reset your password. We received a request…"*. Era o template padrão do GoTrue, não o `supabase/templates/recovery.html` do repositório.
+- **Por que:** os modelos vivem em dois sítios. O repositório guarda o HTML, mas **quem manda é o painel do Supabase**, e publicar lá é manual e fora do git. Até 2026-10-13 o Supabase nem deixava editar modelo sem SMTP próprio, por isso o passo C3 ficou parado e ninguém reparou — ninguém tinha visto um email real antes.
+- **Como evitar:** ao ligar um provedor de email, não parar em "o fluxo funciona". **Abrir o email e lê-lo**: idioma, remetente, assunto, aparência. Depois de publicar modelo no painel, enviar um de teste e conferir que é mesmo o do repositório.
+- **Onde a regra mora:** [ROADMAP → item 3 do pré-deploy](ROADMAP.md); a regra de idioma está no `CLAUDE.md` (*interface e mensagens em português do Brasil, com acento*).
+
+## L39 — Falha de envio de email aparece como erro genérico: a causa só está nos auth logs
+*2026-11-02 · pré-deploy, T9*
+
+- **O que aconteceu:** ao pedir o link de recuperação, o front mostrou *"Não foi possível falar com o servidor de autenticação"* e o log da API registrou só `HTTP 500, código unexpected_failure`. Nada dizia **por que**. A causa real estava nos **auth logs do Supabase**: `550 "The veloswallet.com.br domain is not verified"` — o Resend recusou o envio porque o domínio ainda não tinha sido verificado no painel, mesmo com o DNS já publicado.
+- **Por que:** o GoTrue não devolve o erro do SMTP na resposta HTTP (e é certo que não devolva — vazaria infraestrutura). Ele vira `unexpected_failure`, e a API, corretamente, não vaza mensagem do Supabase.
+- **Como evitar:** diante de `unexpected_failure` em qualquer rota de email (`/recover`, `/signup`, `/resend`), **ir direto aos auth logs** antes de suspeitar do código. O campo `error` do evento traz a mensagem do SMTP inteira.
+- **Onde a regra mora:** [ROADMAP → O que falta, item 1](ROADMAP.md).
+
+## L38 — Conferir DNS no servidor errado faz parecer que a zona não publicou
+*2026-11-02 · pré-deploy, Registro.br*
+
+- **O que aconteceu:** o pré-deploy ficou parado ~1 dia com a nota "o DNS ainda não responde", porque o `nslookup` era feito contra `a.auto.dns.br`. Os registros estavam publicados desde o início: o domínio está delegado a **`a.sec.dns.br` / `c.sec.dns.br`**.
+- **Por que:** o `a.auto.dns.br` responde SOA para o domínio (e até declara `NS = a.auto/b.auto`), mas não serve a zona publicada — devolve *Non-existent domain* para tudo, o que a olho é idêntico a "ainda não propagou".
+- **Como evitar:** nunca assumir o servidor autoritativo. Primeiro `nslookup -type=NS <domínio> 8.8.8.8` para descobrir a delegação real, depois consultar **esse** NS, e só então confirmar a propagação num resolver público.
+- **Onde a regra mora:** [ROADMAP → Infraestrutura já contratada](ROADMAP.md).
+
+## L37 — Rastreamento de cliques quebra link de uso único
+*2026-11-02 · pré-deploy, Resend*
+
+- **O que aconteceu:** ao adicionar o domínio no Resend, o **click tracking vinha ligado por padrão**. Ele reescreve todo link do email para passar por um domínio de rastreio antes de redirecionar.
+- **Por que importa aqui:** o link de recuperação de senha é **de uso único**. Qualquer scanner de email corporativo, antivírus ou preview de link que siga o endereço **consome o código** — e o clique da pessoa falha. É uma das causas clássicas de "o link não funciona". Fora que coletar cliques contraria o princípio *"Privado por padrão"* da [VISAO](VISAO.md).
+- **Como evitar:** em email transacional, click tracking e open tracking **desligados**. Conferir na criação do domínio, não depois.
+- **Regra em:** painel do Resend, domínio `veloswallet.com.br` → *Advanced options*.
+
+## L36 — O navegador embutido do Claude não registra service worker
+*2026-11-01 · spec 009 (PWA) e SEC-004*
+
+- **O que aconteceu:** depois de ligar a CSP completa, o service worker parou de registrar com *"An unknown error occurred when fetching the script"*. Culpei a CSP e mudei o middleware para mandar a política só no HTML.
+- **Por que:** era falso. No **Chrome de verdade** o SW registra normalmente, **com** a CSP em toda resposta — o navegador embutido simplesmente não suporta service worker. A mudança foi revertida.
+- **Como evitar:** PWA e service worker se testam no Chrome, nunca no painel embutido. E mudança de comportamento justificada por hipótese não confirmada **se reverte**, não se mantém "porque também é defensável".
+- **Regra em:** `api/src/Velos.Api/Configuration/SecurityHeadersMiddleware.cs` (a CSP vai em toda resposta, como a revisão de segurança anterior exigia).
+
+## L35 — Modo avançado do Registro.br tem dois pedágios
+*2026-11-01/02 · pré-deploy, DNS*
+
+- **O que aconteceu:** criar TXT e CNAME exige o **modo avançado** da zona. Ao ligar, (a) a volta ao modo básico fica **travada por 2 horas** e (b) o domínio entra em **"em transição"** e recusa registros por alguns minutos.
+- **E depois:** salvar **não é** publicar. Os registros persistem no painel na hora, mas o DNS só responde quando o Registro.br publica a zona, em lotes.
+- **Como evitar:** conferir no servidor autoritativo, não no resolver local — `nslookup -type=TXT <nome> a.auto.dns.br`. E conferir os valores no DOM antes de salvar: a chave DKIM aparece truncada na tela, e é onde um erro passa despercebido.
+- **Regra em:** [ROADMAP](ROADMAP.md), seção "Antes do deploy em produção".
+
 ## L34 — Hover com opacidade derruba o contraste que o estado normal tinha
 *2026-11-01 · spec 006, T8*
 

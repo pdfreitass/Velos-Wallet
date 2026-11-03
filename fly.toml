@@ -1,0 +1,66 @@
+# Velos Wallet — Fly.io, regiao gru (Sao Paulo). Spec 011, ADR 0020.
+#
+# Segredos NAO moram aqui. Este arquivo e versionado; connection string e afins vao por
+# `fly secrets set`, que o Fly entrega como variavel de ambiente (RN1).
+
+app = "velos-wallet"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # Endereco publico: e daqui que saem os links dos emails e do OAuth (RN6).
+  App__PublicOrigin = "https://veloswallet.com.br"
+  # RN5: so o dominio responde. Em dev continua "*" pelo appsettings.
+  AllowedHosts = "veloswallet.com.br"
+  # RN3: onde as chaves do Data Protection sao gravadas, no volume montado abaixo.
+  DataProtection__KeysPath = "/data/keys"
+  ASPNETCORE_ENVIRONMENT = "Production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Uma maquina sempre de pe: sem isto o primeiro acesso depois de uma pausa paga o arranque a
+  # frio, e o app e de uso pessoal, acedido poucas vezes por dia (ADR 0020).
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+# As chaves do Data Protection tem de sobreviver ao redeploy, senao cada publicacao desloga
+# toda a gente e quebra os links de recuperacao em andamento (RN3).
+#
+# ATENCAO: o volume e local a maquina. Com mais de uma maquina, cada uma teria as suas chaves e
+# a sessao quebraria ao saltar entre elas — ai as chaves passam a ter de ser partilhadas.
+[[mounts]]
+  source = "velos_keys"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+# `/api/health`, nao `/health`: qualquer rota fora de /api cai no fallback do SPA e devolve o
+# index.html com 200, entao um check em "/health" passaria mesmo com a API quebrada.
+#
+# O header Host e obrigatorio aqui. O check chega pela rede interna, com o Host do IP da
+# maquina, e o AllowedHosts restrito ao dominio (RN5) responde 400 a qualquer outro Host — a
+# maquina nunca ficaria saudavel e o deploy falharia. Confirmado com a imagem local em
+# 2026-11-02: Host do dominio -> 200; qualquer outro, inclusive sem Host -> 400.
+[checks]
+  [checks.health]
+    type = "http"
+    port = 8080
+    method = "GET"
+    path = "/api/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+
+    [checks.health.headers]
+      Host = "veloswallet.com.br"

@@ -6,6 +6,72 @@
 
 ## [Não lançado]
 
+### 2026-11-02 — 🚀 No ar em veloswallet.com.br
+#### Adicionado
+- **O Velos Wallet está publicado**: https://veloswallet.com.br, no Fly.io região `gru` (São Paulo), uma máquina, imagem de 55 MB, com volume para as chaves do Data Protection.
+- Certificado **Let's Encrypt** emitido e ativo; `http://` redireciona para `https://` com 301.
+- Registros **A** e **AAAA** na zona do Registro.br, apontando para o Fly, sem tocar nos três do Resend.
+- No Supabase, *Site URL* passou ao domínio e as *Redirect URLs* de produção entraram — mantendo o `localhost:3000` para desenvolvimento.
+- **A connection string de produção usa `SSL Mode=VerifyFull`**, com o certificado raiz do Supabase embarcado na imagem. O `Require` de antes cifrava mas não validava o servidor.
+#### Corrigido
+- **O PWA funciona.** Com HTTPS de verdade, o service worker fica `activated` e o manifest responde 200 — era o que faltava para a Etapa 8 sair do lugar.
+- **A recuperação de senha aponta para o domínio**: o email traz `redirect_to=https://veloswallet.com.br/auth/confirm`.
+#### Em aberto
+- **Login com Google** continua restrito aos *test users*: sair do modo *Teste* depende das páginas de política e termos (item **L1**).
+- Falta conferir no ar: entrar com a conta real, continuar logado depois de um redeploy, e o limite por IP enxergar o IP do cliente.
+
+### 2026-11-02 — Host escolhido e deploy preparado (spec 011)
+#### Adicionado
+- **`Dockerfile`** de três estágios: build do front, build da API, imagem final enxuta. O `dist/` do Vite entra como `wwwroot`, para API e SPA viverem na mesma origem ([ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md)). Roda como usuário sem privilégio.
+- **`.dockerignore`** que, além de acelerar o build, é rede de segurança: o que não entra no contexto não pode acabar dentro da imagem.
+- **`fly.toml`** para a região `gru` (São Paulo), com volume para as chaves do Data Protection e health check em `/api/health` — não em `/health`, que cai no fallback do SPA e devolveria 200 mesmo com a API quebrada.
+- **`ProductionSetup.cs`**: chaves do Data Protection persistidas com nome de aplicação fixo, e `ForwardedHeaders` aceito **só** da rede privada do Fly. Sem configuração nenhum dos dois faz nada, então dev e testes seguem iguais.
+#### Decidido
+- **Fly.io `gru`** como host ([ADR 0020](adr/0020-host-fly-io-gru.md)), fechando o buraco que o ADR 0013 tinha deixado. O Azure faria o mesmo com muito mais cerimônia para um app de um processo e um usuário.
+- Só o **domínio nu**: `www` fica de fora.
+#### Em aberto
+- **Nada está no ar ainda.** Falta conta no Fly.io e o `flyctl` instalado, que são do Pedro.
+#### Corrigido
+- **A imagem foi construída e provada** (196 MB): health, SPA, 404 da API, usuário sem privilégio, CSP com o hash certo, e as **chaves do Data Protection sobrevivendo a recriar o container** — que é o que garante não deslogar ninguém a cada publicação.
+- **O health check do Fly teria falhado no primeiro deploy.** Com o `AllowedHosts` restrito ao domínio, o check chega pela rede interna com o Host do IP da máquina e leva **400** — a máquina nunca ficaria saudável. O `fly.toml` passou a mandar `Host = "veloswallet.com.br"` no check.
+
+### 2026-11-02 — Emails com a cara do Velos (passo C3)
+#### Alterado
+- **O email de redefinição de senha passou a ser o nosso**, publicado no painel do Supabase: assunto `Redefinição de senha — Velos Wallet`, logo no topo, texto em português e botão em **verde profundo** (a marca, nunca o verde vivo). Até aqui saía o modelo padrão do Supabase, em inglês — o SMTP próprio é que destravou a edição.
+- Conferido com um email de verdade no Gmail: assunto, logo, botão, o preheader ao lado do assunto e o link do PKCE, todos certos.
+#### Em aberto
+- **O `confirmation.html` não foi publicado, e não é esquecimento.** Ele aponta para `/auth/confirm?token_hash=…`: esse endpoint lê só `?code=` **e** é a rota da redefinição de senha, não da confirmação de cadastro. Não existe rota que confirme cadastro. O passo **C1** tem de construir o fluxo antes de o modelo fazer sentido.
+- As abas *Invite user*, *Magic link*, *Change email* e *Reauthentication* ficam no padrão: o app não usa nenhum desses fluxos.
+
+### 2026-11-02 — Rosca de gastos por categoria (spec 010)
+#### Alterado
+- **O Início passou a mostrar os gastos do mês numa rosca**, acima da lista. A página inicial pública já mostrava a mesma informação assim, e o app mostrava barras: quem vinha de lá não reconhecia a tela. Agora as duas usam **o mesmo componente**, `CategoryDonut`.
+- A rosca mostra **no máximo 6 fatias** — as 5 maiores categorias e uma "Outras" com a soma do resto —, porque com 10 ou 15 fatias a cor deixa de significar. **A lista por baixo continua completa**, uma linha por categoria, e nenhuma linha se chama "Outras": a fatia agrupada existe só no gráfico.
+- A rosca é decorativa (`aria-hidden`): nome, valor e porcentagem continuam a ser texto, e cada linha continua a levar às transações daquela categoria.
+- Nenhuma dependência nova: `conic-gradient` em CSS, como manda o [ADR 0019](adr/0019-rosca-de-categorias-em-css.md), que revê o desenho do [0018](adr/0018-grafico-de-categorias-sem-biblioteca.md) e mantém a sua regra central. O `PanelPage` ficou em 4,14 KB gzip.
+
+### 2026-11-02 — Domínio próprio e email de verdade (pré-deploy)
+#### Adicionado
+- **`veloswallet.com.br`** registrado no Registro.br (CPF, sem CNPJ), publicado, vencendo em 01/11/2027. O `velos.com.br` já tinha dono.
+- Domínio adicionado ao **Resend** na região **São Paulo (`sa-east-1`)**, com **click tracking desligado** (ligado por padrão, reescreveria o link de uso único da recuperação de senha).
+- Três registros na zona DNS: o TXT do DKIM e os CNAME `rsend` e `send`. O `MX` de *receiving* ficou de fora de propósito — o app só envia, e um MX na raiz impediria uma caixa de email de verdade no domínio depois.
+- Chave de API do Resend com permissão **Sending access**, não Full access.
+- **Domínio verificado no Resend** e **email de verdade a sair** do `veloswallet.com.br`. A zona já estava publicada desde o início — quem dizia o contrário era a nossa conferência, feita contra `a.auto.dns.br` quando a delegação real é `a.sec.dns.br` / `c.sec.dns.br`. Faltava só clicar em *Verify DNS records*: publicar o DNS não verifica sozinho, e até o clique o Resend recusa todo envio com `550 domain is not verified`.
+- Com o SMTP próprio, o limite de email do Supabase subiu de `2/1h` para **30**.
+#### Corrigido
+- **T9 / CA7 da spec 001 validado**, aberto desde a Etapa 3 e nunca testado por limite de email. Os cinco passos passaram: email na caixa de entrada → link abre `/redefinir-senha` → `PUT /user` troca a senha → login com `grant_type: password` → o mesmo link devolve **403 `One-time token not found`**, e o app mostra *"Este link não é mais válido…"*. Com isso fica **validada a correção do `recovery.html`** de 2026-11-01 (o modelo montava `token_hash`; o `/auth/confirm` lê só `?code=`).
+#### Em aberto
+- **O email de auth sai com o template padrão do Supabase, em inglês.** Os modelos de `supabase/templates/` nunca foram publicados no painel (passo C3) — agora é possível, porque o Supabase exigia SMTP próprio. O `confirmation.html` ainda monta `token_hash` e precisa de revisão antes de ser publicado.
+- **Um link de recuperação foi consumido 54 s após o envio**, do IP do Pedro, antes de alguém o abrir. Suspeita de scanner de links (antivírus ou varredura do Gmail na entrega); uma única ocorrência, o link seguinte sobreviveu. Não está estabelecido — vigiar.
+
+### 2026-11-01 — Segurança do pré-deploy
+#### Adicionado
+- **CSP completa** (SEC-004), com o hash do script de tema calculado no arranque a partir do `index.html` servido. Escrevê-lo à mão quebraria em produção: o repositório guarda LF, o Windows traz CRLF, e os hashes diferem — e o navegador normaliza CRLF para LF ao parsear, então o hash é sempre o do texto com LF. 12 testes novos.
+- **Dependabot** nos quatro manifestos (npm do `web`, NuGet da `api`, actions do CI e o Remotion do vídeo), agrupado por ecossistema.
+#### Corrigido
+- **O link de recuperação de senha estava quebrado.** O modelo montava `?token_hash=`, e o `/auth/confirm` lê só `?code=` do PKCE: todo link caía em `/recuperar-senha?erro=link`. Passou a usar `{{ .ConfirmationURL }}`. O README da pasta afirmava que isso quebraria a recuperação — a afirmação descrevia o fluxo implícito e tinha caducado.
+- **SEC-002 estava escrito de um jeito que derrubaria o login.** Revogar `execute` de `anon` em `reserve_login_attempt` quebra o fluxo: o `LoginLockoutStore` chama a função como `anon`, antes de o usuário se autenticar. O que protege é a Data API desligada.
+
 ### 2026-11-01 — Etapa 7: metas (spec 006)
 #### Adicionado
 - Telas das metas: `/metas` (lista em andamento e atingidas, na ordem da RN8), `/metas/nova`, `/metas/:id` (progresso, ritmo e aportes) e `/metas/:id/editar`, todas em `lazy()`.

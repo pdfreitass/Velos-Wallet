@@ -3,19 +3,23 @@ import { PieChart } from "lucide-react";
 import { Link } from "react-router";
 
 import { CategoryIcon } from "@/components/shared/CategoryBadge";
+import { CategoryDonut } from "@/components/shared/CategoryDonut";
 import { categoryColorVar } from "@/features/categories/catalog";
 import { CATEGORY_PARAM, MONTH_PARAM } from "@/features/transactions/types";
 import { ROUTES } from "@/lib/auth/routes";
 import { formatSignedCurrency } from "@/lib/utils/currency";
 
 import type { CategorySpending as Spending, Dashboard } from "./api";
+import { toDonutSlices } from "./donut-slices";
 
 /**
- * RN4: gastos do mês por categoria, do maior para o menor, em barras horizontais feitas em HTML
- * (ADR 0018). Nome, valor e porcentagem são texto; a barra só reforça. Cada linha leva à lista de
- * transações já filtrada pela categoria.
+ * RN4 da spec 005: gastos do mês por categoria, do maior para o menor. A rosca resume e a lista
+ * informa — nome, valor e porcentagem são texto, e cada linha leva às transações já filtradas
+ * pela categoria. Sem biblioteca de gráfico (ADR 0018, revisto pelo ADR 0019).
  */
 export function CategorySpending({ data }: { data: Dashboard }) {
+  const slices = toDonutSlices(data.categories, data.expenseCents);
+
   return (
     <section aria-labelledby="category-spending" className="rounded-2xl border border-border bg-card p-5">
       <h2 id="category-spending" className="mb-4 font-semibold">
@@ -27,13 +31,17 @@ export function CategorySpending({ data }: { data: Dashboard }) {
           <p>Nenhuma despesa neste mês.</p>
         </div>
       ) : (
-        <ul className="space-y-1">
-          {data.categories.map((item) => (
-            <li key={item.categoryId ?? "none"}>
-              <SpendingRow item={item} month={data.month} totalCents={data.expenseCents} />
-            </li>
-          ))}
-        </ul>
+        <>
+          {/* RN8: só há rosca quando há despesa. O `count` é o total real de categorias, não o de fatias. */}
+          <CategoryDonut slices={slices} count={data.categories.length} className="mx-auto mb-5" />
+          <ul className="space-y-1">
+            {data.categories.map((item) => (
+              <li key={item.categoryId ?? "none"}>
+                <SpendingRow item={item} month={data.month} totalCents={data.expenseCents} />
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </section>
   );
