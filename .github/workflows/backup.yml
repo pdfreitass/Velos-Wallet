@@ -1,0 +1,87 @@
+name: Backup do banco
+
+# ADR 0021: pg_dump diário do Supabase (plano free, sem backup) pelo pooler de
+# sessão, cifrado com GPG (AES256) e guardado como artefato do Actions.
+# Se qualquer passo falhar, abre uma issue automaticamente.
+
+on:
+  schedule:
+    # 03:00 UTC = 00:00 em São Paulo (UTC-3).
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  backup:
+    name: pg_dump + GPG + artefato
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Instalar o cliente PostgreSQL 17 (o runner só traz o 16)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Despejar o banco (pg_dump, pooler de sessão)
+        env:
+          PGHOST: aws-1-sa-east-1.pooler.supabase.com
+          PGPORT: '5432'
+          PGUSER: postgres.khvottmyspapwsdeqqnm
+          PGDATABASE: postgres
+          PGSSLMODE: require
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          pg_dump \
+            --format=custom \
+            --no-owner \
+            --no-privileges \
+            --exclude-schema='extensions|graphql|graphql_public|pgbouncer|realtime|storage|supabase_functions|vault|net|pgmq|pgsodium|pgsodium_masks|pgtle|_analytics|_realtime|_supavisor|cron|dbdev|etl|repack|tiger|tiger_data|topology|timescaledb_*|_timescaledb_*|information_schema|pg_*' \
+            --file=velos-backup.dump
+
+      - name: Conferir que o dump é um arquivo válido
+        run: pg_restore --list velos-backup.dump | head -n 20
+
+      - name: Cifrar com GPG (AES256, frase das Actions secrets)
+        run: |
+          gpg --batch --yes --pinentry-mode loopback \
+            --passphrase "${{ secrets.BACKUP_PASSPHRASE }}" \
+            --symmetric --cipher-algo AES256 \
+            --output "velos-backup-$(date +%F).dump.gpg" \
+            velos-backup.dump
+          rm -f velos-backup.dump
+
+      - name: Guardar o artefato cifrado
+        uses: actions/upload-artifact@v4
+        with:
+          name: velos-db-backup
+          path: velos-backup-*.dump.gpg
+          if-no-files-found: error
+
+      - name: Abrir issue se o backup falhar
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Backup do banco falhou';
+            const { data: abertas } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            if (abertas.some((i) => i.title === title)) return;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: `O workflow de backup falhou na execução ${context.runId}.\n\nVer: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });

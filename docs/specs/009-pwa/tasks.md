@@ -12,7 +12,7 @@
   - Verificação: `typecheck` e `lint`; em `npm run dev` nenhum SW registrado
 - [x] **T5** — (offline ainda por conferir no DevTools) Verificação com a API servindo o build (passos 1–5 do plano): `Content-Type` do manifest, instalável no Chrome do PC, logado/deslogado, offline, sem *Cache Storage*
 - [ ] **T6** — Aparelhos reais (CA3–CA5) se houver; senão registrar "a validar no deploy". Login com Google no iPhone (P3)
-- [ ] **T7** — Revisões `security` e `qa`; `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web`
+- [x] **T7** — Revisões `security` e `qa`; `dotnet build api`, `dotnet test api`, `typecheck`, `lint` e `build` do `web` — 2026-11-03: revisão dos arquivos sem achados; bateria verde (API 354 ✓ + 32 de integração pulados sem banco; web 59 ✓). O PR fica aberto para a revisão do Pedro
 - [ ] **T8** — ROADMAP, CHANGELOG, LICOES, ARQUITETURA e a nota no SEC-004 (`worker-src 'self'`, `manifest-src 'self'`)
 
 > Até 2026-10-18 havia três sessões em paralelo, com a `velos-wallet-2c` revisando cada task (T1–T4 aprovadas por ela). Desde então, uma sessão só; commit com a autorização do Pedro.
@@ -24,3 +24,4 @@
 | T0 | | Spec aprovada pelo Pedro em 2026-10-18 (P1–P5 conforme a proposta); plano revisado pela `velos-wallet-2c`: aprovado com notas, já incorporadas |
 | T1–T4 | (este commit) | Ícones, manifest, `index.html`, `sw.js` + registro em PROD. Revisados pela `velos-wallet-2c` (APROVADO) |
 | T5 | — | API servindo o build em `:5090`: manifest `application/manifest+json`, `sw.js` `text/javascript`, ícones `image/png`, sem cookie e fora do fallback; SW `activated`, Cache Storage vazio, console limpo; **ícone de instalar na barra confirmado pelo Pedro** (o handler sem `respondWith` basta, fallback não foi preciso). Falta: teste offline (CA6) |
+| T5-bis (CA6) | E2E (ADR 0022) | O teste offline virou E2E (`web/e2e/`, projeto `probe` contra a produção). **Achou um bug real e o consertou**: o TanStack Query padrão `online` pausa toda query nova sem rede — a tela ficava em "Carregando…" eterno em vez do estado de erro. Correção: `networkMode: "always"` + teste de unidade; o E2E do CA6 fica verde no deploy. Ouvir o `aria-live` num leitor de tela continua manual (CA-a11y) |

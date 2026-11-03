@@ -7,6 +7,22 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L45 — E2E contra a produção: conta descartável, asserts exatos e a árvore de acessibilidade
+*2026-11-03 · spec 009/012, ADR 0022*
+
+- **O que aconteceu:** a primeira suíte E2E do projeto tropeçou três vezes em armadilhas de quem nunca testou o próprio app de fora: (1) o assert `/categorias` **passava** com a página ainda em `/categorias/nova` — a criação da categoria tinha falhado e o teste seguia como se nada tivesse acontecido; (2) o campo de data não era localizável pelo placeholder "Escolha a data", porque o **nome acessível do botão vem do label do campo** ("Data"); (3) o CDP devolve `installabilityErrors`, não `errors`.
+- **Por que:** testar contra a produção significa testar o app como um usuário — inclusive os detalhes de acessibilidade que o código "correto" esconde. Assert de URL por prefixo é assert fraco; placeholder não é rótulo; e protocolo de navegador tem seus próprios nomes de campo.
+- **Como evitar:** em testes E2E, **todo passo que salva tem de provar que salvou** (URL exata + o item aparecendo na lista seguinte). Localizar por **nome acessível** (o que o leitor de tela veria) e, na dúvida, consultar o snapshot que o Playwright gera na falha — ele mostra a árvore de acessibilidade da página inteira. E as sondas contra produção vivem num projeto separado (`probe`), com conta descartável e limpeza, fora do CI de rotina.
+- **Onde a regra mora:** [ADR 0022](adr/0022-testes-e2e-com-playwright.md) e os helpers de `web/e2e/helpers.ts`.
+
+## L44 — TanStack Query "online" pausa queries offline para sempre
+*2026-11-03 · spec 009 (CA6)*
+
+- **O que aconteceu:** ao testar o CA6 (app sem internet), a tela de Transações ficava eternamente em "Carregando as transações…". O E2E com Playwright mostrou que **nenhuma requisição era disparada**: o TanStack Query, no `networkMode` padrão (`"online"`), **pausa toda query nova quando `navigator.onLine` é falso**. O estado de erro com "Tentar de novo" nunca chegava — e o usuário real veria um skeleton infinito, não o erro de conexão que a spec 009 promete (RN1/CA6).
+- **Por que:** o padrão foi desenhado para "não gastar bateria tentando à toa" — mas esconde do usuário que a rede caiu, e pior: deixa saldo antigo na tela como se fosse atual. A spec já dizia o comportamento correto; o código padrão o contradizia em silêncio.
+- **Como evitar:** critérios de **offline** têm de ser exercitados de verdade (cortando a rede numa sessão logada), não só raciocinados. No TanStack Query, apps que mostram estado de erro explícito usam `networkMode: "always"` — a query falha rápido e a UI decide. Deixar um teste de unidade prendendo a configuração, porque a regressão aqui é invisível nos testes de componente.
+- **Onde a regra mora:** `web/src/lib/api/query-client.ts` (comentário + teste `query-client.test.ts`) e o E2E `probe` em `web/e2e/simulation.spec.ts`.
+
 ## L43 — Feature analítica não se testa com os dados que existem
 *2026-11-03 · spec 012*
 

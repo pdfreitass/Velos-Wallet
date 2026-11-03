@@ -44,6 +44,8 @@ web/src/
   components/ui/             # shadcn sobre @base-ui/react
   components/shared/         # MoneyInput, CategoryBadge, FormField, FormAlert, FormPageShell, LoadError…
   lib/                       # api (client, errors), auth (rotas), utils (currency, date), validations (Zod)
+web/e2e/                     # E2E com Playwright ([ADR 0022](adr/0022-testes-e2e-com-playwright.md)): projeto `readonly` (PWA, roda no CI) e `probe` (conta descartável na produção, sob demanda)
+  playwright.config.ts       # base = https://veloswallet.com.br (E2E_BASE_URL para outra origem)
 supabase/
   migrations/                # 0001–0010 aplicadas
   templates/                 # modelos de email (T18)

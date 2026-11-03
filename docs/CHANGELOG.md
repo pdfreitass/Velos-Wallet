@@ -6,6 +6,29 @@
 
 ## [Não lançado]
 
+### 2026-11-03 — E2E com Playwright + correção do offline (ADR 0022)
+#### Adicionado
+- **Suíte E2E** em `web/e2e/` com Playwright ([ADR 0022](adr/0022-testes-e2e-com-playwright.md)), em dois projetos: **`readonly`** (manifest, `sw.js`, ícones, service worker sem cache e instalabilidade — roda em todo CI contra a produção) e **`probe`** (conta descartável: CA9 da spec 012, `aria-live` estrutural e o CA6 offline, com limpeza dos dados de sonda no fim; roda sob demanda).
+- Scripts `test:e2e`, `test:e2e:readonly` e `test:e2e:probe`; job **`e2e`** no CI (só leitura, com artefato do relatório em falha).
+#### Corrigido
+- **CA6 da spec 009 (offline)**: sem internet, toda tela nova ficava presa em "Carregando…" para sempre — o TanStack Query no padrão `online` pausa qualquer query nova quando `navigator.onLine` é falso. `networkMode: "always"` em queries e mutações; agora a tela falha rápido e mostra o estado de erro com "Tentar de novo". Preso por teste de unidade.
+#### Pendente
+- O E2E `probe` do CA6 fica verde **depois do deploy** dessa correção (a produção ainda serve o código antigo).
+- Aparelhos reais (CA3–CA5) e **ouvir** o `aria-live` num leitor de tela continuam manuais.
+
+### 2026-11-03 — Backup do banco (ADR 0021)
+#### Adicionado
+- Workflow **`backup.yml`**: todo dia às **03:00 UTC (00:00 em São Paulo)** e sob demanda, o banco é despejado com `pg_dump` pelo pooler de sessão, o arquivo é conferido e **cifrado com GPG (AES256)** antes de virar artefato do Actions.
+- Cobre `public` (dados financeiros), `auth` (contas) e `supabase_migrations`; schemas gerenciados pela plataforma ficam de fora.
+- **Issue automática** quando o backup falha — o aviso que faltava.
+- [ADR 0021](adr/0021-backup-pg-dump-github-actions.md) com o procedimento de restauração: dados no mesmo projeto (`--data-only`) e projeto novo (com as ressalvas do `auth`).
+#### Pendente
+- O Pedro cria os segredos `SUPABASE_DB_PASSWORD` e `BACKUP_PASSPHRASE` no GitHub e dispara o workflow uma vez para provar o caminho de ponta a ponta.
+
+### 2026-11-03 — CA9 da spec 012 conferido na tela
+#### Adicionado
+- **"Sem categoria" na simulação foi conferida no navegador** (375 px, temas claro e escuro): com 3 meses de despesa numa categoria apagada depois dos lançamentos, a tela mostrou o rótulo com o círculo "?" e simulou 20% de R$ 400,00 = +R$ 80,00/mês (+R$ 480,00 em 6 e +R$ 960,00 em 12 meses). Dados semeados e apagados em seguida; só as contas de teste ficam para apagar no painel do Supabase.
+
 ### 2026-11-03 — "E se você não tivesse gastado?" (spec 012)
 #### Adicionado
 - **Simulação de corte** em `/simular`: escolher uma categoria, cortar 10%, 20%, 30% ou um percentual livre, e ver quanto sobraria por mês, em 6 e em 12 meses. Primeira ideia a sair do [caderno](IDEIAS.md) (era a **I5**).
@@ -20,7 +43,6 @@
 - **Sem migration e sem dependência nova** (nem NuGet nem npm). A janela de meses depende de "hoje em São Paulo", e esse fuso já tem fonte única no `TransactionRules` — uma view teria de repetir `America/Sao_Paulo` no SQL.
 
 #### Em aberto
-- **CA9 não foi conferido na tela**: "Sem categoria" é tratada no código e nos testes, mas não houve despesa sem categoria nos dados semeados.
 - O `aria-live` do resultado está no código, mas não foi ouvido num leitor de tela.
 - A janela de 3 meses é um palpite informado. Só se calibra com uso real.
 
