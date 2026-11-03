@@ -35,11 +35,16 @@ public sealed class AuthController : ControllerBase
     [AllowAnonymous]
     [EnableRateLimiting(RateLimitingSetup.Auth)]
     public async Task<IActionResult> SignUp(
-        SignUpRequest request, [FromServices] SignUpHandler handler, CancellationToken cancellationToken)
+        SignUpRequest request,
+        [FromServices] SignUpHandler handler,
+        [FromServices] AuthFlowCookies cookies,
+        [FromServices] PublicOrigin origin,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         var result = await handler.HandleAsync(
             new SignUpCommand(request.Name ?? "", request.Email ?? "", request.Password ?? "", request.ConfirmPassword ?? ""),
+            origin.Url("/auth/confirmar-cadastro"),
             cancellationToken);
 
         if (!result.IsSuccess)
@@ -47,7 +52,15 @@ public sealed class AuthController : ControllerBase
             return this.ToProblem(result.Error!);
         }
 
-        SessionCookies.Write(HttpContext, result.Value);
+        // Confirmação desligada (dev): sessão direta, como antes da spec 013.
+        if (result.Value.Session is { } session)
+        {
+            SessionCookies.Write(HttpContext, session);
+            return StatusCode(StatusCodes.Status201Created);
+        }
+
+        // Confirmação ligada: sem sessão; o verifier fica só no cookie httpOnly (RN6 da spec 013).
+        cookies.WriteSignupVerifier(HttpContext, result.Value.CodeVerifier!);
         return StatusCode(StatusCodes.Status201Created);
     }
 

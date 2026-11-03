@@ -1,0 +1,57 @@
+using FluentValidation;
+using Velos.Application.Abstractions;
+using Velos.Application.Common;
+using Velos.Domain.Auth;
+
+namespace Velos.Application.Auth.SignUp;
+
+public sealed record RequestSignUpConfirmationCommand(string Email);
+
+/// <summary>
+/// O verifier volta para a API gravar no cookie httpOnly, nunca em JSON: quem tiver o verifier e
+/// o link do email confirma a conta.
+/// </summary>
+public sealed record SignUpConfirmationStarted(string CodeVerifier);
+
+public sealed class RequestSignUpConfirmationValidator : AbstractValidator<RequestSignUpConfirmationCommand>
+{
+    public RequestSignUpConfirmationValidator() =>
+        RuleFor(command => command.Email).Cascade(CascadeMode.Stop).ValidEmail();
+}
+
+/// <summary>
+/// Reenvio do email de confirmação (spec 013, RN4). Resposta NEUTRA: existindo cadastro pendente,
+/// já confirmado ou não existindo, a resposta é a mesma. Exceção à neutralidade: limite de envios
+/// e Supabase fora do ar sobem como erro — nenhum dos dois depende de o email ter conta, e fingir
+/// "enviamos" com o serviço fora seria mentir para o usuário.
+/// </summary>
+public sealed class RequestSignUpConfirmationHandler(
+    IValidator<RequestSignUpConfirmationCommand> validator,
+    IIdentityProvider identity)
+{
+    public async Task<Result<SignUpConfirmationStarted>> HandleAsync(
+        RequestSignUpConfirmationCommand command, string redirectTo, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        var input = command with { Email = EmailAddress.Normalize(command.Email) };
+
+        var validation = await validator.ValidateAsync(input, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return Result.Failure<SignUpConfirmationStarted>(ValidationErrors.From(validation));
+        }
+
+        var pkce = PkcePair.Create();
+        var sent = await identity.SendSignupConfirmationAsync(
+            input.Email, pkce.Challenge, redirectTo, cancellationToken);
+
+        // RN4: só serviço fora do ar e limite de envios sobem; qualquer outra resposta do Supabase
+        // (inclusive "já confirmado" ou "não existe") vira o mesmo sucesso neutro.
+        var neutral = sent.IsSuccess
+            || sent.Error!.Kind is not (ErrorKind.Unavailable or ErrorKind.TooManyRequests);
+
+        return neutral
+            ? Result.Success(new SignUpConfirmationStarted(pkce.Verifier))
+            : Result.Failure<SignUpConfirmationStarted>(sent.Error!);
+    }
+}

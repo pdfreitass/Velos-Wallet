@@ -19,9 +19,30 @@ internal sealed partial class SupabaseAuthClient(HttpClient http, ILogger<Supaba
     public Task<Result<AuthSession>> SignInWithPasswordAsync(string email, string password, CancellationToken cancellationToken) =>
         RequestSessionAsync("token?grant_type=password", new { email, password }, isSignUp: false, cancellationToken);
 
-    public Task<Result<AuthSession>> SignUpAsync(string name, string email, string password, CancellationToken cancellationToken) =>
+    public Task<Result<AuthSession>> SignUpAsync(
+        string name, string email, string password, string? codeChallenge, string? redirectTo, CancellationToken cancellationToken)
+    {
         // full_name vira o nome do perfil pelo trigger handle_new_user (RN9).
-        RequestSessionAsync("signup", new { email, password, data = new { full_name = name } }, isSignUp: true, cancellationToken);
+        // redirect_to vai na QUERY (é assim que o GoTrue lê), como no recover.
+        var path = string.IsNullOrEmpty(redirectTo)
+            ? "signup"
+            : $"signup?redirect_to={Uri.EscapeDataString(redirectTo)}";
+
+        // Sem challenge (dev com a confirmação desligada), o corpo é o de sempre; com ele, o link
+        // do email volta com ?code= no redirectTo (PKCE, spec 013).
+        object body = codeChallenge is null
+            ? new { email, password, data = new { full_name = name } }
+            : new
+            {
+                email,
+                password,
+                data = new { full_name = name },
+                code_challenge = codeChallenge,
+                code_challenge_method = PkcePair.Method,
+            };
+
+        return RequestSessionAsync(path, body, isSignUp: true, cancellationToken);
+    }
 
     public Task<Result<AuthSession>> RefreshAsync(string refreshToken, CancellationToken cancellationToken) =>
         RequestSessionAsync(
@@ -61,6 +82,22 @@ internal sealed partial class SupabaseAuthClient(HttpClient http, ILogger<Supaba
         var path = $"recover?redirect_to={Uri.EscapeDataString(redirectTo)}";
         var body = new { email, code_challenge = codeChallenge, code_challenge_method = PkcePair.Method };
         return await PostAsync("recover", path, body, cancellationToken);
+    }
+
+    public async Task<Result<Unit>> SendSignupConfirmationAsync(
+        string email, string codeChallenge, string redirectTo, CancellationToken cancellationToken)
+    {
+        // O resend do GoTrue leva o redirect no corpo (email_redirect_to) e aceita o challenge no
+        // mesmo formato do signup: o link volta igual ao do cadastro (spec 013, RN4).
+        var body = new
+        {
+            type = "signup",
+            email,
+            code_challenge = codeChallenge,
+            code_challenge_method = PkcePair.Method,
+            email_redirect_to = redirectTo,
+        };
+        return await PostAsync("resend", "resend", body, cancellationToken);
     }
 
     public Task<Result<AuthSession>> ExchangeCodeAsync(string code, string codeVerifier, CancellationToken cancellationToken) =>
