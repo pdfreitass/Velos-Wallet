@@ -18,7 +18,7 @@
 | [I2](#i2--assinatura-do-velos-saas-com-7-dias-grátis) | Assinatura do Velos (SaaS) | G | LGPD, CNPJ, gateway, push |
 | [I3](#i3--central-de-notícias-financeiras) | Central de notícias financeiras | G | API externa, IA, licenciamento |
 | [I4](#i4--velos-score) | Velos Score (0 a 100) | M | histórico de uso real |
-| [I5](#i5--e-se-você-não-tivesse-gastado) | "E se você não tivesse gastado?" | M | nada novo |
+| [I5](#i5--e-se-você-não-tivesse-gastado) | "E se você não tivesse gastado?" | M | nada novo — ✅ **virou a [spec 012](specs/012-simulacao-de-corte/spec.md)** |
 | [I6](#i6--radar-de-assinaturas-do-usuário) | Radar de assinaturas do usuário | M | recorrência (fora do escopo) |
 | [I7](#i7--velos-ai-atendimento) | Velos AI (atendimento) | G | painel admin, IA, base de conhecimento |
 
@@ -311,6 +311,11 @@ nenhuma.
 ## I5 — "E se você não tivesse gastado?"
 
 *2026-11-01 · parente do [X1](audit/08-implementation-roadmap.md) (orçamentos, P2)*
+
+> ✅ **Saiu do caderno em 2026-11-03: é a [spec 012 — Simulação de corte](specs/012-simulacao-de-corte/spec.md)** (status Rascunho).
+> O que estava aqui como "o que falta decidir" foi decidido lá: a base passou a ser a **média dos
+> últimos 3 meses completos** (RN1), o que dá resposta ao ponto 4 — quem não tem histórico vê um
+> estado próprio em vez de número fraco. O texto abaixo fica como registro da ideia original.
 
 ### O que é
 
