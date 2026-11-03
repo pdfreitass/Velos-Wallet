@@ -15,6 +15,10 @@
 #### Pendente
 - O Pedro cria os segredos `SUPABASE_DB_PASSWORD` e `BACKUP_PASSPHRASE` no GitHub e dispara o workflow uma vez para provar o caminho de ponta a ponta.
 
+### 2026-11-03 — CA9 da spec 012 conferido na tela
+#### Adicionado
+- **"Sem categoria" na simulação foi conferida no navegador** (375 px, temas claro e escuro): com 3 meses de despesa numa categoria apagada depois dos lançamentos, a tela mostrou o rótulo com o círculo "?" e simulou 20% de R$ 400,00 = +R$ 80,00/mês (+R$ 480,00 em 6 e +R$ 960,00 em 12 meses). Dados semeados e apagados em seguida; só as contas de teste ficam para apagar no painel do Supabase.
+
 ### 2026-11-03 — "E se você não tivesse gastado?" (spec 012)
 #### Adicionado
 - **Simulação de corte** em `/simular`: escolher uma categoria, cortar 10%, 20%, 30% ou um percentual livre, e ver quanto sobraria por mês, em 6 e em 12 meses. Primeira ideia a sair do [caderno](IDEIAS.md) (era a **I5**).
@@ -29,7 +33,6 @@
 - **Sem migration e sem dependência nova** (nem NuGet nem npm). A janela de meses depende de "hoje em São Paulo", e esse fuso já tem fonte única no `TransactionRules` — uma view teria de repetir `America/Sao_Paulo` no SQL.
 
 #### Em aberto
-- **CA9 não foi conferido na tela**: "Sem categoria" é tratada no código e nos testes, mas não houve despesa sem categoria nos dados semeados.
 - O `aria-live` do resultado está no código, mas não foi ouvido num leitor de tela.
 - A janela de 3 meses é um palpite informado. Só se calibra com uso real.
 

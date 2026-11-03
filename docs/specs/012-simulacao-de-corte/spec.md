@@ -3,7 +3,7 @@
 > **O QUE** fazer e **como saber que está pronto.** O detalhe técnico está no [plan.md](plan.md).
 
 - **Etapa do roadmap:** Etapa 9 — primeira ideia do caderno ([I5](../../IDEIAS.md#i5--e-se-você-não-tivesse-gastado))
-- **Status:** Concluída (CA9 por conferir na tela)
+- **Status:** Concluída
 - **Data:** 2026-11-03
 
 ## Problema
@@ -78,7 +78,7 @@ rodando em 375 px, com dados semeados nos três cenários numa conta de teste, d
 - [x] **CA6** — Quando o usuário move o percentual, então o resultado muda **sem recarregar a página** e sem nova chamada à API. · *navegador, confirmado na aba de rede*
 - [x] **CA7** — Quando o usuário toca em "Transformar em meta", então vai para `/metas/nova` com nome e valor preenchidos, e **nenhuma meta foi criada** até ele confirmar (RN8). · *navegador + contagem no banco*
 - [x] **CA8** — Um corte de 100% é aceito; um de 0% não, com mensagem em português. · *testes dos dois lados; na tela o `input[type=range]` não deixa chegar a 0*
-- [ ] **CA9** — A categoria "Sem categoria" pode ser simulada (RN9). · **não verificado no navegador**: o código a trata (a query agrupa `category_id` nulo e a tela tem o rótulo e o círculo "?"), e há teste de unidade no handler, mas não houve despesa sem categoria nos dados semeados
+- [x] **CA9** — A categoria "Sem categoria" pode ser simulada (RN9). · *navegador + teste* — conferido em 2026-11-03 com 3 meses de despesa numa categoria apagada depois dos lançamentos, em 375 px e nos dois temas: a tela mostra o rótulo com o círculo "?" e simula (média de R$ 400,00 → 20% = +R$ 80,00/mês)
 - [x] **CA-seg** — Um usuário não consegue simular sobre dados de outro: a média vem de view com `security_invoker` e a query filtra pelo usuário autenticado (RLS). · *teste de integração com dois usuários reais*
 - [x] **CA-a11y** — Funciona em 375 px, nos dois temas, nenhuma informação depende só da cor, e o resultado é anunciado a leitor de tela quando muda. · *375 px e os dois temas vistos; o `aria-live` está no código mas **não foi ouvido num leitor de tela***
 - [x] **CA-build** — `dotnet build api`, `dotnet test api`, `npm run typecheck`, `npm run lint` e `npm run build` passam. · *386 testes na API, 58 no front, 0 falhas*

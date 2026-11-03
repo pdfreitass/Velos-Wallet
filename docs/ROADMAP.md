@@ -59,7 +59,7 @@
 - **"Transformar em meta"** abre `/metas/nova` preenchida — e não salva nada até a pessoa confirmar.
 - A base é a **média dos 3 meses completos anteriores** (o mês corrente fica fora). Sem mês completo, a tela diz que ainda não dá para simular, em vez de mostrar número fraco; com 1 ou 2, avisa em quantos meses a média se apoia.
 - **Sem migration e sem dependência nova.** A média é somada no banco; a janela vem do `TransactionRules`, que continua a ser a única fonte do fuso de São Paulo.
-- **Conferido no navegador** em 375 px, nos dois temas, com três meses semeados numa conta de teste depois apagada. **Falta o CA9** ("Sem categoria" na tela) e ouvir o `aria-live` num leitor de tela.
+- **Conferido no navegador** em 375 px, nos dois temas, com três meses semeados numa conta de teste depois apagada. **CA9 ("Sem categoria") também conferido no navegador** em 2026-11-03, com despesa sem categoria de verdade (categoria apagada depois dos lançamentos). Falta só ouvir o `aria-live` num leitor de tela.
 
 ### Backup do banco ([ADR 0021](adr/0021-backup-pg-dump-github-actions.md))
 *2026-11-03 — fechando o único risco sem volta*
