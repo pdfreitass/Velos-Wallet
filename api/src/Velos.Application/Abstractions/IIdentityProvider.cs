@@ -11,8 +11,20 @@ public interface IIdentityProvider
 {
     Task<Result<AuthSession>> SignInWithPasswordAsync(string email, string password, CancellationToken cancellationToken);
 
-    /// <summary>Cria a conta. Com "Confirm email" desligado (Revisão 1), já devolve a sessão.</summary>
-    Task<Result<AuthSession>> SignUpAsync(string name, string email, string password, CancellationToken cancellationToken);
+    /// <summary>
+    /// Cria a conta (spec 013). Com "Confirm email" desligado (dev), já devolve a sessão; ligado,
+    /// devolve <see cref="AuthErrors.ConfirmationRequired"/> e o email leva o link PKCE com
+    /// <c>redirectTo</c>. Com <c>codeChallenge</c> nulo, comporta-se como antes da spec 013.
+    /// </summary>
+    Task<Result<AuthSession>> SignUpAsync(
+        string name, string email, string password, string? codeChallenge, string? redirectTo, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Reenvia o email de confirmação de cadastro (spec 013, RN4). Mesmo formato PKCE do cadastro:
+    /// o link volta com <c>?code=</c> na query para o <c>redirectTo</c>.
+    /// </summary>
+    Task<Result<Unit>> SendSignupConfirmationAsync(
+        string email, string codeChallenge, string redirectTo, CancellationToken cancellationToken);
 
     Task<Result<AuthSession>> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
 

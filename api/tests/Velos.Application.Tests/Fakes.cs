@@ -21,10 +21,18 @@ internal sealed class FakeIdentityProvider : IIdentityProvider
         return Task.FromResult(NextResult);
     }
 
-    public Task<Result<AuthSession>> SignUpAsync(string name, string email, string password, CancellationToken cancellationToken)
+    public Task<Result<AuthSession>> SignUpAsync(
+        string name, string email, string password, string? codeChallenge, string? redirectTo, CancellationToken cancellationToken)
     {
-        Calls.Add($"sign-up:{name}|{email}");
+        Calls.Add($"sign-up:{name}|{email}|{codeChallenge ?? "sem-challenge"}|{redirectTo ?? "sem-redirect"}");
         return Task.FromResult(NextResult);
+    }
+
+    public Task<Result<Unit>> SendSignupConfirmationAsync(
+        string email, string codeChallenge, string redirectTo, CancellationToken cancellationToken)
+    {
+        Calls.Add($"signup-resend:{email}|{codeChallenge}|{redirectTo}");
+        return Task.FromResult(NextUnitResult);
     }
 
     public Task<Result<AuthSession>> RefreshAsync(string refreshToken, CancellationToken cancellationToken) =>

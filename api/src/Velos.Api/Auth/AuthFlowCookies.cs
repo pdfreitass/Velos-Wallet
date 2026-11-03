@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.DataProtection;
 namespace Velos.Api.Auth;
 
 /// <summary>
-/// Cookies de curta duração dos fluxos que saem do app e voltam: redefinição de senha (T19) e
-/// Google (T20).
+/// Cookies de curta duração dos fluxos que saem do app e voltam: redefinição de senha (T19),
+/// Google (T20) e confirmação de cadastro (spec 013).
 ///
 /// Todos são httpOnly E <b>protegidos com Data Protection</b>. O httpOnly só impede o JavaScript da
 /// página de ler; não impede o dono do navegador de FORJAR um cookie na mão. Como o
@@ -13,9 +13,11 @@ namespace Velos.Api.Auth;
 /// texto puro seria uma porta aberta para quem pegasse um computador com a sessão aberta.
 /// A proteção é com prazo: o valor expira sozinho, mesmo que o cookie continue no navegador.
 ///
-/// Os dois verifiers têm cookies e <b>propósitos diferentes</b> de propósito. Com um purpose só,
-/// um código devolvido pelo Google poderia ser trocado em <c>/auth/confirm</c> e render um ticket de
-/// redefinição — virando uma troca de senha sem saber a senha atual.
+/// Os verifiers têm cookies e <b>propósitos diferentes</b> de propósito. Com um purpose só, um
+/// código devolvido pelo Google poderia ser trocado em <c>/auth/confirm</c> e render um ticket de
+/// redefinição — virando uma troca de senha sem saber a senha atual. O verifier do cadastro segue
+/// a mesma regra: um código de confirmação não pode ser trocado no fluxo de redefinição, e
+/// vice-versa.
 /// </summary>
 /// <remarks>
 /// Pública (e não <c>internal</c> como <see cref="SessionCookies"/>) só porque aparece na assinatura
@@ -25,6 +27,7 @@ public sealed class AuthFlowCookies(IDataProtectionProvider provider)
 {
     private const string ResetVerifierName = "velos_pkce";
     private const string OAuthVerifierName = "velos_oauth";
+    private const string SignupVerifierName = "velos_signup";
     private const string TicketName = "velos_pw_reset";
 
     /// <summary>Os verifiers voltam em navegações para <c>/auth/*</c>, fora de <c>/api</c>.</summary>
@@ -35,6 +38,9 @@ public sealed class AuthFlowCookies(IDataProtectionProvider provider)
 
     /// <summary>Acompanha o prazo padrão do link do Supabase (mailer_otp_exp, 1 hora).</summary>
     private static readonly TimeSpan ResetVerifierLifetime = TimeSpan.FromHours(1);
+
+    /// <summary>O link de confirmação de cadastro vale o mesmo que o de redefinição.</summary>
+    private static readonly TimeSpan SignupVerifierLifetime = TimeSpan.FromHours(1);
 
     /// <summary>Tempo de ir ao Google, escolher a conta e voltar.</summary>
     private static readonly TimeSpan OAuthVerifierLifetime = TimeSpan.FromMinutes(15);
@@ -47,6 +53,9 @@ public sealed class AuthFlowCookies(IDataProtectionProvider provider)
 
     private readonly ITimeLimitedDataProtector _oauth =
         provider.CreateProtector("Velos.Google.Pkce").ToTimeLimitedDataProtector();
+
+    private readonly ITimeLimitedDataProtector _signup =
+        provider.CreateProtector("Velos.Signup.Pkce").ToTimeLimitedDataProtector();
 
     private readonly ITimeLimitedDataProtector _ticket =
         provider.CreateProtector("Velos.PasswordReset.Ticket").ToTimeLimitedDataProtector();
@@ -66,6 +75,14 @@ public sealed class AuthFlowCookies(IDataProtectionProvider provider)
         Unprotect(_oauth, context.Request.Cookies[OAuthVerifierName]);
 
     public void ClearOAuthVerifier(HttpContext context) => Clear(context, OAuthVerifierName, FlowPath);
+
+    public void WriteSignupVerifier(HttpContext context, string verifier) =>
+        Write(context, SignupVerifierName, FlowPath, _signup, verifier, SignupVerifierLifetime);
+
+    public string? ReadSignupVerifier(HttpContext context) =>
+        Unprotect(_signup, context.Request.Cookies[SignupVerifierName]);
+
+    public void ClearSignupVerifier(HttpContext context) => Clear(context, SignupVerifierName, FlowPath);
 
     /// <summary>Autoriza a troca de senha, e só para este usuário.</summary>
     public void WriteTicket(HttpContext context, Guid userId) =>
