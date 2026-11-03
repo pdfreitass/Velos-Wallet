@@ -3,7 +3,7 @@
 > Leia no **início de cada sessão** para saber onde paramos.
 > Atualize **ao terminar cada feature** (junto com [CHANGELOG.md](CHANGELOG.md) e [LICOES.md](LICOES.md)).
 
-**🚀 O Velos Wallet está NO AR em https://veloswallet.com.br desde 2026-11-02** (Fly.io `gru`, [spec 011](specs/011-deploy/spec.md), [ADR 0020](adr/0020-host-fly-io-gru.md)). O MVP tem 7 de 8 etapas fechadas; a **Etapa 8 (PWA) ficou destravada**, porque o service worker já registra com HTTPS de verdade. Falta conferir no ar: entrar com a conta real, o redeploy não deslogar, e o limite por IP — atualizado em 2026-11-02.
+**🚀 O Velos Wallet está NO AR em https://veloswallet.com.br desde 2026-11-02** (Fly.io `gru`, [spec 011](specs/011-deploy/spec.md), [ADR 0020](adr/0020-host-fly-io-gru.md)). O MVP tem 7 de 8 etapas fechadas; a **Etapa 8 (PWA) ficou destravada**, porque o service worker já registra com HTTPS de verdade. Conferido no ar: ✅ **conta real entrando normalmente** e ✅ **o redeploy de 2026-11-03 não deslogou ninguém** (as chaves do Data Protection no volume `velos_keys` sobreviveram à atualização da máquina). Falta só conferir o **limite por IP** — atualizado em 2026-11-03.
 
 > **Numeração:** são 8 etapas, a mesma que os comentários do código já usam ("Etapa 2" = banco, "Etapa 3" = autenticação, "Etapa 6" = dashboard). A identidade visual faz parte da Etapa 1. O checklist antigo do `CLAUDE.md` tinha 9 itens porque contava a identidade visual à parte.
 
