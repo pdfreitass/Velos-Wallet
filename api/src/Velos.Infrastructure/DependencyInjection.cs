@@ -27,6 +27,7 @@ public static class DependencyInjection
         services.AddScoped<ITransactionStore, TransactionStore>();
         services.AddScoped<IDashboardStore, DashboardStore>();
         services.AddScoped<IGoalStore, GoalStore>();
+        services.AddScoped<ISimulationStore, SimulationStore>();
 
         services.AddHttpClient<IIdentityProvider, SupabaseAuthClient>(client =>
         {

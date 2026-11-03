@@ -11,6 +11,7 @@ using Velos.Application.Auth.SignIn;
 using Velos.Application.Auth.SignOut;
 using Velos.Application.Auth.SignUp;
 using Velos.Application.Profiles;
+using Velos.Application.Simulation;
 using Velos.Application.Transactions;
 
 namespace Velos.Application;
@@ -53,6 +54,8 @@ public static class DependencyInjection
         services.AddScoped<DeleteTransactionHandler>();
 
         services.AddScoped<GetDashboardHandler>();
+
+        services.AddScoped<GetSimulationBaseHandler>();
 
         services.AddScoped<ListGoalsHandler>();
         services.AddScoped<GetGoalHandler>();
