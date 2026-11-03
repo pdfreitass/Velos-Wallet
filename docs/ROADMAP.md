@@ -61,6 +61,15 @@
 - **Sem migration e sem dependência nova.** A média é somada no banco; a janela vem do `TransactionRules`, que continua a ser a única fonte do fuso de São Paulo.
 - **Conferido no navegador** em 375 px, nos dois temas, com três meses semeados numa conta de teste depois apagada. **Falta o CA9** ("Sem categoria" na tela) e ouvir o `aria-live` num leitor de tela.
 
+### Backup do banco ([ADR 0021](adr/0021-backup-pg-dump-github-actions.md))
+*2026-11-03 — fechando o único risco sem volta*
+
+- Workflow **diário** (03:00 UTC, 00:00 em São Paulo) + `workflow_dispatch` que despeja o banco com `pg_dump` pelo **pooler de sessão**, confere o arquivo, **cifra com GPG (AES256)** e sobe o `.gpg` como artefato do Actions.
+- Cobre `public` (dados financeiros) + `auth` (contas) + `supabase_migrations`; schemas gerenciados pela plataforma ficam de fora.
+- **Falha abre issue automaticamente** — é o aviso que faltava.
+- Restauração documentada no ADR: dados no mesmo projeto (`--data-only`) e projeto novo (com ressalvas do `auth`).
+- **Falta o Pedro criar os segredos** `SUPABASE_DB_PASSWORD` e `BACKUP_PASSPHRASE` no GitHub e **disparar o workflow uma vez** para provar o caminho de ponta a ponta.
+
 ## 🟡 Em andamento
 
 **Etapa 8 — PWA** ([spec 009](specs/009-pwa/tasks.md)): T1–T5 feitas (ícones, manifest, `index.html`, service worker, instalável confirmado pelo Pedro). Faltam: o teste offline (CA6), aparelhos reais (T6), as revisões (T7) e a documentação (T8).

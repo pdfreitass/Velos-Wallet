@@ -6,6 +6,15 @@
 
 ## [Não lançado]
 
+### 2026-11-03 — Backup do banco (ADR 0021)
+#### Adicionado
+- Workflow **`backup.yml`**: todo dia às **03:00 UTC (00:00 em São Paulo)** e sob demanda, o banco é despejado com `pg_dump` pelo pooler de sessão, o arquivo é conferido e **cifrado com GPG (AES256)** antes de virar artefato do Actions.
+- Cobre `public` (dados financeiros), `auth` (contas) e `supabase_migrations`; schemas gerenciados pela plataforma ficam de fora.
+- **Issue automática** quando o backup falha — o aviso que faltava.
+- [ADR 0021](adr/0021-backup-pg-dump-github-actions.md) com o procedimento de restauração: dados no mesmo projeto (`--data-only`) e projeto novo (com as ressalvas do `auth`).
+#### Pendente
+- O Pedro cria os segredos `SUPABASE_DB_PASSWORD` e `BACKUP_PASSPHRASE` no GitHub e dispara o workflow uma vez para provar o caminho de ponta a ponta.
+
 ### 2026-11-03 — "E se você não tivesse gastado?" (spec 012)
 #### Adicionado
 - **Simulação de corte** em `/simular`: escolher uma categoria, cortar 10%, 20%, 30% ou um percentual livre, e ver quanto sobraria por mês, em 6 e em 12 meses. Primeira ideia a sair do [caderno](IDEIAS.md) (era a **I5**).
