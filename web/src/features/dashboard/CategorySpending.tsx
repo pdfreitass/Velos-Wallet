@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { PieChart } from "lucide-react";
+import { PieChart, Scissors } from "lucide-react";
 import { Link } from "react-router";
 
 import { CategoryIcon } from "@/components/shared/CategoryBadge";
@@ -41,6 +41,13 @@ export function CategorySpending({ data }: { data: Dashboard }) {
               </li>
             ))}
           </ul>
+          {/* Spec 012: a ponte entre "para onde foi" e "para onde vai". */}
+          <Link
+            to={ROUTES.simulation}
+            className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-3 text-sm font-medium outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <Scissors className="size-4" aria-hidden="true" />E se você cortasse um desses?
+          </Link>
         </>
       )}
     </section>

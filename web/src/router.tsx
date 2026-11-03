@@ -94,6 +94,10 @@ export const router = createBrowserRouter([
                 lazy: () => import("@/pages/GoalFormPage").then((m) => ({ Component: m.EditGoalPage })),
               },
               {
+                path: "/simular",
+                lazy: () => import("@/pages/SimulationPage").then((m) => ({ Component: m.SimulationPage })),
+              },
+              {
                 path: "/transacoes",
                 lazy: () => import("@/pages/TransactionsPage").then((m) => ({ Component: m.TransactionsPage })),
               },

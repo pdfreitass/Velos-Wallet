@@ -20,6 +20,8 @@ export const ROUTES = {
   newTransaction: "/transacoes/nova",
   goals: "/metas",
   newGoal: "/metas/nova",
+  /** Spec 012. Aceita `?categoria=<id>` para abrir já numa categoria. */
+  simulation: "/simular",
 } as const;
 
 export const accountPath = (id: string) => `${ROUTES.accounts}/${id}`;
