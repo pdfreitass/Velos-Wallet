@@ -18,11 +18,13 @@ public sealed class PrivateByDefaultTests(ApiFactory factory) : IClassFixture<Ap
     [
         "GET api/health",
         "POST api/auth/sign-up",
+        "POST api/auth/sign-up/resend",
         "POST api/auth/sign-in",
         "POST api/auth/sign-out",
         "GET api/auth/google",
         "POST api/auth/password-reset",
         "GET auth/confirm",
+        "GET auth/confirmar-cadastro",
         "GET auth/callback",
     ];
 
