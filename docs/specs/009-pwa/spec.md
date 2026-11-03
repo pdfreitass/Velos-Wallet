@@ -54,15 +54,15 @@ Não há tela nova. O que muda é a "casca":
 
 ## Critérios de aceite
 
-- [ ] **CA1** — O manifest é servido pela API em produção (`dotnet run` com o build do front) com o tipo de conteúdo correto, **sem login**, e passa sem erros no painel "Manifest" do Chrome DevTools.
-- [ ] **CA2** — No Chrome do PC, o app é instalável e abre em janela própria no Início (logado) ou em Entrar (deslogado).
+- [x] **CA1** — O manifest é servido pela API em produção (`dotnet run` com o build do front) com o tipo de conteúdo correto, **sem login**, e passa sem erros no painel "Manifest" do Chrome DevTools. · *T5 (API servindo o build) + E2E `readonly` em produção (2026-11-03): 200, `application/manifest+json`, campos conferidos, sem login*
+- [x] **CA2** — No Chrome do PC, o app é instalável e abre em janela própria no Início (logado) ou em Entrar (deslogado). · *T5: ícone de instalar confirmado pelo Pedro; E2E `readonly`: `Page.getInstallabilityErrors` vazio (2026-11-03)*
 - [ ] **CA3** — No Android, "Instalar app" aparece; o ícone instalado não é cortado (teste do maskable) e a tela de abertura é verde profundo.
 - [ ] **CA4** — No iPhone, "Adicionar à Tela de Início" usa o ícone e o nome "Velos", e o app abre sem a barra do Safari.
 - [ ] **CA5** — Login com email e senha funciona **dentro** do app instalado, e a sessão continua depois de fechar e reabrir o app.
-- [ ] **CA6** — Sem internet, o app instalado mostra o estado de erro das telas, sem tela branca e sem dado velho.
-- [ ] **CA-seg** — Nenhum dado do usuário é guardado em cache pela PWA; manifest e ícones são os únicos arquivos novos públicos.
-- [ ] **CA-a11y** — Ícones com contraste visível nos fundos claro e escuro do sistema; `lang="pt-BR"` mantido.
-- [ ] **CA-build** — `npm run typecheck`, `npm run lint` e `npm run build` do `web`; `dotnet build api` e `dotnet test api`.
+- [x] **CA6** — Sem internet, o app instalado mostra o estado de erro das telas, sem tela branca e sem dado velho. · *E2E `probe` em produção (2026-11-03): navegação SPA offline → "Não foi possível carregar as transações" + "Tentar de novo" → volta a funcionar online. O teste achou e consertou o skeleton eterno (`networkMode: "always"`), e ficou verde no deploy*
+- [x] **CA-seg** — Nenhum dado do usuário é guardado em cache pela PWA; manifest e ícones são os únicos arquivos novos públicos. · *E2E `readonly`: SW `activated` com `caches.keys()` vazio (2026-11-03)*
+- [x] **CA-a11y** — Ícones com contraste visível nos fundos claro e escuro do sistema; `lang="pt-BR"` mantido. · *T1–T4 (revisões) + manifest confere `lang` no E2E*
+- [x] **CA-build** — `npm run typecheck`, `npm run lint` e `npm run build` do `web`; `dotnet build api` e `dotnet test api`. · *verde em 2026-11-03 (59 testes no front; API 354 ✓ + 32 de integração pulados sem banco) e no CI da `main`*
 
 ## Perguntas em aberto
 

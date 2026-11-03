@@ -13,7 +13,7 @@
 #### Corrigido
 - **CA6 da spec 009 (offline)**: sem internet, toda tela nova ficava presa em "Carregando…" para sempre — o TanStack Query no padrão `online` pausa qualquer query nova quando `navigator.onLine` é falso. `networkMode: "always"` em queries e mutações; agora a tela falha rápido e mostra o estado de erro com "Tentar de novo". Preso por teste de unidade.
 #### Pendente
-- O E2E `probe` do CA6 fica verde **depois do deploy** dessa correção (a produção ainda serve o código antigo).
+- ~~O E2E `probe` do CA6 fica verde **depois do deploy** dessa correção (a produção ainda serve o código antigo).~~ ✅ **Deploy feito em 2026-11-03**: `probe` 1/1 e `readonly` 4/4 verdes contra a produção, e o CA6 marcado como conferido na spec 009.
 - Aparelhos reais (CA3–CA5) e **ouvir** o `aria-live` num leitor de tela continuam manuais.
 
 ### 2026-11-03 — Backup do banco (ADR 0021)
