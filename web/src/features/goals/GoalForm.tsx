@@ -22,8 +22,23 @@ import type { Goal } from "./types";
 
 const serverFields = ["name", "deadline"] as const;
 
+/**
+ * Valores que chegam já preenchidos numa meta nova — hoje, da simulação de corte (RN8 da spec
+ * 012). São uma sugestão e nada mais: o formulário continua editável e nada é salvo sem o
+ * usuário confirmar aqui.
+ */
+export type GoalSuggestion = { name: string; targetCents: number; deadline: string };
+
 /** Nova meta (sem `goal`) ou edição. RN2: na edição, o prazo gravado pode ficar como está. */
-export function GoalForm({ goal, footer }: { goal?: Goal; footer?: ReactNode }) {
+export function GoalForm({
+  goal,
+  suggestion,
+  footer,
+}: {
+  goal?: Goal;
+  suggestion?: GoalSuggestion;
+  footer?: ReactNode;
+}) {
   const navigate = useNavigate();
   const create = useCreateGoal();
   const update = useUpdateGoal(goal?.id ?? "");
@@ -41,7 +56,11 @@ export function GoalForm({ goal, footer }: { goal?: Goal; footer?: ReactNode }) 
     resolver: zodResolver(goalFormSchema(currentDeadline)),
     defaultValues: goal
       ? { name: goal.name, targetCents: goal.targetCents, deadline: goal.deadline ?? "" }
-      : { name: "", targetCents: 0, deadline: "" },
+      : {
+          name: suggestion?.name ?? "",
+          targetCents: suggestion?.targetCents ?? 0,
+          deadline: suggestion?.deadline ?? "",
+        },
     mode: "onTouched",
   });
   const target = useController({ control, name: "targetCents" });

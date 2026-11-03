@@ -7,6 +7,22 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L43 — Feature analítica não se testa com os dados que existem
+*2026-11-03 · spec 012*
+
+- **O que aconteceu:** a simulação de corte ficou pronta, com 386 testes na API e 58 no front, tudo verde. Ao abrir a tela no navegador, ela mostrava corretamente… *"Ainda não dá para simular"*. É o estado certo — os dados reais eram 8 transações de dois dias — mas não exercitava nada do que tinha sido construído. Para ver a tela de verdade foi preciso **semear** três meses de despesa numa conta de teste, conferir, e apagar tudo depois.
+- **Por que:** uma feature que lê histórico só tem o que mostrar quando o histórico existe. Os testes cobrem os cenários porque os constroem; a tela, não — ela mostra o que o banco tem. Num app novo, o estado "sem dados" é o estado **normal**, e é fácil confundir "a tela funciona" com "a tela está vazia e eu não reparei".
+- **Como evitar:** antes de dar por verificada uma tela que depende de histórico, perguntar **quais dados existem agora**. Se o cenário real é o estado vazio, semear os outros cenários numa conta de teste, conferir à mão, e apagar — confirmando no fim que só os dados semeados sumiram. E marcar na spec **como** cada critério foi verificado: "passou no teste" e "vi na tela" não são a mesma garantia.
+- **Onde a regra mora:** [spec 012 → Critérios de aceite](specs/012-simulacao-de-corte/spec.md), que agora diz ao lado de cada um se foi navegador, teste, ou os dois.
+
+## L42 — Cálculo duplicado entre front e API precisa de um teste que prenda os dois
+*2026-11-03 · spec 012*
+
+- **O que aconteceu:** a simulação recalcula o corte em memória enquanto a pessoa move o percentual, para não ir à rede a cada ajuste. Isso obriga a mesma aritmética a existir em C# e em TypeScript — com o mesmo arredondamento ao centavo, que não é óbvio: arredonda-se **uma vez só**, no valor mensal, e as projeções multiplicam o já arredondado. Arredondar noutra ordem faz 12× o número da tela não bater com o número da tela.
+- **Por que:** duplicação deliberada por desempenho é legítima, mas as duas cópias envelhecem em silêncio. Nada no compilador liga uma à outra.
+- **Como evitar:** quando a duplicação for deliberada, escrever **os mesmos números à mão dos dois lados** — aqui, os casos do CA1 e do CA2 em `SimulationRulesTests.cs` e em `simulation-math.test.ts`, com um comentário em cada ficheiro a apontar para o outro. Se alguém mexer num, o outro fica vermelho.
+- **Onde a regra mora:** [plan.md da spec 012](specs/012-simulacao-de-corte/plan.md) → *Resumo da abordagem*.
+
 ## L41 — A vitrine de marketing cria expectativa de produto
 *2026-11-02 · spec 010*
 

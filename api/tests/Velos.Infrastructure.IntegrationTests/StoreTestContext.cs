@@ -23,9 +23,12 @@ internal sealed class StoreTestContext : IAsyncDisposable
         Transactions = new TransactionStore(Session, NullLogger<TransactionStore>.Instance);
         Dashboard = new DashboardStore(Session, NullLogger<DashboardStore>.Instance);
         Goals = new GoalStore(Session, NullLogger<GoalStore>.Instance);
+        Simulation = new SimulationStore(Session, NullLogger<SimulationStore>.Instance);
     }
 
     public IDashboardStore Dashboard { get; }
+
+    public ISimulationStore Simulation { get; }
 
     public IGoalStore Goals { get; }
 
