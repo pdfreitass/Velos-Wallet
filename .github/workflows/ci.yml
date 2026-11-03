@@ -54,3 +54,29 @@ jobs:
         run: npm run check:password
       - name: Build
         run: npm run build
+
+  e2e:
+    name: E2E (só leitura, produção)
+    # ADR 0022: o projeto `readonly` não cria dado nenhum — manifest, service worker, cache e
+    # instalabilidade. O projeto `probe` cria conta descartável e fica fora do CI de rotina.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: E2E só leitura
+        run: npm run test:e2e:readonly
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: web/playwright-report/
+          retention-days: 7

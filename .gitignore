@@ -78,6 +78,10 @@ desktop.ini
 # Pré-visualização dos modelos de email (npm run preview:emails)
 web/.preview-emails/
 
+# Saída do Playwright (test:e2e)
+web/test-results/
+web/playwright-report/
+
 # Material de divulgação (posts e capturas do Instagram e do LinkedIn): só local, fora do Git
 media/instagram/
 media/linkedin/
