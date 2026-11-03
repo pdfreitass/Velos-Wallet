@@ -41,6 +41,13 @@ COPY --from=web /src/web/dist /app/wwwroot
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS final
 WORKDIR /app
 
+# Base de fusos horarios. O Alpine NAO a traz, e sem ela o `America/Sao_Paulo` do
+# TransactionRules nao existe: o inicializador estatico lanca, o tipo fica quebrado para o resto
+# da vida do processo, e todo endpoint que calcula "hoje" (metas, contas, formulario de
+# transacao, mes atual) devolve 500 — enquanto o /api/health, que nao toca no dominio, segue
+# verde. Foi exatamente o que aconteceu em producao em 2026-11-03.
+RUN apk add --no-cache tzdata
+
 # RN8: sem privilegio. O usuario `app` ja vem na imagem da Microsoft.
 # O volume das chaves do Data Protection (RN3) e montado em /data pelo fly.toml, e precisa
 # de ser gravavel por ele — o diretorio e criado aqui para o dono ficar certo mesmo que o

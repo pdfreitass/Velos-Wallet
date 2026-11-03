@@ -6,6 +6,7 @@ using Velos.Api.Configuration;
 using Velos.Api.Http;
 using Velos.Application;
 using Velos.Application.Abstractions;
+using Velos.Domain.Transactions;
 using Velos.Infrastructure;
 using Velos.Infrastructure.Supabase;
 
@@ -57,6 +58,26 @@ var supabase = new SupabaseSettings(
 builder.Services.AddInfrastructure(connectionString, supabase);
 
 var app = builder.Build();
+
+// O "hoje" do app é sempre de São Paulo (TransactionRules), e a zona vem da base de fusos do
+// sistema. Tocar nela aqui força o inicializador estático do tipo no arranque: se a imagem não
+// tiver a base, a API não sobe e o deploy falha, mantendo a versão anterior no ar.
+//
+// Sem isto o estrago é silencioso e pior: o tipo quebra na primeira request e fica assim para o
+// resto da vida do processo, todo endpoint que calcula "hoje" devolve 500, e o /api/health —
+// que não toca no domínio — segue verde, então o Fly considera a máquina saudável. Aconteceu em
+// produção em 2026-11-03, com a imagem Alpine sem o pacote tzdata.
+try
+{
+    // O mesmo caminho que os endpoints percorrem, e não só o campo: se "hoje" sai daqui no
+    // arranque, sai em qualquer request.
+    _ = TransactionRules.Today(TimeProvider.System);
+}
+catch (Exception ex)
+{
+    throw new InvalidOperationException(
+        "Base de fusos horários ausente na imagem (tzdata). Ver o Dockerfile.", ex);
+}
 
 // Primeiro de todos: o resto do pipeline (limite por IP, HSTS, links absolutos) tem de enxergar o
 // IP e o esquema do cliente, não os do proxy. Em dev não há proxy, e os cabeçalhos de um
