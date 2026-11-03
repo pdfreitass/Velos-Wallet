@@ -41,12 +41,23 @@ COPY --from=web /src/web/dist /app/wwwroot
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS final
 WORKDIR /app
 
-# Base de fusos horarios. O Alpine NAO a traz, e sem ela o `America/Sao_Paulo` do
-# TransactionRules nao existe: o inicializador estatico lanca, o tipo fica quebrado para o resto
-# da vida do processo, e todo endpoint que calcula "hoje" (metas, contas, formulario de
-# transacao, mes atual) devolve 500 — enquanto o /api/health, que nao toca no dominio, segue
-# verde. Foi exatamente o que aconteceu em producao em 2026-11-03.
-RUN apk add --no-cache tzdata
+# O que a imagem Alpine NAO traz, e o app precisa. Faltou as duas coisas em producao no
+# 2026-11-03, uma de cada vez:
+#
+# - `tzdata`: sem /usr/share/zoneinfo o `America/Sao_Paulo` do TransactionRules nao existe.
+# - `icu-libs` + `icu-data-full`: sem ICU, a imagem liga o modo invariante de globalizacao e o
+#   `CultureInfo.GetCultureInfo("pt-BR")` do PgEnums lanca CultureNotFoundException.
+#
+# Nos dois casos quem lanca e um inicializador estatico, e ai o tipo fica quebrado para o resto
+# da vida do processo: todo endpoint que o toque devolve 500, enquanto o /api/health, que nao
+# toca no dominio, segue verde e o Fly considera a maquina saudavel.
+RUN apk add --no-cache tzdata icu-libs icu-data-full
+
+# A imagem da Microsoft define DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true, porque sem ICU nao ha
+# alternativa. A variavel de ambiente GANHA do <InvariantGlobalization>false</InvariantGlobalization>
+# do Directory.Build.props — foi por isso que o projeto parecia configurado certo e nao estava.
+# Instalado o ICU acima, desligamos o modo aqui.
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # RN8: sem privilegio. O usuario `app` ja vem na imagem da Microsoft.
 # O volume das chaves do Data Protection (RN3) e montado em /data pelo fly.toml, e precisa

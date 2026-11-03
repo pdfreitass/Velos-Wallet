@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -59,24 +60,33 @@ builder.Services.AddInfrastructure(connectionString, supabase);
 
 var app = builder.Build();
 
-// O "hoje" do app é sempre de São Paulo (TransactionRules), e a zona vem da base de fusos do
-// sistema. Tocar nela aqui força o inicializador estático do tipo no arranque: se a imagem não
-// tiver a base, a API não sobe e o deploy falha, mantendo a versão anterior no ar.
+// O app depende de duas coisas que a imagem precisa de trazer e que o build não garante: a base
+// de fusos horários (o "hoje" é sempre de São Paulo) e o ICU (ordenação em pt-BR). Quem resolve
+// as duas são inicializadores estáticos — TransactionRules e PgEnums — e um inicializador
+// estático que lança deixa o tipo quebrado para o RESTO DA VIDA DO PROCESSO: todo endpoint que
+// o toque devolve 500, enquanto o /api/health, que não toca no domínio, segue verde e o Fly
+// considera a máquina saudável.
 //
-// Sem isto o estrago é silencioso e pior: o tipo quebra na primeira request e fica assim para o
-// resto da vida do processo, todo endpoint que calcula "hoje" devolve 500, e o /api/health —
-// que não toca no domínio — segue verde, então o Fly considera a máquina saudável. Aconteceu em
-// produção em 2026-11-03, com a imagem Alpine sem o pacote tzdata.
-try
+// Por isso são exercidas aqui, no arranque: se faltar alguma, a API não sobe, o deploy falha e
+// a versão anterior continua no ar. Em 2026-11-03 produção quebrou duas vezes assim, uma por
+// cada uma delas.
+//
+// Ao acrescentar outra dependência de ambiente desse tipo, exercê-la aqui também.
+foreach (var (nome, verificar) in new (string, Action)[]
 {
-    // O mesmo caminho que os endpoints percorrem, e não só o campo: se "hoje" sai daqui no
-    // arranque, sai em qualquer request.
-    _ = TransactionRules.Today(TimeProvider.System);
-}
-catch (Exception ex)
+    ("Base de fusos horários (tzdata)", () => TransactionRules.Today(TimeProvider.System)),
+    ("ICU — a imagem está em modo invariante de globalização",
+        () => CultureInfo.GetCultureInfo("pt-BR")),
+})
 {
-    throw new InvalidOperationException(
-        "Base de fusos horários ausente na imagem (tzdata). Ver o Dockerfile.", ex);
+    try
+    {
+        verificar();
+    }
+    catch (Exception ex)
+    {
+        throw new InvalidOperationException($"Ambiente incompleto: {nome}. Ver o Dockerfile.", ex);
+    }
 }
 
 // Primeiro de todos: o resto do pipeline (limite por IP, HSTS, links absolutos) tem de enxergar o
