@@ -1,5 +1,5 @@
 /*
- * PWA só instalável (spec 007, ADR 0010): este service worker existe porque o Chrome exige um fetch
+ * PWA só instalável (spec 009, ADR 0010): este service worker existe porque o Chrome exige um fetch
  * handler para mostrar o ícone de instalar. Não guarda nada (sem Cache Storage) e nunca intercepta
  * /api nem métodos diferentes de GET: o navegador vai à rede como se ele não existisse.
  */
