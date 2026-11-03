@@ -29,7 +29,7 @@
 
 ---
 
-### T3 — Api: rotas, cookie e redirects
+### [x] T3 — Api: rotas, cookie e redirects
 `api/src/Velos.Api/Auth/AuthFlowCookies.cs`, `AuthController.cs`, `AuthCallbackController.cs`
 
 - `AuthFlowCookies`: `velos_signup` com protector `"Velos.Signup.Pkce"`, 1 h, httpOnly, path `/`.
@@ -48,6 +48,8 @@
 - Troca do `code` com o verifier cria sessão.
 
 **Pronto quando:** rodar localmente com user-secrets — se o Pedro não tiver as credenciais aqui, marcar "a provar no deploy" e seguir.
+
+**Estado (2026-11-03):** a provar no deploy. A máquina TEM os user-secrets, mas a flag *Confirm email* está desligada na produção e **só pode ser ligada depois do deploy** do código novo (T1–T3) — ligar antes quebraria os cadastros no ar, que ainda rodam o código antigo. Com a flag desligada o reenvio não dispara email de verdade, então o risco do T1 (GoTrue ignorar o PKCE no resend) não é provável agora. A prova roda no fecho, contra a produção, junto da T5/T6.
 
 ## Front
 
