@@ -6,9 +6,8 @@
 
 ## Back
 
-### T1 — Cliente Supabase com PKCE e resend
+### [x] T1 — Cliente Supabase com PKCE e resend
 `api/src/Velos.Infrastructure/Supabase/SupabaseAuthClient.cs`
-
 - `SignUpAsync(name, email, password, codeChallenge, redirectTo)` → `signup?redirect_to=…` com `code_challenge`/`code_challenge_method` no corpo.
 - Novo `SendSignupConfirmationAsync(email, codeChallenge, redirectTo)` → `POST resend` com `type=signup`.
 - Mapeamentos existentes ficam: resposta sem sessão no cadastro → `ConfirmationRequired`; `email_not_confirmed` → `EmailNotConfirmed`.
@@ -18,7 +17,7 @@
 
 ---
 
-### T2 — Application: cadastro, confirmação e reenvio
+### [x] T2 — Application: cadastro, confirmação e reenvio
 `api/src/Velos.Application/Auth/`
 
 - `SignUpHandler` devolve `Result<SignUpStarted>` (`AuthSession? Session` + `string? CodeVerifier`); gera `PkcePair` quando a confirmação é exigida.
