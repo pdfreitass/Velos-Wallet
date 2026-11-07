@@ -66,13 +66,23 @@
 
 ---
 
-### T5 — Template do email + passos do Pedro no painel
+### [~] T5 — Template do email + passos do Pedro no painel
 `supabase/templates/confirmation.html`
 
-- Link → `{{ .ConfirmationURL }}` (4 ocorrências); remover a nota "GUARDADO, NÃO ATIVAR"; `npm run preview:emails`.
-- **Pedro no painel:** ligar *Confirm email*; adicionar as redirect URLs de produção e dev; publicar o modelo na aba *Confirm signup*.
+- [x] Link → `{{ .ConfirmationURL }}` (4 ocorrências); remover a nota "GUARDADO, NÃO ATIVAR"; `npm run preview:emails`.
+- [x] `web/scripts/supabase-templates-edit.mjs`: publica o modelo no painel por Playwright, já que o Supabase não lê esta pasta.
+- [ ] **Pedro no painel:** ligar *Confirm email*; adicionar as redirect URLs de produção e dev; publicar o modelo na aba *Confirm signup*.
 
 **Pronto quando:** preview renderiza e o Pedro publica (registrar o horário).
+
+**Estado (2026-11-07):** o arquivo e o script estão feitos e o preview responde *"só variáveis
+conhecidas"*. Falta a parte do painel — e ela **só pode acontecer depois do deploy do T4**.
+O T3-bis já avisava para não ligar a flag antes do código da API, que está no ar desde a v6
+(03/11 23:11). Mas as **telas** do T4 não estão: sem elas, quem se cadastrar com a flag ligada
+não vê "Enviamos um link para…" e fica sem entender o que aconteceu.
+
+> **Ao usar o script:** apagar a cópia do perfil do Chrome depois. Ela leva os cookies e o Local
+> Storage — a sessão do Supabase em claro — e o Temp não se limpa sozinho.
 
 ---
 
