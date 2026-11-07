@@ -58,7 +58,8 @@ jobs:
   e2e:
     name: E2E (só leitura, produção)
     # ADR 0022: o projeto `readonly` não cria dado nenhum — manifest, service worker, cache e
-    # instalabilidade. O projeto `probe` cria conta descartável e fica fora do CI de rotina.
+    # instalabilidade. O projeto `probe` escreve na produção (numa conta fixa de sonda) e fica
+    # fora do CI de rotina.
     runs-on: ubuntu-latest
     defaults:
       run:

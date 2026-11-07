@@ -7,12 +7,46 @@ Formato de cada lição: **o que aconteceu → por que → como evitar → onde 
 
 ---
 
+## L49 — Senha de teste fixa no código, em repositório público
+*2026-11-07 · commit `08c1ec3`, encontrada pela revisão `security` da spec 013*
+
+- **O que aconteceu:** a sonda E2E cadastrava uma conta por execução com a senha `Velos-E2E-Sonda-123!` escrita no `helpers.ts`. O repositório é **público**, e nenhuma dessas contas era apagada: ficaram **7 usuários vivos em produção com senha conhecida por qualquer pessoa que lesse o repo**. Não há dado financeiro real neles, mas são sessões autenticadas de verdade — dá para exercitar toda a superfície privada da API, sondar IDOR, escrever movimentações e queimar as cotas de `/token` e de email.
+- **Por que:** o teste precisava de credenciais e ninguém perguntou "e se isto for lido por um estranho?". A senha parecia inofensiva porque a conta era "de teste" — mas a conta era **de produção**.
+- **Como evitar:** teste que se autentica contra produção lê credenciais do **ambiente**, nunca do repositório, e usa uma conta **dedicada** cujo endereço também não aparece no repo (nomear a caixa é entregar metade do par). Teste que **cria** usuário em produção precisa saber apagá-lo; se não sabe, reutiliza uma conta fixa e limpa os dados no `finally`. E senha exposta é senha queimada: não se reaproveita, apaga-se o que a aceita.
+- **Onde a regra mora:** `web/e2e/helpers.ts` (`requireEnv`) e a [revisão do ADR 0022](adr/0022-testes-e2e-com-playwright.md).
+
+## L48 — Apagar conta de teste da produção quebra os testes de integração
+*2026-11-07 · spec 013*
+
+- **O que aconteceu:** `dotnet test api` passou a falhar **24 dos 33** testes de integração, todos com `validation_failed`. O erro real, escondido lá no fundo, era `23503: insert or update on table "accounts" violates foreign key constraint "accounts_user_id_fkey"`: o `Tests:UserId` dos user-secrets aponta para um usuário que **já não existe** em `auth.users` — foi apagado numa limpeza de contas de teste.
+- **Por que:** o `DatabaseFactAttribute` pula o teste quando **falta** a connection string ou o `Tests:UserId`, mas não confere se o usuário ainda existe. Com um id que aponta para o vazio, ele não pula: falha. E o `StoreGuard` traduz FK/check/not null para `validation_failed`, que não diz nada sobre a causa.
+- **Como evitar:** antes de apagar conta de teste da produção, conferir se ela não é o `Tests:UserId`. Ao ver `validation_failed` em massa nos testes de integração, ler a exceção do Postgres antes de procurar regressão no código — provavelmente é ambiente, não código.
+- **Onde a regra mora:** `api/tests/Velos.Infrastructure.IntegrationTests/DatabaseFactAttribute.cs` (que ganharia muito em conferir a existência do usuário e pular com recado claro).
+
+## L47 — Mudar a premissa de uma sonda E2E exige varrer a documentação
+*2026-11-07 · spec 013 (T6), ADR 0022*
+
+- **O que aconteceu:** a sonda `probe` deixou de cadastrar uma conta descartável e passou a entrar numa conta fixa. O código ficou certo em minutos; **seis lugares continuaram dizendo "conta descartável"**: o comentário do `playwright.config.ts`, o ADR 0022, o `ARQUITETURA.md`, o `CHANGELOG.md`, o `ci.yml` e a lição L45 aqui embaixo.
+- **Por que:** a premissa de um teste vaza para a documentação inteira, porque é ela que explica *por que* o teste é daquele jeito. Quem muda o teste vê só o arquivo do teste.
+- **Como evitar:** ao mudar o modelo de dados de uma sonda, rodar um `grep -rn` pelo termo antigo (`descartável`, `e2e-probe`) em `docs/`, `.github/` e nos comentários, e atualizar tudo **no mesmo commit**. Documentação que descreve comportamento envelhece em silêncio.
+- **Onde a regra mora:** [ADR 0022](adr/0022-testes-e2e-com-playwright.md), na seção "Revisão — 2026-11-07".
+
+## L46 — Num caminho de erro, o recado errado custa mais que o erro
+*2026-11-07 · spec 013*
+
+- **O que aconteceu:** quem se cadastrava no celular e abria o email de confirmação no computador — o caminho **mais comum** — via "Este link não é mais válido. Peça outro". Pedia outro link, abria noutro navegador de novo, e repetia. A conta já estava confirmada desde o primeiro clique: só faltava **entrar**.
+- **Por que:** a troca PKCE precisa do verificador, que mora num cookie do navegador onde a pessoa se cadastrou. Sem ele a troca falha — e "a troca falhou" tinha sido traduzido para "o link não vale", que é outra coisa. Um único desfecho de erro cobria três situações diferentes.
+- **Como evitar:** antes de escrever a mensagem de um caminho de erro, listar **todas** as situações que caem ali e perguntar, uma a uma, "o que esta pessoa deveria fazer agora?". Se a resposta muda, a mensagem tem de mudar junto. Aqui o sinal estava no banco o tempo todo: `email_confirmed_at` preenchido com `last_sign_in_at` nulo é a assinatura exata de quem confirmou e nunca conseguiu entrar.
+- **Armadilha 1 — não inferir o que o provedor declara.** A primeira versão deduzia "foi confirmado" da *ausência* de `error`, e a spec registrou isso como "premissa a verificar à mão". O GoTrue manda `error` e `error_code` (ex.: `otp_expired`) na própria volta: ler esses parâmetros **primeiro** troca uma premissa por um contrato, e custa duas linhas.
+- **Armadilha 2 — o desfecho novo engole o sinal de ataque.** Cookie de verifier adulterado ou de outro fluxo também cai em "sem verifier". Logar esse caso (cookie veio e não desprotegeu), senão a tentativa fica invisível.
+- **Onde a regra mora:** [ADR 0023](adr/0023-confirmacao-de-email-tres-desfechos.md), RN9 da [spec 013](specs/013-confirmacao-de-email/spec.md) e `AuthCallbackController.ConfirmSignUp`.
+
 ## L45 — E2E contra a produção: conta descartável, asserts exatos e a árvore de acessibilidade
 *2026-11-03 · spec 009/012, ADR 0022*
 
 - **O que aconteceu:** a primeira suíte E2E do projeto tropeçou três vezes em armadilhas de quem nunca testou o próprio app de fora: (1) o assert `/categorias` **passava** com a página ainda em `/categorias/nova` — a criação da categoria tinha falhado e o teste seguia como se nada tivesse acontecido; (2) o campo de data não era localizável pelo placeholder "Escolha a data", porque o **nome acessível do botão vem do label do campo** ("Data"); (3) o CDP devolve `installabilityErrors`, não `errors`.
 - **Por que:** testar contra a produção significa testar o app como um usuário — inclusive os detalhes de acessibilidade que o código "correto" esconde. Assert de URL por prefixo é assert fraco; placeholder não é rótulo; e protocolo de navegador tem seus próprios nomes de campo.
-- **Como evitar:** em testes E2E, **todo passo que salva tem de provar que salvou** (URL exata + o item aparecendo na lista seguinte). Localizar por **nome acessível** (o que o leitor de tela veria) e, na dúvida, consultar o snapshot que o Playwright gera na falha — ele mostra a árvore de acessibilidade da página inteira. E as sondas contra produção vivem num projeto separado (`probe`), com conta descartável e limpeza, fora do CI de rotina.
+- **Como evitar:** em testes E2E, **todo passo que salva tem de provar que salvou** (URL exata + o item aparecendo na lista seguinte). Localizar por **nome acessível** (o que o leitor de tela veria) e, na dúvida, consultar o snapshot que o Playwright gera na falha — ele mostra a árvore de acessibilidade da página inteira. E as sondas contra produção vivem num projeto separado (`probe`), com limpeza, fora do CI de rotina. (A conta descartável por execução saiu em 2026-11-07 — ver a **L47**.)
 - **Onde a regra mora:** [ADR 0022](adr/0022-testes-e2e-com-playwright.md) e os helpers de `web/e2e/helpers.ts`.
 
 ## L44 — TanStack Query "online" pausa queries offline para sempre
