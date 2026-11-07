@@ -2,12 +2,12 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import type { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSignIn } from "@/features/auth/api";
+import { useResendSignUpConfirmation, useSignIn } from "@/features/auth/api";
 import { FormAlert } from "@/components/shared/FormAlert";
 import { FormField } from "@/components/shared/FormField";
 import { LockedNotice } from "@/features/auth/components/LockedNotice";
@@ -34,10 +34,15 @@ function lockFor(email: string, minutes: number): Lock {
 
 export function SignInForm({ next }: { next: string }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const signIn = useSignIn();
+  const resend = useResendSignUpConfirmation();
   const [alert, setAlert] = useState<ErrorAlert | null>(null);
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const [lock, setLock] = useState<Lock | null>(null);
+  const [notConfirmedEmail, setNotConfirmedEmail] = useState<string | null>(null);
+  const [resendAlert, setResendAlert] = useState<ErrorAlert | null>(null);
+  const [resendSent, setResendSent] = useState(false);
   const secondsLeft = useCountdown(lock?.until ?? null);
   const {
     register,
@@ -57,9 +62,15 @@ export function SignInForm({ next }: { next: string }) {
   const email = useWatch({ control, name: "email" });
   const isLocked = lock !== null && secondsLeft > 0 && normalizeEmail(email ?? "") === lock.email;
 
+  // Veio de /auth/confirmar-cadastro com link velho, já usado ou aberto em outro navegador (CA3/CA4).
+  const confirmationLinkInvalid = params.get("erro") === "confirmacao";
+
   const onSubmit = handleSubmit(async (values) => {
     setAlert(null);
     setAttemptsLeft(null);
+    setNotConfirmedEmail(null);
+    setResendAlert(null);
+    setResendSent(false);
     try {
       await signIn.mutateAsync(values);
       navigate(next, { replace: true });
@@ -70,10 +81,26 @@ export function SignInForm({ next }: { next: string }) {
         setLock(lockFor(values.email, minutes));
         return;
       }
-      setAlert(toErrorAlert(error));
+      const alertError = toErrorAlert(error);
+      setAlert(alertError);
       setAttemptsLeft(attemptsLeftOf(error));
+      if (alertError.code === "email_not_confirmed") {
+        setNotConfirmedEmail(values.email);
+      }
     }
   });
+
+  const onResendConfirmation = async () => {
+    if (notConfirmedEmail === null) return;
+    setResendAlert(null);
+    setResendSent(false);
+    try {
+      await resend.mutateAsync(notConfirmedEmail);
+      setResendSent(true);
+    } catch (error) {
+      setResendAlert(toErrorAlert(error));
+    }
+  };
 
   function handleUseOtherEmail() {
     setLock(null);
@@ -89,8 +116,39 @@ export function SignInForm({ next }: { next: string }) {
         <p className="text-muted-foreground">Entre para ver seu saldo e seus gastos.</p>
       </div>
 
+      {confirmationLinkInvalid ? <FormAlert message="Este link não é mais válido. Peça outro." /> : null}
+
       {isLocked ? (
         <LockedNotice secondsLeft={secondsLeft} onUseOtherEmail={handleUseOtherEmail} />
+      ) : alert?.code === "email_not_confirmed" && notConfirmedEmail !== null ? (
+        <FormAlert message={alert.message}>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <Button
+              type="button"
+              className="h-11 text-base"
+              onClick={onResendConfirmation}
+              disabled={resend.isPending}
+              aria-live="polite"
+            >
+              {resend.isPending ? (
+                <>
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                  Enviando…
+                </>
+              ) : resendSent ? (
+                "Enviado de novo!"
+              ) : (
+                "Reenviar email de confirmação"
+              )}
+            </Button>
+            {resendSent ? (
+              <span role="status">
+                Enviamos outro link para {notConfirmedEmail}. Confira a caixa de entrada e o spam.
+              </span>
+            ) : null}
+          </div>
+          {resendAlert ? <p className="text-destructive">{resendAlert.message}</p> : null}
+        </FormAlert>
       ) : alert ? (
         attemptsLeft !== null ? (
           <FormAlert message="Email ou senha incorretos.">

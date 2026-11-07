@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "@/lib/api/client";
+import { api, isUnauthenticated } from "@/lib/api/client";
 import type {
   ForgotPasswordInput,
   ResetPasswordInput,
@@ -38,6 +38,30 @@ export function useSignUp() {
   return useMutation({
     mutationFn: (input: SignUpInput) => api("/api/auth/sign-up", { method: "POST", body: input }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: meKey }),
+  });
+}
+
+/**
+ * Depois do cadastro a API responde 201 nos dois casos (spec 013): com sessão (confirmação
+ * desligada, ex.: dev) ou pendente de confirmação — o cookie httpOnly decide, e o JavaScript não
+ * o vê. Só o /api/me distingue: 401 aqui é conta aguardando confirmação, não um erro de tela.
+ */
+export async function fetchCurrentUser(): Promise<CurrentUser | "unauthenticated"> {
+  try {
+    return await api<CurrentUser>("/api/me");
+  } catch (error) {
+    if (isUnauthenticated(error)) return "unauthenticated";
+    throw error;
+  }
+}
+
+/**
+ * Reenvia o email de confirmação de cadastro (spec 013, RN4). Resposta NEUTRA: 202 tanto para
+ * cadastro pendente quanto para email sem cadastro — o front não distingue de propósito.
+ */
+export function useResendSignUpConfirmation() {
+  return useMutation({
+    mutationFn: (email: string) => api("/api/auth/sign-up/resend", { method: "POST", body: { email } }),
   });
 }
 
