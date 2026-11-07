@@ -2,7 +2,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate } from "react-router";
 import type { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { FormField } from "@/components/shared/FormField";
 import { LockedNotice } from "@/features/auth/components/LockedNotice";
 import { GoogleSignIn } from "@/features/auth/components/GoogleSignIn";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
+import { SignUpConfirmationNotice } from "@/features/auth/components/SignUpConfirmationNotice";
 import { attemptsLeftOf, minutesLeftOf } from "@/features/auth/errors";
 import { applyServerFieldErrors, toErrorAlert, type ErrorAlert } from "@/lib/api/errors";
 import { withNext } from "@/features/auth/form-errors";
@@ -34,7 +35,6 @@ function lockFor(email: string, minutes: number): Lock {
 
 export function SignInForm({ next }: { next: string }) {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
   const signIn = useSignIn();
   const resend = useResendSignUpConfirmation();
   const [alert, setAlert] = useState<ErrorAlert | null>(null);
@@ -61,9 +61,6 @@ export function SignInForm({ next }: { next: string }) {
   // Bloqueado só enquanto o relógio corre e o email é o mesmo: outro email pode tentar (a API decide).
   const email = useWatch({ control, name: "email" });
   const isLocked = lock !== null && secondsLeft > 0 && normalizeEmail(email ?? "") === lock.email;
-
-  // Veio de /auth/confirmar-cadastro com link velho, já usado ou aberto em outro navegador (CA3/CA4).
-  const confirmationLinkInvalid = params.get("erro") === "confirmacao";
 
   const onSubmit = handleSubmit(async (values) => {
     setAlert(null);
@@ -116,7 +113,8 @@ export function SignInForm({ next }: { next: string }) {
         <p className="text-muted-foreground">Entre para ver seu saldo e seus gastos.</p>
       </div>
 
-      {confirmationLinkInvalid ? <FormAlert message="Este link não é mais válido. Peça outro." /> : null}
+      {/* Volta de /auth/confirmar-cadastro: email confirmado em outro navegador ou link inválido. */}
+      <SignUpConfirmationNotice />
 
       {isLocked ? (
         <LockedNotice secondsLeft={secondsLeft} onUseOtherEmail={handleUseOtherEmail} />

@@ -9,8 +9,9 @@ namespace Velos.Api.Tests.Auth;
 
 /// <summary>
 /// Spec 013 (T3): a volta do link de confirmação — troca do código com o verifier do cookie
-/// próprio, consumo do verifier em qualquer desfecho, redirects /painel e /entrar?erro=confirmacao,
-/// e propósitos separados do fluxo de redefinição (RN6).
+/// próprio, consumo do verifier em qualquer desfecho, os três redirects (/painel,
+/// /entrar?aviso=confirmado e /entrar?erro=confirmacao, RN9) e propósitos separados do fluxo de
+/// redefinição (RN6).
 /// </summary>
 public class ConfirmSignUpApiTests
 {
@@ -62,8 +63,13 @@ public class ConfirmSignUpApiTests
         Assert.False(string.IsNullOrEmpty(parts[1]));
     }
 
+    /// <summary>
+    /// Sem código não há o que trocar — e o verifier NÃO é consumido. Apagá-lo aqui deixaria
+    /// qualquer página de terceiros matar um cadastro em andamento com um
+    /// <c>&lt;img src="…/auth/confirmar-cadastro"&gt;</c>, já que o cookie é SameSite=Lax.
+    /// </summary>
     [Fact]
-    public async Task Confirm_sign_up_without_a_code_consumes_the_verifier_and_redirects_to_entrar()
+    public async Task Confirm_sign_up_without_a_code_keeps_the_verifier_and_redirects_to_entrar()
     {
         using var app = new AuthTestApp();
         app.Factory.Identity.NextResult = Result.Failure<AuthSession>(AuthErrors.ConfirmationRequired);
@@ -77,21 +83,64 @@ public class ConfirmSignUpApiTests
         using var response = await app.Client.SendAsync(confirm);
 
         AuthTestApp.AssertRedirect(response, "/entrar?erro=confirmacao");
-        AuthTestApp.AssertExpired(AuthTestApp.Cookie(response, SignUpVerifier));
+        Assert.Null(AuthTestApp.Cookie(response, SignUpVerifier));
         Assert.Null(AuthTestApp.Cookie(response, AccessToken));
         Assert.DoesNotContain(
             app.Factory.Identity.Calls, call => call.StartsWith("exchange:", StringComparison.Ordinal));
     }
 
-    /// <summary>CA4: link aberto em outro navegador, sem o cookie do verifier, é o mesmo link inválido.</summary>
+    /// <summary>
+    /// RN9 não é inferência: o GoTrue recusa o token ANTES de redirecionar e volta com
+    /// <c>error</c>/<c>error_code</c>. Erro declarado manda, mesmo com um <c>code</c> junto — nunca
+    /// dizer "foi confirmado" para quem não confirmou.
+    /// </summary>
+    [Theory]
+    [InlineData("?code=code-do-link&error=access_denied&error_code=otp_expired")]
+    [InlineData("?error_code=otp_expired")]
+    [InlineData("?code=code-do-link&error=access_denied")]
+    public async Task Confirm_sign_up_with_an_error_from_gotrue_is_an_invalid_link(string query)
+    {
+        using var app = new AuthTestApp();
+
+        using var response = await app.Client.GetAsync($"{ConfirmPath}{query}");
+
+        AuthTestApp.AssertRedirect(response, "/entrar?erro=confirmacao");
+        Assert.Null(AuthTestApp.Cookie(response, AccessToken));
+        Assert.DoesNotContain(
+            app.Factory.Identity.Calls, call => call.StartsWith("exchange:", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// CA4 (RN9): link aberto em outro navegador — com código e sem o cookie do verifier. O email
+    /// JÁ foi confirmado pelo GoTrue, então o recado é "é só entrar", não "peça outro link". Sem
+    /// sessão: a troca PKCE não é possível sem o verifier, e nem é tentada.
+    /// </summary>
     [Fact]
-    public async Task Confirm_sign_up_without_the_verifier_cookie_is_the_same_invalid_link()
+    public async Task Confirm_sign_up_in_another_browser_says_the_email_was_confirmed()
     {
         using var app = new AuthTestApp();
 
         using var response = await app.Client.GetAsync($"{ConfirmPath}?code=code-do-link");
 
+        AuthTestApp.AssertRedirect(response, "/entrar?aviso=confirmado");
+        Assert.Null(AuthTestApp.Cookie(response, AccessToken));
+        Assert.DoesNotContain(
+            app.Factory.Identity.Calls, call => call.StartsWith("exchange:", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// CA3: sem código e sem cookie não houve confirmação nenhuma (o GoTrue recusa o token velho
+    /// antes de redirecionar, e volta sem <c>code</c>) — aí o link é que não vale.
+    /// </summary>
+    [Fact]
+    public async Task Confirm_sign_up_without_a_code_and_without_a_cookie_is_an_invalid_link()
+    {
+        using var app = new AuthTestApp();
+
+        using var response = await app.Client.GetAsync(ConfirmPath);
+
         AuthTestApp.AssertRedirect(response, "/entrar?erro=confirmacao");
+        Assert.Null(AuthTestApp.Cookie(response, AccessToken));
         Assert.DoesNotContain(
             app.Factory.Identity.Calls, call => call.StartsWith("exchange:", StringComparison.Ordinal));
     }
@@ -144,10 +193,13 @@ public class ConfirmSignUpApiTests
         Assert.NotNull(resetVerifierCookie);
         var resetVerifier = resetVerifierCookie!.Value.Value!;
 
+        // Para a rota do cadastro é como se não houvesse verifier: não troca nada e não dá sessão
+        // (o recado é o de outro navegador, RN9 — o que importa aqui é que o verifier não serviu).
         using (var confirm = AuthTestApp.GetWithCookie($"{ConfirmPath}?code=code-do-link", ResetVerifier, resetVerifier))
         using (var response = await app.Client.SendAsync(confirm))
         {
-            AuthTestApp.AssertRedirect(response, "/entrar?erro=confirmacao");
+            AuthTestApp.AssertRedirect(response, "/entrar?aviso=confirmado");
+            Assert.Null(AuthTestApp.Cookie(response, AccessToken));
             Assert.DoesNotContain(
                 app.Factory.Identity.Calls, call => call.StartsWith("exchange:", StringComparison.Ordinal));
         }
@@ -169,7 +221,9 @@ public class ConfirmSignUpApiTests
         using (var confirm = AuthTestApp.GetWithCookie($"{ConfirmPath}?code=code-do-link", SignUpVerifier, forgedSignup))
         using (var response = await app.Client.SendAsync(confirm))
         {
-            AuthTestApp.AssertRedirect(response, "/entrar?erro=confirmacao");
+            // Não desprotege: a rota age como se o verifier não existisse (RN9) e não cria sessão.
+            AuthTestApp.AssertRedirect(response, "/entrar?aviso=confirmado");
+            Assert.Null(AuthTestApp.Cookie(response, AccessToken));
         }
 
         // E o contrário: propósito do CADASTRO no cookie da REDEFINIÇÃO.
