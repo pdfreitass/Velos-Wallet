@@ -23,8 +23,9 @@ const LOCAL_LOGO = "velos-claro.png";
 
 /** Valores de exemplo. O token é fictício, só para o link ficar com o tamanho real. */
 const SAMPLE: Record<string, string> = {
-  ".SiteURL": "http://localhost:3000",
-  ".TokenHash": "pkce_3f7a1c9e2b4d8a6f0c5e1b7d9a3f6c2e8b4d0a7f1c5e9b3d6a2f8c4e0b7d1a5f",
+  // O link de verdade é montado pelo GoTrue com o redirect_to + o code do PKCE (spec 013).
+  ".ConfirmationURL":
+    "https://veloswallet.com.br/auth/confirmar-cadastro?code=pkce_3f7a1c9e2b4d8a6f0c5e1b7d9a3f6c2e8b4d0a7f1c5e9b3d6a2f8c4e0b7d1a5f",
 };
 
 const TEMPLATES = ["recovery.html", "confirmation.html"] as const;
