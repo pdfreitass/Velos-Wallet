@@ -69,12 +69,12 @@ public sealed class AuthController : ControllerBase
     /// <summary>
     /// Reenvia o email de confirmação de cadastro (spec 013, RN4). Resposta NEUTRA: 202 tanto para
     /// cadastro pendente quanto para email sem cadastro — e o verifier novo substitui o anterior no
-    /// cookie httpOnly, então o link antigo morre (RN2). Exceção à neutralidade: limite de envios e
-    /// Supabase fora do ar sobem como erro, porque fingir "enviamos" com o serviço fora seria mentir.
+    /// cookie httpOnly, então o link antigo morre (RN2). Única exceção à neutralidade: Supabase fora
+    /// do ar, porque fingir "enviamos" com o serviço fora seria mentir.
     /// </summary>
     [HttpPost("sign-up/resend")]
     [AllowAnonymous]
-    [EnableRateLimiting(RateLimitingSetup.Auth)]
+    [EnableRateLimiting(RateLimitingSetup.SignUpResend)]
     public async Task<IActionResult> ResendSignUpConfirmation(
         ResendSignUpConfirmationRequest request,
         [FromServices] RequestSignUpConfirmationHandler handler,

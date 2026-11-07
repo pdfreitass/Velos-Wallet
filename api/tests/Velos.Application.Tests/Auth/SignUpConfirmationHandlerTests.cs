@@ -98,19 +98,34 @@ public class SignUpConfirmationHandlerTests
         Assert.False(string.IsNullOrWhiteSpace(result.Value.CodeVerifier));
     }
 
+    /// <summary>
+    /// RN4: o limite de envios do Supabase é POR USUÁRIO (`SMTP_MAX_FREQUENCY`), então devolvê-lo
+    /// revelaria que o email tem cadastro — email sem conta não tem frequência para estourar.
+    /// Fica neutro; quem freia abuso é a política por IP da API.
+    /// </summary>
     [Fact]
-    public async Task Resend_surfaces_rate_limit_and_outage_because_neither_reveals_an_account()
+    public async Task Resend_stays_neutral_when_supabase_reports_its_per_user_email_rate_limit()
     {
         var handler = new RequestSignUpConfirmationHandler(new RequestSignUpConfirmationValidator(), _identity);
-
         _identity.NextUnitResult = Result.Failure<Unit>(AuthErrors.RateLimited);
+
         var limited = await handler.HandleAsync(
             new RequestSignUpConfirmationCommand("pedro@example.com"), RedirectTo, default);
-        Assert.Equal("rate_limited", limited.Error!.Code);
 
+        Assert.True(limited.IsSuccess);
+        Assert.False(string.IsNullOrWhiteSpace(limited.Value.CodeVerifier));
+    }
+
+    /// <summary>Serviço fora do ar é a única exceção à neutralidade: dizer "enviamos" seria mentir.</summary>
+    [Fact]
+    public async Task Resend_surfaces_an_outage_instead_of_lying()
+    {
+        var handler = new RequestSignUpConfirmationHandler(new RequestSignUpConfirmationValidator(), _identity);
         _identity.NextUnitResult = Result.Failure<Unit>(AuthErrors.Unavailable);
+
         var down = await handler.HandleAsync(
             new RequestSignUpConfirmationCommand("pedro@example.com"), RedirectTo, default);
+
         Assert.Equal("auth_unavailable", down.Error!.Code);
     }
 

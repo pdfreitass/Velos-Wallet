@@ -22,6 +22,14 @@ public static class RateLimitingSetup
     /// <summary>Pedir email de recuperação: 3 a cada 15 minutos por IP (cada um gasta cota de email).</summary>
     public const string PasswordReset = "password-reset";
 
+    /// <summary>
+    /// Reenviar a confirmação de cadastro: 3 a cada 15 minutos por IP. Mesma razão e mesmo valor
+    /// do <see cref="PasswordReset"/> — cada chamada gasta cota de email. Com a política
+    /// <see cref="Auth"/> (10/min) seriam 150 em 15 minutos: daria para encher a caixa de uma
+    /// vítima e, pior, esgotar a cota de envio do projeto, derrubando cadastro E recuperação.
+    /// </summary>
+    public const string SignUpResend = "signup-resend";
+
     /// <summary>Teto geral de qualquer rota /api: 300 por minuto por pessoa (ou por IP, sem sessão).</summary>
     public const int GlobalPermitsPerMinute = 300;
 
@@ -30,6 +38,7 @@ public static class RateLimitingSetup
         {
             options.AddPolicy(Auth, context => PerIp(context, permits: 10, TimeSpan.FromMinutes(1)));
             options.AddPolicy(PasswordReset, context => PerIp(context, permits: 3, TimeSpan.FromMinutes(15)));
+            options.AddPolicy(SignUpResend, context => PerIp(context, permits: 3, TimeSpan.FromMinutes(15)));
 
             // Teto geral de /api (achado SEC-003 da T15): por pessoa (sub do JWT já validado, pois o
             // UseRateLimiter vem depois do UseAuthentication) ou, sem sessão, por IP. Folgado para o uso

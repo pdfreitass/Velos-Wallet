@@ -5,9 +5,11 @@ using System.Text.Json;
 namespace Velos.Api.Tests.Auth;
 
 /// <summary>
-/// RN7 da spec 013: as duas rotas novas entram no limite Auth (10 por minuto por IP). Cada teste
-/// ganha uma instância própria da API para o balde do limite começar vazio — o limite é por IP, e
-/// o servidor de teste responde sempre do mesmo endereço.
+/// RN7 da spec 013: as duas rotas novas têm limite por IP. A volta do link fica no limite `Auth`
+/// (10 por minuto); o reenvio tem política própria, `SignUpResend` (3 a cada 15 minutos), porque
+/// cada chamada gasta cota de email — mesmo valor e mesma razão da recuperação de senha. Cada
+/// teste ganha uma instância própria da API para o balde começar vazio: o limite é por IP, e o
+/// servidor de teste responde sempre do mesmo endereço.
 /// </summary>
 public class SignUpConfirmationRateLimitTests
 {
@@ -19,7 +21,9 @@ public class SignUpConfirmationRateLimitTests
     {
         using var app = new AuthTestApp();
 
-        for (var i = 0; i < 10; i++)
+        // Três passam; o quarto já bate no teto — bem mais apertado que os 10/min do `Auth`,
+        // porque aqui cada chamada dispara um email de verdade.
+        for (var i = 0; i < 3; i++)
         {
             using var accepted = await app.PostJsonAsync(ResendPath, new { email = $"pedro{i}@example.com" });
             Assert.Equal(HttpStatusCode.Accepted, accepted.StatusCode);
