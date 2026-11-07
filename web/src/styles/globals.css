@@ -199,6 +199,18 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    /*
+     * iPhone: sem isto, um toque duplo em qualquer lugar dá zoom, e a pessoa fica a arrastar a
+     * tela para os lados sem perceber por quê — num app que se usa com o polegar, isso acontece
+     * o tempo todo.
+     *
+     * `manipulation` tira SÓ o toque-duplo-para-zoom. O zoom de dois dedos continua a funcionar,
+     * e tem de continuar: bloqueá-lo (`user-scalable=no`) quebraria quem precisa de ampliar para
+     * ler, e é falha de acessibilidade (WCAG 1.4.4).
+     */
+    touch-action: manipulation;
+    /* O arrasto lateral elástico do Safari, que faz a tela "escorregar" sem ter para onde ir. */
+    overscroll-behavior-x: none;
   }
   html {
     @apply font-sans;
@@ -206,6 +218,8 @@
     scroll-padding-bottom: 6rem;
     /* Barra de rolagem com a paleta, não o cinza do sistema. */
     scrollbar-color: var(--border) transparent;
+    /* O Safari no iPhone aumenta o texto sozinho ao virar o aparelho; o layout já é fluido. */
+    -webkit-text-size-adjust: 100%;
   }
   /* Partes que o navegador desenha também levam a identidade. */
   ::selection {
