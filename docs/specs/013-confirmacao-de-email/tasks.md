@@ -66,20 +66,26 @@
 
 ---
 
-### [~] T5 — Template do email + passos do Pedro no painel
+### [x] T5 — Template do email + passos do Pedro no painel
 `supabase/templates/confirmation.html`
 
 - [x] Link → `{{ .ConfirmationURL }}` (4 ocorrências); remover a nota "GUARDADO, NÃO ATIVAR"; `npm run preview:emails`.
 - [x] `web/scripts/supabase-templates-edit.mjs`: publica o modelo no painel por Playwright, já que o Supabase não lê esta pasta.
-- [ ] **Pedro no painel:** ligar *Confirm email*; adicionar as redirect URLs de produção e dev; publicar o modelo na aba *Confirm signup*.
+- [x] **No painel:** flag *Confirm email* ligada, redirect URLs cobertas, modelo publicado na aba *Confirm signup*.
 
-**Pronto quando:** preview renderiza e o Pedro publica (registrar o horário).
+**Conferido no painel em 2026-11-07:**
 
-**Estado (2026-11-07):** o arquivo e o script estão feitos e o preview responde *"só variáveis
-conhecidas"*. Falta a parte do painel — e ela **só pode acontecer depois do deploy do T4**.
-O T3-bis já avisava para não ligar a flag antes do código da API, que está no ar desde a v6
-(03/11 23:11). Mas as **telas** do T4 não estão: sem elas, quem se cadastrar com a flag ligada
-não vê "Enviamos um link para…" e fica sem entender o que aconteceu.
+| Peça | Estado |
+|---|---|
+| Flag *Confirm email* | ligada desde 03/11 (as sondas no mailinator provam) |
+| Modelo em *Confirm signup* | publicado: assunto "Confirme seu cadastro no Velos Wallet", 5 ocorrências de `{{ .ConfirmationURL }}`, nenhum `token_hash` |
+| O publicado é o versionado? | **sim** — 7841 bytes contra 7704 do arquivo, e a diferença são exatamente os 137 `\r` das 138 linhas: o painel guarda em CRLF |
+| Redirect URLs | `http://localhost:3000/*`, `…/auth/confirm*`, `…/auth/callback*` |
+
+> ⚠️ **O `/auth/confirmar-cadastro` é coberto por acidente.** O wildcard `…/auth/confirm*` casa
+> com ele — e com qualquer rota que comece por `confirm`. Funciona, mas se a rota for renomeada
+> quebra em silêncio. Trocar por entradas explícitas exige cuidado: `/auth/confirm` é a da
+> recuperação de senha, e mexer ali derruba os dois fluxos.
 
 > **Ao usar o script:** apagar a cópia do perfil do Chrome depois. Ela leva os cookies e o Local
 > Storage — a sessão do Supabase em claro — e o Temp não se limpa sozinho.

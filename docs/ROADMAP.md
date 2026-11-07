@@ -154,16 +154,30 @@ As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pe
    >
    > O email chegou na **caixa de entrada** (não spam), de `Velos Wallet <nao-responda@veloswallet.com.br>`. No reuso, o app encaminha para `/recuperar-senha?erro=link` e mostra *"Este link não é mais válido…"* (`ForgotPasswordForm.tsx:94`). O limite de email do Supabase subiu de `2/1h` para **30** quando o SMTP próprio entrou — era isso que mantinha o T9 parado.
 
-3. ⚠️ **O email de auth sai com o template padrão do Supabase, em inglês** (*"Reset your password"*). Os modelos de `supabase/templates/` nunca foram publicados no painel — é o passo **C3**, que até agora estava bloqueado porque o Supabase exigia SMTP próprio. O link funciona, mas o idioma contraria a regra do `CLAUDE.md`. Publicar o `recovery.html` (já corrigido); o `confirmation.html` **ainda monta `token_hash`** e precisa de revisão antes.
+3. ~~**O email de auth sai com o template padrão do Supabase, em inglês**~~ ✅ **resolvido em 2026-11-02** — ver o item 5, que é a versão certa deste mesmo assunto. Este item ficou para trás e **contradizia o 5 dentro do próprio documento** até 2026-11-07, quando os dois modelos foram conferidos no painel.
 
 4. 🔍 **Um link de recuperação foi consumido 54 s depois do envio**, a partir do IP do Pedro, antes de alguém o abrir (`/verify` 303 com `action: login` às 14:25:10, para um email de 14:24:16). Suspeita de scanner de links — antivírus na máquina ou varredura do Gmail na entrega. **Uma única ocorrência**, e o link seguinte sobreviveu 59 s, então não está estabelecido. Se voltar a acontecer é sério: queima o link antes de o usuário clicar, e a recuperação falha sem explicação para quem tiver o mesmo antivírus.
 5. ~~**Publicar os modelos** de `supabase/templates/` (passo C3)~~ ✅ **feito em 2026-11-02**: o `recovery.html` está no painel, e o email chega em português, com a logo e o botão em verde profundo. O C6 (logo no bucket) também já estava feito.
    > **Só a aba *Reset password* entrou**, e de propósito. As de *Invite*, *Magic link*, *Change email* e *Reauthentication* o app não usa. A de *Confirm signup* fica para o C1 — ver o item seguinte.
 
-6. ⚠️ **Religar a confirmação de email** (Revisão 1 da spec 001, passo **C1**). **Não é só ligar um interruptor:** o `confirmation.html` aponta para `/auth/confirm?token_hash=…`, e isso falha por duas razões — esse endpoint lê **só** `?code=`, e além disso **é a rota da redefinição de senha** (lê o `resetVerifier`, manda para `/redefinir-senha`). Não existe hoje rota nenhuma que confirme um cadastro. O C1 tem de **construir o fluxo** (rota própria, PKCE, destino depois de confirmar) e só então ajustar o modelo.
+6. 🟡 **Religar a confirmação de email** (Revisão 1 da spec 001, passo **C1**) — virou a **[spec 013](specs/013-confirmacao-de-email/spec.md)**, quase fechada.
+
+   O diagnóstico original continua certo, e é por isso que isto não era "ligar um interruptor": o `confirmation.html` apontava para `/auth/confirm?token_hash=…`, que falha por duas razões — esse endpoint lê **só** `?code=`, e além disso é a rota da **redefinição de senha**. A spec 013 construiu a rota própria (`/auth/confirmar-cadastro`), o fluxo PKCE e as telas.
+
+   **Estado em 2026-11-07, conferido no painel:**
+
+   | Peça | Estado |
+   |---|---|
+   | T1–T4 (API, rotas, telas) | ✅ no ar |
+   | Flag *Confirm email* | ✅ ligada desde 03/11 |
+   | Modelo no painel (*Confirm signup*) | ✅ publicado, em português, com `{{ .ConfirmationURL }}` — idêntico ao versionado (o painel guarda em CRLF, daí 137 bytes a mais) |
+   | Redirect URLs | ✅ `/auth/confirmar-cadastro` é coberto pelo wildcard `https://veloswallet.com.br/auth/confirm*` |
+
+   > ⚠️ **O wildcard cobre por acidente, não por desenho.** `confirm*` casa com `confirmar-cadastro` — e também com qualquer outra rota que comece por `confirm`. Se a rota for renomeada, quebra em silêncio. Vale trocar por entradas explícitas, com cuidado: `/auth/confirm` é usada pela recuperação de senha.
+
+   **Falta:** T3-bis (provar o fluxo ponta a ponta contra produção), T6 (E2E do cadastro), T7 (bateria e revisões) e T8 (documentação).
 7. 🟡 ~~**Escolher o host**~~ ✅ decidido em 2026-11-02: **Fly.io `gru`** ([ADR 0020](adr/0020-host-fly-io-gru.md)). O deploy em si é a [spec 011](specs/011-deploy/spec.md), **em andamento**: `Dockerfile`, `.dockerignore`, `fly.toml` e os ajustes de produção da API (chaves do Data Protection persistidas, `ForwardedHeaders` restrito ao proxy) estão **prontos e commitados**.
-   > **Falta o que depende do Pedro:** criar conta no Fly (pede cartão, mesmo no plano gratuito) e instalar o `flyctl`, que não está na máquina. Depois: `fly launch`, volume, segredos, `fly deploy`, certificado e os registros A/AAAA. Só o domínio nu — `www` ficou de fora.
-   > A imagem ainda **não foi construída localmente** (o Docker Desktop não estava a correr), então o `Dockerfile` está escrito mas não provado.
+   > ✅ **Tudo isto foi feito em 2026-11-02**: conta no Fly, `flyctl`, `fly launch`, volume `velos_keys`, segredos, deploy, certificado Let's Encrypt e os registros A/AAAA. O `Dockerfile` foi construído e provado — e desde então corrigido duas vezes, por faltarem `tzdata` e `icu-libs` na imagem Alpine ([LICOES](LICOES.md)). Só o domínio nu; `www` ficou de fora.
 
 > ⚠️ **A Vercel está ligada ao repositório** e gera preview em cada PR, mas o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) diz que **ela não roda .NET**: o preview é só o front, sem API, e não loga. Decidir se desliga.
 
