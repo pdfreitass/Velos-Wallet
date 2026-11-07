@@ -47,7 +47,10 @@ export function AppLayout() {
       <main
         id={MAIN_ID}
         tabIndex={-1}
-        className="px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] outline-none sm:px-6 lg:pt-10 lg:pr-10 lg:pb-10 lg:pl-70"
+        // As laterais também levam a safe area: com `viewport-fit=cover` o conteúdo vai até a
+        // borda, e no iPhone deitado o notch come um pedaço de um dos lados. Em pé os insets
+        // laterais são 0, então isto não muda nada no uso normal.
+        className="px-[max(1rem,env(safe-area-inset-left))] pt-6 pr-[max(1rem,env(safe-area-inset-right))] pb-[calc(6rem+env(safe-area-inset-bottom))] outline-none sm:px-6 lg:pt-10 lg:pr-10 lg:pb-10 lg:pl-70"
       >
         <Outlet />
       </main>

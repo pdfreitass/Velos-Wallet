@@ -2,7 +2,14 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      `viewport-fit=cover` é o que faz o `env(safe-area-inset-*)` devolver um valor de verdade no
+      iPhone — sem ele o iOS responde 0, e os cinco lugares que já reservam espaço para a barra de
+      gestos (a navegação de baixo, o AppLayout, os diálogos, a barra da página inicial) estavam a
+      reservar nada. No app instalado isso é pior que no Safari: não há barra do navegador embaixo,
+      então a navegação encosta direto na barra de gestos.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Velos Wallet</title>
     <meta name="description" content="Seu dinheiro na direção certa." />
     <link rel="icon" href="/favicon.ico" sizes="any" />
