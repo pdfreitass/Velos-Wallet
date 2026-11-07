@@ -1,31 +1,40 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /**
  * Passos de UI compartilhados pelas sondas E2E (spec 012 e CA6 da spec 009). Código em inglês,
  * textos da interface em português, como o resto do projeto.
  */
 
-/** Uma conta descartável por execução. A senha cumpre a política dos dois lados. */
-export function probeCredentials() {
-  const stamp = Date.now().toString(36);
-  return {
-    name: `Sonda E2E ${stamp}`,
-    email: `e2e-probe-${stamp}@example.com`,
-    password: "Velos-E2E-Sonda-123!",
-  };
+/**
+ * Entra com a conta da sonda (T6 da spec 013). A sonda cadastrava uma conta descartável por
+ * execução, mas desde que a confirmação de email voltou o cadastro **não dá sessão**: o caminho
+ * passa por um link no email, que o Playwright não lê. Então a sonda usa uma conta JÁ confirmada.
+ *
+ * As credenciais vêm do ambiente e nunca do repositório. A conta tem de ser **dedicada à sonda**
+ * e ficar **vazia** entre execuções: o roteiro conta com uma única despesa na janela da simulação.
+ * De quebra, acabam os usuários órfãos que cada execução deixava em produção.
+ */
+export async function signInExisting(page: Page) {
+  const email = requireEnv("E2E_EMAIL");
+  const password = requireEnv("E2E_PASSWORD");
+
+  await page.goto("/entrar");
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Senha", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(page).toHaveURL(/\/painel/, { timeout: 30_000 });
 }
 
-export type ProbeCredentials = ReturnType<typeof probeCredentials>;
-
-/** Cadastro real. A confirmação de email está desligada (C1 pendente), então entra direto no painel. */
-export async function signUp(page: Page, credentials: ProbeCredentials) {
-  await page.goto("/cadastro");
-  await page.getByLabel("Nome", { exact: true }).fill(credentials.name);
-  await page.getByLabel("Email", { exact: true }).fill(credentials.email);
-  await page.getByLabel("Senha", { exact: true }).fill(credentials.password);
-  await page.getByLabel("Confirmar senha", { exact: true }).fill(credentials.password);
-  await page.getByRole("button", { name: "Criar conta", exact: true }).click();
-  await expect(page).toHaveURL(/\/painel/, { timeout: 30_000 });
+/** Falta de credencial é erro de configuração: dizer o que fazer, em vez de falhar num seletor. */
+function requireEnv(name: string) {
+  const value = process.env[name];
+  if (value === undefined || value.trim() === "") {
+    throw new Error(
+      `O projeto "probe" precisa de ${name}. Defina E2E_EMAIL e E2E_PASSWORD com uma conta ` +
+        "já confirmada e dedicada à sonda (sem dados próprios) antes de rodar.",
+    );
+  }
+  return value;
 }
 
 /** Conta (banco) nova, do tipo padrão. O saldo inicial já nasce zerado. */
@@ -79,6 +88,52 @@ export async function deleteCategory(page: Page, name: string) {
   await expect(dialog.getByText(/passa a aparecer como|passam a aparecer como/)).toBeVisible();
   await dialog.getByRole("button", { name: "Excluir categoria", exact: true }).click();
   await expect(page).toHaveURL(/\/categorias/);
+}
+
+/**
+ * Limpeza tolerante (T6 da spec 013): a conta da sonda é reutilizada, então a limpeza roda sempre
+ * — inclusive quando a execução morreu antes de criar a categoria. Nada a apagar não é erro.
+ */
+export async function deleteCategoryIfPresent(page: Page, name: string) {
+  await page.goto("/categorias");
+  const empty = page.getByRole("heading", { name: /Nenhuma categoria de/ });
+  if (await isAbsent(page.getByRole("link", { name: new RegExp(name) }), empty)) return;
+  await deleteCategory(page, name);
+}
+
+/** Igual à de cima, para a conta (banco) da sonda. */
+export async function deleteBankAccountIfPresent(page: Page, name: string) {
+  await page.goto("/contas");
+  if (await isAbsent(page.getByRole("link", { name: new RegExp(name) }), emptyAccounts(page))) return;
+  await deleteBankAccountWithMovements(page, name);
+}
+
+/**
+ * Pré-condição da sonda: a conta de usuário tem de estar vazia. O roteiro conta com UMA despesa
+ * na janela da simulação, então dado de outra origem (ou resto de uma execução anterior) daria
+ * número errado no CA9 — e um erro difícil de ler. Falhar aqui diz o que está errado.
+ */
+export async function expectEmptyProbeAccount(page: Page) {
+  await page.goto("/contas");
+  await expect(
+    emptyAccounts(page),
+    "A conta da sonda (E2E_EMAIL) tem de estar vazia: apague o que sobrou antes de rodar.",
+  ).toBeVisible();
+}
+
+function emptyAccounts(page: Page) {
+  return page.getByRole("heading", { name: "Você ainda não tem contas" });
+}
+
+/**
+ * `count()` não espera. Esperar o esqueleto sumir não basta: a lista pode nem ter montado, ou ter
+ * caído no estado de erro, e aí "zero" significaria "não carregou" em vez de "não existe" — e a
+ * limpeza passaria batida. Por isso esperamos um estado POSITIVO: ou a linha procurada, ou a
+ * lista vazia reconhecível.
+ */
+async function isAbsent(locator: Locator, whenEmpty: Locator) {
+  await expect(locator.or(whenEmpty).first()).toBeVisible();
+  return (await locator.count()) === 0;
 }
 
 /** Limpeza da sonda: excluir a conta apaga também as movimentações dela (RN6 da spec 002). */

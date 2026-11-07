@@ -5,10 +5,12 @@ import { defineConfig, devices } from "@playwright/test";
  *
  * - `readonly`: só leitura, seguro para rodar em todo CI contra a produção (spec 009: manifest,
  *   service worker, cache e instalabilidade).
- * - `probe`: cria uma conta descartável e sonda dados reais (spec 012: CA9, aria-live estrutural)
- *   e o CA6 offline (spec 009). Rodar sob demanda — nunca no CI de rotina, para não acumular
- *   contas de teste em produção. A conta fica para trás (ainda não há exclusão de conta de
- *   usuário, C1); os dados financeiros criados são apagados no fim.
+ * - `probe`: entra numa conta **já confirmada e dedicada à sonda** (`E2E_EMAIL`/`E2E_PASSWORD`,
+ *   do ambiente) e sonda dados reais (spec 012: CA9, aria-live estrutural) e o CA6 offline
+ *   (spec 009). Rodar sob demanda — nunca no CI de rotina, porque escreve em produção. Desde a
+ *   T6 da spec 013 **não cadastra mais** uma conta descartável por execução: com a confirmação
+ *   de email ligada o cadastro não dá sessão, e cada execução deixava um usuário órfão. Os dados
+ *   financeiros criados são apagados no fim, sempre (a conta é reutilizada).
  *
  * A base é a produção. Para outra origem (ex.: API local com user-secrets):
  *   E2E_BASE_URL=http://localhost:5080 npm run test:e2e
