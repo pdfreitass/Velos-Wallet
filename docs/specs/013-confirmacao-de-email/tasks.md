@@ -49,7 +49,23 @@
 
 **Pronto quando:** rodar localmente com user-secrets — se o Pedro não tiver as credenciais aqui, marcar "a provar no deploy" e seguir.
 
-**Estado (2026-11-03):** a provar no deploy. A máquina TEM os user-secrets, mas a flag *Confirm email* está desligada na produção e **só pode ser ligada depois do deploy** do código novo (T1–T3) — ligar antes quebraria os cadastros no ar, que ainda rodam o código antigo. Com a flag desligada o reenvio não dispara email de verdade, então o risco do T1 (GoTrue ignorar o PKCE no resend) não é provável agora. A prova roda no fecho, contra a produção, junto da T5/T6.
+**Estado (2026-11-07): BLOQUEADO por falta de um email que dê para ler.**
+
+Tentei provar contra a produção e o email não chega: **o Resend recusa tudo o que vai para
+`@mailinator.com`**. No painel do Resend, as 11 sondas de 03/11 e as 2 de hoje estão todas
+**`Bounced`**; o único `Delivered` é para o Gmail do Pedro. Foi por isso que esta task ficou
+aberta desde o início — não é o fluxo que falha, é o endereço de teste.
+
+> 🔎 **O que o Resend ainda assim provou:** as sondas de 03/11 saíram com o assunto
+> *"Confirm your email address"* (o modelo padrão, em inglês) e as de hoje com
+> *"Confirme seu cadastro no Velos Wallet"*. Ou seja, **o modelo em português está publicado e
+> ativo** — o que confirma a T5 por outro caminho.
+
+**Para destravar,** um endereço que receba de verdade e que dê para abrir. O mais simples é um
+alias do próprio Gmail do Pedro (`...+t3bis@gmail.com`): o Gmail entrega na mesma caixa e o
+Supabase trata como usuário diferente, então não colide com a conta real.
+
+**Estado anterior (2026-11-03):** a provar no deploy. A máquina TEM os user-secrets, mas a flag *Confirm email* está desligada na produção e **só pode ser ligada depois do deploy** do código novo (T1–T3) — ligar antes quebraria os cadastros no ar, que ainda rodam o código antigo. Com a flag desligada o reenvio não dispara email de verdade, então o risco do T1 (GoTrue ignorar o PKCE no resend) não é provável agora. A prova roda no fecho, contra a produção, junto da T5/T6.
 
 ## Front
 
