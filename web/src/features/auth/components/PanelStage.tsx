@@ -16,7 +16,7 @@ const viagem = goals[0];
  * Os cartões repetem o exemplo do aparelho e ficam fora do leitor de tela.
  */
 export function PanelStage() {
-  const [screen, setScreen] = useState<ScreenId>("accounts");
+  const [screen, setScreen] = useState<ScreenId>("home");
 
   return (
     <div className="relative w-fit">

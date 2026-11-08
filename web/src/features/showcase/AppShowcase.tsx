@@ -5,9 +5,9 @@ import { PhoneMockup, type PhoneSize } from "@/features/showcase/PhoneMockup";
 import { ScreenTabs } from "@/features/showcase/ScreenTabs";
 import { Ticker } from "@/features/showcase/Ticker";
 import { AccountsScreen } from "@/features/showcase/screens/AccountsScreen";
-import { CategoriesScreen } from "@/features/showcase/screens/CategoriesScreen";
 import { GoalsScreen } from "@/features/showcase/screens/GoalsScreen";
-import { MonthScreen } from "@/features/showcase/screens/MonthScreen";
+import { HomeScreen } from "@/features/showcase/screens/HomeScreen";
+import { TransactionsScreen } from "@/features/showcase/screens/TransactionsScreen";
 import {
   screenIndex,
   screens,
@@ -22,7 +22,7 @@ type AppShowcaseProps = {
   /** Sem ele, o aparelho é só vitrine (sem abas), como nas seções da página no celular. */
   onScreenChange?: (screen: ScreenId) => void;
   highlight?: AccountId | null;
-  /** A primeira tela de contas "se soma" ao aparecer (assinatura). */
+  /** A primeira tela (Início ou Contas) "se soma" ao aparecer (assinatura). */
   intro?: boolean;
   /** Atraso do início da soma, para combinar com o que acontece em volta do aparelho. */
   introDelayMs?: number;
@@ -33,7 +33,8 @@ type AppShowcaseProps = {
 
 /**
  * O app de exemplo dentro do iPhone (spec 003): cabeçalho com o número da tela, a tela ativa e
- * as abas. Tudo é texto de verdade, numa região rotulada como exemplo (RN2, RN6).
+ * as abas, nas mesmas telas e na mesma ordem da barra do app no celular. Tudo é texto de verdade,
+ * numa região rotulada como exemplo para o leitor de tela (RN2, RN6); a etiqueta visível saiu.
  */
 export function AppShowcase({
   size,
@@ -76,7 +77,7 @@ export function AppShowcase({
           className="flex min-h-0 flex-1 flex-col px-4 pt-2"
         >
           <p className="px-2 text-xs text-muted-foreground">{definition.headline}</p>
-          <div className="flex items-end justify-between gap-2 px-2">
+          <div className="px-2">
             <Ticker
               text={headline}
               className={cn(
@@ -86,7 +87,6 @@ export function AppShowcase({
                 playIntro && "ticker-intro",
               )}
             />
-            <span className="mb-1.5 rounded-md bg-muted px-2 py-0.5 text-xs font-medium">Exemplo</span>
           </div>
 
           <div
@@ -94,9 +94,9 @@ export function AppShowcase({
             className={cn("mt-5 min-h-0 flex-1 overflow-hidden", view.changed && "screen-in")}
             style={{ "--screen-dir": view.direction } as CSSProperties}
           >
+            {screen === "home" ? <HomeScreen intro={playIntro} spendingFirst={size === "peek"} /> : null}
+            {screen === "transactions" ? <TransactionsScreen /> : null}
             {screen === "accounts" ? <AccountsScreen highlight={highlight} intro={playIntro} /> : null}
-            {screen === "month" ? <MonthScreen /> : null}
-            {screen === "categories" ? <CategoriesScreen /> : null}
             {screen === "goals" ? <GoalsScreen /> : null}
           </div>
         </div>

@@ -43,7 +43,7 @@ export function DevicesIllustration({ className }: { className?: string }) {
         </div>
       </div>
 
-      <AppShowcase size="mini" screen="month" className="absolute right-[-2.5rem] bottom-0" />
+      <AppShowcase size="mini" screen="transactions" className="absolute right-[-2.5rem] bottom-0" />
     </div>
   );
 }
