@@ -9,8 +9,8 @@ import type { ScreenId } from "@/features/showcase/showcase-data";
 /** Cartões ao lado do texto. No celular só o do cartão aparece; as outras seções mostram a tela. */
 const artifacts: Partial<Record<ScreenId, ReactNode>> = {
   accounts: <CardArtifact />,
-  month: <MonthArtifacts />,
-  categories: <CategoryArtifacts />,
+  transactions: <MonthArtifacts />,
+  home: <CategoryArtifacts />,
   goals: <GoalArtifact />,
 };
 

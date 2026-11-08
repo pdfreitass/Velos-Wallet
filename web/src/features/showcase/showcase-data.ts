@@ -2,7 +2,6 @@ import {
   ArrowLeftRight,
   Banknote,
   Car,
-  ChartPie,
   CircleDashed,
   CreditCard,
   Gamepad2,
@@ -26,7 +25,7 @@ import {
  * account_balances, monthly_summary, goal_progress), nunca do JS.
  */
 
-export type ScreenId = "accounts" | "month" | "categories" | "goals";
+export type ScreenId = "home" | "transactions" | "accounts" | "goals";
 export type AccountId = "checking" | "savings" | "cash" | "card";
 
 export type ExampleAccount = {
@@ -60,11 +59,16 @@ export const totalBalanceCents = 1_065_045;
 
 export type ExampleTransaction = {
   title: string;
-  category: string;
+  /** "Categoria · Conta", como a linha da lista de transações do app. */
+  subtitle: string;
   icon: LucideIcon;
+  /** Cor da categoria, a mesma do seed do banco. */
+  color: string;
   cents: number;
   direction: "in" | "out";
 };
+
+export type ExampleDay = { label: string; transactions: ExampleTransaction[] };
 
 export const monthIncomeCents = 420_000;
 export const monthExpenseCents = 261_840;
@@ -73,11 +77,48 @@ export const monthLeftoverCents = 158_160;
 /** Saídas ÷ entradas, para a largura da barra (62,3%). */
 export const monthExpenseShare = 62.3;
 
-export const recentTransactions: ExampleTransaction[] = [
-  { title: "Salário", category: "Salário", icon: Wallet, cents: 420_000, direction: "in" },
-  { title: "Aluguel", category: "Moradia", icon: House, cents: 145_000, direction: "out" },
-  { title: "Mercado", category: "Alimentação", icon: UtensilsCrossed, cents: 38_640, direction: "out" },
-  { title: "Uber", category: "Transporte", icon: Car, cents: 3_290, direction: "out" },
+/** A lista de /transacoes: agrupada por dia, a mais recente em cima. */
+export const transactionDays: ExampleDay[] = [
+  {
+    label: "Hoje",
+    transactions: [
+      {
+        title: "Mercado",
+        subtitle: "Alimentação · Conta corrente",
+        icon: UtensilsCrossed,
+        color: "#E8833A",
+        cents: 38_640,
+        direction: "out",
+      },
+      { title: "Uber", subtitle: "Transporte · Cartão", icon: Car, color: "#7C5CF5", cents: 3_290, direction: "out" },
+    ],
+  },
+  {
+    label: "Ontem",
+    transactions: [
+      {
+        title: "Salário",
+        subtitle: "Salário · Conta corrente",
+        icon: Wallet,
+        color: "#1C7F54",
+        cents: 420_000,
+        direction: "in",
+      },
+    ],
+  },
+  {
+    label: "Dia 5",
+    transactions: [
+      {
+        title: "Aluguel",
+        subtitle: "Moradia · Conta corrente",
+        icon: House,
+        color: "#4F8DF7",
+        cents: 145_000,
+        direction: "out",
+      },
+    ],
+  },
 ];
 
 export type ExampleCategory = {
@@ -126,26 +167,26 @@ export type ScreenDefinition = {
   headlineDirection?: "in" | "out";
 };
 
+/**
+ * As abas na mesma ordem da barra do app no celular (AppNav): Início, Transações, o "+" no meio
+ * (só desenho, ver ScreenTabs), Contas e Metas.
+ */
 export const screens: ScreenDefinition[] = [
-  { id: "accounts", tab: "Contas", icon: Wallet, headline: "Saldo total", headlineCents: totalBalanceCents },
+  { id: "home", tab: "Início", icon: House, headline: "Saldo total", headlineCents: totalBalanceCents },
   {
-    id: "month",
-    tab: "Mês",
+    id: "transactions",
+    tab: "Transações",
     icon: ArrowLeftRight,
-    headline: "Sobrou este mês",
+    headline: "Resultado do mês",
     headlineCents: monthLeftoverCents,
     headlineDirection: "in",
   },
-  {
-    id: "categories",
-    tab: "Gastos",
-    icon: ChartPie,
-    headline: "Gastos do mês",
-    headlineCents: monthExpenseCents,
-    headlineDirection: "out",
-  },
+  { id: "accounts", tab: "Contas", icon: Wallet, headline: "Somando 3 contas", headlineCents: totalBalanceCents },
   { id: "goals", tab: "Metas", icon: Target, headline: "Guardado nas metas", headlineCents: goalsSavedCents },
 ];
+
+/** Posição do "+" na barra: entre a segunda e a terceira aba, como no app. */
+export const PLUS_SLOT = 2;
 
 export function screenIndex(id: ScreenId): number {
   return screens.findIndex((screen) => screen.id === id);

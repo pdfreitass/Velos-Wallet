@@ -18,12 +18,12 @@ export const storySteps: StoryStep[] = [
     highlight: "card",
   },
   {
-    id: "month",
+    id: "transactions",
     title: "Entrou, saiu, sobrou.",
     text: "Cada salário, conta e compra entra no mês com a sua categoria. Você vê na hora quanto entrou, quanto saiu e quanto ainda sobra.",
   },
   {
-    id: "categories",
+    id: "home",
     title: "Para onde vai seu dinheiro.",
     text: "Os gastos do mês divididos por categoria. Fica fácil ver o que pesa mais e onde dá para cortar.",
   },
