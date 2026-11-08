@@ -5,7 +5,6 @@ import { cn } from "cn";
 import { CategoryDonut, type DonutSlice } from "@/components/shared/CategoryDonut";
 import {
   cardAccount,
-  goals,
   monthExpenseCents,
   monthExpenseShare,
   monthIncomeCents,
@@ -24,8 +23,8 @@ const slices: DonutSlice[] = spendingByCategory.map((category) => ({
 }));
 
 /**
- * Início do app (spec 005) em miniatura: dívida do cartão à parte, as metas (RN9 da spec 006), o
- * resumo do mês e os gastos por categoria, na mesma ordem do celular. O saldo total é o número grande do topo.
+ * Início do app (spec 005) em miniatura: dívida do cartão à parte, o resumo do mês e os gastos
+ * por categoria, na mesma ordem do celular. O saldo total é o número grande do topo.
  * `intro`: os blocos entram um a um na primeira exibição (assinatura, ver .sum-row).
  * `spendingFirst`: no aparelho cortado da seção "Para onde vai seu dinheiro" (celular), os gastos
  * sobem para o topo, senão o corte esconde justamente o assunto da seção.
@@ -41,9 +40,7 @@ export function HomeScreen({ intro = false, spendingFirst = false }: { intro?: b
         </span>
       </Block>
 
-      <HomeGoals index={1} intro={intro} />
-
-      <Block index={2} intro={intro} className="space-y-2.5 p-3">
+      <Block index={1} intro={intro} className="space-y-2.5 p-3">
         <FlowLine label="Receitas" cents={monthIncomeCents} direction="in" share={100} />
         <FlowLine label="Despesas" cents={monthExpenseCents} direction="out" share={monthExpenseShare} />
         <p className="flex items-center gap-2 border-t border-border pt-2.5 text-xs font-medium">
@@ -55,7 +52,7 @@ export function HomeScreen({ intro = false, spendingFirst = false }: { intro?: b
         </p>
       </Block>
 
-      <Block index={3} intro={intro} className="p-3">
+      <Block index={2} intro={intro} className="p-3">
         <p className="text-sm font-semibold">Gastos por categoria</p>
         <div className="mt-2.5 flex items-center gap-3">
           <CategoryDonut
@@ -76,34 +73,6 @@ export function HomeScreen({ intro = false, spendingFirst = false }: { intro?: b
           </ul>
         </div>
       </Block>
-    </div>
-  );
-}
-
-/** Bloco "Metas" do Início: as metas em andamento, com a porcentagem e a barra. */
-function HomeGoals({ index, intro }: { index: number; intro: boolean }) {
-  return (
-    <div className={cn(intro && "sum-row")} style={{ "--sum-index": index } as CSSProperties}>
-      <p className="mb-1 flex items-baseline justify-between px-1">
-        <span className="text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase">Metas</span>
-        <span className="text-xs font-medium underline underline-offset-2" aria-hidden="true">
-          Ver todas
-        </span>
-      </p>
-      <ul className="space-y-1.5" aria-label="Metas">
-        {goals.map((goal) => (
-          <li key={goal.name} className="rounded-xl border border-border bg-card px-3 py-2 text-card-foreground">
-            <p className="flex items-center gap-2 text-xs">
-              <goal.icon className="size-3.5 text-muted-foreground" aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate font-medium">{goal.name}</span>
-              <span className="font-semibold tabular-nums">{goal.percent}%</span>
-            </p>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-              <div className="grow-x h-full rounded-full bg-income" style={{ width: `${goal.percent}%` }} />
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
