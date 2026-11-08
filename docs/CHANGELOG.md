@@ -6,6 +6,23 @@
 
 ## [Não lançado]
 
+### 2026-11-07 — Confirmação de email no cadastro (spec 013)
+#### Adicionado
+- **Confirmação de email religada** (C1 da Revisão 1 da spec 001): cadastro não entra mais direto; o email chega em português, com a logo e o botão verde, e o link volta por `/auth/confirmar-cadastro`, que troca o código por sessão (PKCE) e leva a `/painel` já logado. Telas de "confira seu email", reenvio com resposta neutra e limite por IP nas rotas novas.
+#### Corrigido
+- **Link aberto em outro navegador deixou de mentir** (RN9): cadastrar no celular e abrir o email no computador levava a "Este link não é mais válido. Peça outro", num ciclo sem fim — a conta já estava confirmada. Agora, com código na volta e sem o verificador, a tela de entrar diz **"Seu email foi confirmado. É só entrar."** O link de fato inválido continua pedindo outro.
+#### Alterado
+- **A sonda E2E `probe` entra em vez de cadastrar** ([ADR 0022](adr/0022-testes-e2e-com-playwright.md), revisão de 2026-11-07): com a confirmação ligada, o cadastro não dá sessão. Usa `E2E_EMAIL`/`E2E_PASSWORD` de uma conta fixa e dedicada, confere que ela está vazia antes de começar e limpa sempre no fim. Acaba o usuário órfão que cada execução deixava em produção.
+#### Segurança
+- **Reenvio da confirmação ganhou política de limite própria**: 3 a cada 15 min por IP, como a da recuperação de senha, em vez dos 10/min do limite geral de auth. Cada chamada gasta cota de email — no valor antigo dava para encher a caixa de uma vítima e esgotar a cota de envio do projeto, derrubando cadastro e recuperação.
+- **O limite de envios do Supabase deixou de subir no reenvio** (RN4): o `SMTP_MAX_FREQUENCY` é **por usuário**, então devolver o 429 revelava que o email tem cadastro.
+- **A volta do link lê o `error`/`error_code` do GoTrue** em vez de inferir o desfecho pela ausência de `code`; o verificador só é consumido quando há código para trocar (antes, qualquer página de terceiros derrubava um cadastro em andamento com um `<img>`); e um cookie de verificador que chega e não desprotege passou a ser logado.
+#### Pendente
+- Rodar o `probe` contra a produção com a conta da sonda configurada (T6).
+- 🔴 **Apagar as 7 contas `e2e-probe-*@example.com` da produção**: a senha delas está no histórico de um repositório público ([L49](LICOES.md)).
+- Botão "reenviar" com contagem de 60 s, agora que o 429 do Supabase não sobe mais.
+- `dotnet test api` não fecha nesta máquina: 24 testes de integração falham porque o `Tests:UserId` dos user-secrets aponta para um usuário apagado do banco ([L48](LICOES.md)) — ambiente, não código.
+
 ### 2026-11-03 — E2E com Playwright + correção do offline (ADR 0022)
 #### Adicionado
 - **Suíte E2E** em `web/e2e/` com Playwright ([ADR 0022](adr/0022-testes-e2e-com-playwright.md)), em dois projetos: **`readonly`** (manifest, `sw.js`, ícones, service worker sem cache e instalabilidade — roda em todo CI contra a produção) e **`probe`** (conta descartável: CA9 da spec 012, `aria-live` estrutural e o CA6 offline, com limpeza dos dados de sonda no fim; roda sob demanda).

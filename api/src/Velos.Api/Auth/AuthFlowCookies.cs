@@ -84,6 +84,18 @@ public sealed class AuthFlowCookies(IDataProtectionProvider provider)
 
     public void ClearSignupVerifier(HttpContext context) => Clear(context, SignupVerifierName, FlowPath);
 
+    /// <summary>
+    /// Se o cookie do verifier de cadastro CHEGOU, mesmo que não desproteja. Serve para separar
+    /// "nunca houve cookie" (outro navegador, o caso comum) de "veio um cookie que não presta"
+    /// (adulterado, de outro fluxo ou vencido) — o desfecho é o mesmo, mas o segundo é sinal de
+    /// ataque e precisa aparecer no log.
+    /// </summary>
+    public static bool HasSignupVerifierCookie(HttpContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return !string.IsNullOrEmpty(context.Request.Cookies[SignupVerifierName]);
+    }
+
     /// <summary>Autoriza a troca de senha, e só para este usuário.</summary>
     public void WriteTicket(HttpContext context, Guid userId) =>
         Write(context, TicketName, TicketPath, _ticket, userId.ToString(), TicketLifetime);

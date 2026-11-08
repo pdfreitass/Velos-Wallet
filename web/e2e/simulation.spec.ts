@@ -4,26 +4,57 @@ import {
   createBankAccount,
   createExpenseCategory,
   createExpenseOnPreviousMonth,
-  deleteBankAccountWithMovements,
+  deleteBankAccountIfPresent,
   deleteCategory,
-  probeCredentials,
-  signUp,
+  deleteCategoryIfPresent,
+  expectEmptyProbeAccount,
+  signInExisting,
 } from "./helpers";
 
 /**
- * Sonda E2E (projeto `probe`: uma conta descartável por execução, nunca no CI de rotina).
+ * Sonda E2E (projeto `probe`: dados reais em produção, nunca no CI de rotina).
  *
- * Roteiro: conta de teste nova → conta (banco) e categoria de sonda → despesa de R$ 120,00 no mês
- * anterior → categoria excluída (as movimentações passam a "Sem categoria", RN11) → CA9 da spec 012
- * na tela → parte estrutural do CA-a11y (aria-live) → CA6 offline da spec 009 → limpeza.
+ * Roteiro: entra na conta da sonda (E2E_EMAIL/E2E_PASSWORD — desde a spec 013 o cadastro exige
+ * confirmação por email, que o Playwright não lê) → conta (banco) e categoria de sonda → despesa
+ * de R$ 120,00 no mês anterior → categoria excluída (as movimentações passam a "Sem categoria",
+ * RN11) → CA9 da spec 012 na tela → parte estrutural do CA-a11y (aria-live) → CA6 offline da
+ * spec 009 → limpeza.
+ *
+ * A conta é reutilizada entre execuções, então a limpeza roda no `finally`: um resto de uma
+ * execução que morreu no meio quebraria a seguinte pelo nome repetido.
  */
 
 const ACCOUNT_NAME = "Conta Sonda E2E";
 const CATEGORY_NAME = "Sonda CA9 E2E";
 
 test("CA9: 'Sem categoria' aparece e simula depois de excluir a categoria", async ({ page }) => {
-  const credentials = probeCredentials();
-  await signUp(page, credentials);
+  await signInExisting(page);
+  await expectEmptyProbeAccount(page);
+  try {
+    await runProbe(page);
+  } finally {
+    await cleanUp(page);
+  }
+});
+
+/**
+ * Roda sempre, mesmo se uma expectativa falhar: a conta da sonda é reutilizada e tem de voltar
+ * vazia. Um erro AQUI não pode esconder o erro da sonda, que é o que interessa — vira anotação.
+ */
+async function cleanUp(page: Page) {
+  try {
+    await page.context().setOffline(false);
+    await deleteCategoryIfPresent(page, CATEGORY_NAME);
+    await deleteBankAccountIfPresent(page, ACCOUNT_NAME);
+  } catch (error) {
+    test.info().annotations.push({
+      type: "limpeza falhou",
+      description: `Sobrou dado na conta da sonda; apagar à mão antes da próxima execução. ${String(error)}`,
+    });
+  }
+}
+
+async function runProbe(page: Page) {
   await createBankAccount(page, ACCOUNT_NAME);
   await createExpenseCategory(page, CATEGORY_NAME);
   await createExpenseOnPreviousMonth(page, CATEGORY_NAME, "120,00");
@@ -57,10 +88,7 @@ test("CA9: 'Sem categoria' aparece e simula depois de excluir a categoria", asyn
   await page.keyboard.press("Escape");
 
   await verifyOfflineErrorState(page);
-
-  // Limpeza: excluir a conta apaga junto a movimentação de sonda.
-  await deleteBankAccountWithMovements(page, ACCOUNT_NAME);
-});
+}
 
 /** CA6 da spec 009: sem internet, a casca continua e as telas mostram o estado de erro. */
 async function verifyOfflineErrorState(page: Page) {

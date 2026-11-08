@@ -61,6 +61,16 @@
 - **Sem migration e sem dependência nova.** A média é somada no banco; a janela vem do `TransactionRules`, que continua a ser a única fonte do fuso de São Paulo.
 - **Conferido no navegador** em 375 px, nos dois temas, com três meses semeados numa conta de teste depois apagada. **CA9 ("Sem categoria") também conferido no navegador** em 2026-11-03, com despesa sem categoria de verdade (categoria apagada depois dos lançamentos) — e agora **coberto para sempre pelo E2E `probe`** ([ADR 0022](adr/0022-testes-e2e-com-playwright.md)), junto com a parte estrutural do `aria-live`. Falta só **ouvir** o anúncio num leitor de tela de verdade.
 
+### Confirmação de email no cadastro ([spec 013](specs/013-confirmacao-de-email/spec.md))
+*2026-11-07 — o C1, aberto desde a Etapa 3*
+
+- Cadastro não entra mais direto: o email de confirmação chega em português, com a logo e o botão verde, e o link volta por `/auth/confirmar-cadastro`, que troca o código por sessão (PKCE) e leva a `/painel` **já logado**. Reenvio com resposta neutra e limite por IP nas rotas novas.
+- **Provado ponta a ponta contra a produção**, com um alias do Gmail (o Resend recusa `@mailinator.com` — todas as sondas anteriores voltaram `Bounced`).
+- **RN9, a correção que faltava:** link aberto em outro navegador não é link inválido. A conta já está confirmada, e a tela de entrar passou a dizer "Seu email foi confirmado. É só entrar." em vez de mandar pedir outro link para sempre ([ADR 0023](adr/0023-confirmacao-de-email-tres-desfechos.md), [L46](LICOES.md)).
+- A sonda E2E `probe` deixou de cadastrar conta descartável e passou a entrar numa conta fixa (revisão do [ADR 0022](adr/0022-testes-e2e-com-playwright.md)) — acabam os usuários órfãos em produção.
+- Revisão `security` aprovou o **CA-seg** e rendeu quatro correções: política de limite própria para o reenvio (3/15 min, como a do reset), o 429 do Supabase deixando de subir (é **por usuário**, então revelava cadastro), a leitura do `error` do GoTrue no lugar de uma inferência, e o verificador só sendo consumido quando há código.
+- **Falta:** rodar o `probe` com `E2E_EMAIL`/`E2E_PASSWORD` configurados, e **apagar as 7 contas `e2e-probe-*` da produção** — a senha delas está no histórico de um repositório público ([L49](LICOES.md)).
+
 ### Backup do banco ([ADR 0021](adr/0021-backup-pg-dump-github-actions.md))
 *2026-11-03 — fechando o único risco sem volta*
 
@@ -154,16 +164,28 @@ As duas linhas de trabalho correram em paralelo e nenhuma sabia da outra. **O Pe
    >
    > O email chegou na **caixa de entrada** (não spam), de `Velos Wallet <nao-responda@veloswallet.com.br>`. No reuso, o app encaminha para `/recuperar-senha?erro=link` e mostra *"Este link não é mais válido…"* (`ForgotPasswordForm.tsx:94`). O limite de email do Supabase subiu de `2/1h` para **30** quando o SMTP próprio entrou — era isso que mantinha o T9 parado.
 
-3. ⚠️ **O email de auth sai com o template padrão do Supabase, em inglês** (*"Reset your password"*). Os modelos de `supabase/templates/` nunca foram publicados no painel — é o passo **C3**, que até agora estava bloqueado porque o Supabase exigia SMTP próprio. O link funciona, mas o idioma contraria a regra do `CLAUDE.md`. Publicar o `recovery.html` (já corrigido); o `confirmation.html` **ainda monta `token_hash`** e precisa de revisão antes.
+3. ~~**O email de auth sai com o template padrão do Supabase, em inglês**~~ ✅ **resolvido em 2026-11-02** — ver o item 5, que é a versão certa deste mesmo assunto. Este item ficou para trás e **contradizia o 5 dentro do próprio documento** até 2026-11-07, quando os dois modelos foram conferidos no painel.
 
 4. 🔍 **Um link de recuperação foi consumido 54 s depois do envio**, a partir do IP do Pedro, antes de alguém o abrir (`/verify` 303 com `action: login` às 14:25:10, para um email de 14:24:16). Suspeita de scanner de links — antivírus na máquina ou varredura do Gmail na entrega. **Uma única ocorrência**, e o link seguinte sobreviveu 59 s, então não está estabelecido. Se voltar a acontecer é sério: queima o link antes de o usuário clicar, e a recuperação falha sem explicação para quem tiver o mesmo antivírus.
 5. ~~**Publicar os modelos** de `supabase/templates/` (passo C3)~~ ✅ **feito em 2026-11-02**: o `recovery.html` está no painel, e o email chega em português, com a logo e o botão em verde profundo. O C6 (logo no bucket) também já estava feito.
    > **Só a aba *Reset password* entrou**, e de propósito. As de *Invite*, *Magic link*, *Change email* e *Reauthentication* o app não usa. A de *Confirm signup* fica para o C1 — ver o item seguinte.
 
-6. ⚠️ **Religar a confirmação de email** (Revisão 1 da spec 001, passo **C1**). **Não é só ligar um interruptor:** o `confirmation.html` aponta para `/auth/confirm?token_hash=…`, e isso falha por duas razões — esse endpoint lê **só** `?code=`, e além disso **é a rota da redefinição de senha** (lê o `resetVerifier`, manda para `/redefinir-senha`). Não existe hoje rota nenhuma que confirme um cadastro. O C1 tem de **construir o fluxo** (rota própria, PKCE, destino depois de confirmar) e só então ajustar o modelo.
+6. ~~**Religar a confirmação de email**~~ ✅ **feito em 2026-11-07** — era o passo **C1** da Revisão 1 da spec 001 e virou a **[spec 013](specs/013-confirmacao-de-email/spec.md)**.
+
+   O diagnóstico original estava certo, e é por isso que isto não era "ligar um interruptor": o `confirmation.html` apontava para `/auth/confirm?token_hash=…`, que falha por duas razões — esse endpoint lê **só** `?code=`, e além disso é a rota da **redefinição de senha**. A spec 013 construiu a rota própria (`/auth/confirmar-cadastro`), o fluxo PKCE e as telas.
+
+   **O fluxo foi provado ponta a ponta contra a produção** (T3-bis): a conta `…+t3bis@gmail.com` recebeu o email, confirmou e entrou. Flag *Confirm email* ligada desde 03/11, modelo publicado no painel em português, redirect URLs cobertas.
+
+   **A correção que faltava era a mensagem** (RN9): quem se cadastra no celular e abre o email no computador — o caminho comum — caía em "Este link não é mais válido. Peça outro", pedia outro link, abria noutro navegador e repetia, com a conta já confirmada desde o primeiro clique. Agora a tela de entrar diz **"Seu email foi confirmado. É só entrar."** ([L46](LICOES.md)).
+
+   **Falta:** rodar o E2E `probe` com a conta de sonda (T6 — ver abaixo).
+
+   > ⚠️ **O wildcard de redirect cobre por acidente, não por desenho.** `…/auth/confirm*` casa com `confirmar-cadastro` — e com qualquer outra rota que comece por `confirm`. Se a rota for renomeada, quebra em silêncio. Vale trocar por entradas explícitas, com cuidado: `/auth/confirm` é usada pela recuperação de senha.
+   >
+   > ⚠️ **Premissa a verificar à mão:** que o GoTrue só devolve `code` depois de validar o token do email. É o que sustenta o recado "foi confirmado", e nenhum teste exerce o GoTrue real.
+
 7. 🟡 ~~**Escolher o host**~~ ✅ decidido em 2026-11-02: **Fly.io `gru`** ([ADR 0020](adr/0020-host-fly-io-gru.md)). O deploy em si é a [spec 011](specs/011-deploy/spec.md), **em andamento**: `Dockerfile`, `.dockerignore`, `fly.toml` e os ajustes de produção da API (chaves do Data Protection persistidas, `ForwardedHeaders` restrito ao proxy) estão **prontos e commitados**.
-   > **Falta o que depende do Pedro:** criar conta no Fly (pede cartão, mesmo no plano gratuito) e instalar o `flyctl`, que não está na máquina. Depois: `fly launch`, volume, segredos, `fly deploy`, certificado e os registros A/AAAA. Só o domínio nu — `www` ficou de fora.
-   > A imagem ainda **não foi construída localmente** (o Docker Desktop não estava a correr), então o `Dockerfile` está escrito mas não provado.
+   > ✅ **Tudo isto foi feito em 2026-11-02**: conta no Fly, `flyctl`, `fly launch`, volume `velos_keys`, segredos, deploy, certificado Let's Encrypt e os registros A/AAAA. O `Dockerfile` foi construído e provado — e desde então corrigido duas vezes, por faltarem `tzdata` e `icu-libs` na imagem Alpine ([LICOES](LICOES.md)). Só o domínio nu; `www` ficou de fora.
 
 > ⚠️ **A Vercel está ligada ao repositório** e gera preview em cada PR, mas o [ADR 0013](adr/0013-api-aspnet-e-front-react-vite.md) diz que **ela não roda .NET**: o preview é só o front, sem API, e não loga. Decidir se desliga.
 

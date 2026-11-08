@@ -113,21 +113,35 @@ public class SignUpResendApiTests
         Assert.NotNull(AuthTestApp.Cookie(response, SignUpVerifier));
     }
 
+    /// <summary>
+    /// RN4: o limite de envios do GoTrue NÃO sobe. O <c>SMTP_MAX_FREQUENCY</c> é por usuário —
+    /// devolver o 429 diria "este email tem cadastro aqui", que é justo o que a neutralidade
+    /// existe para impedir. Quem freia abuso é a política por IP da API, que não olha o email.
+    /// </summary>
     [Fact]
-    public async Task Resend_surfaces_rate_limit_and_outage_instead_of_lying()
+    public async Task Resend_stays_neutral_when_supabase_reports_its_per_user_email_rate_limit()
     {
         using var app = new AuthTestApp();
-
         app.Factory.Identity.NextUnitResult = Result.Failure<Unit>(AuthErrors.RateLimited);
-        using var limited = await app.PostJsonAsync(ResendPath, new { email = "pedro@example.com" });
-        Assert.Equal(HttpStatusCode.TooManyRequests, limited.StatusCode);
-        Assert.Equal("rate_limited", await Code(limited));
-        Assert.Null(AuthTestApp.Cookie(limited, SignUpVerifier));
 
+        using var response = await app.PostJsonAsync(ResendPath, new { email = "pedro@example.com" });
+
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+        Assert.NotNull(AuthTestApp.Cookie(response, SignUpVerifier));
+    }
+
+    /// <summary>Serviço fora do ar é a única exceção: fingir "enviamos" seria mentir.</summary>
+    [Fact]
+    public async Task Resend_surfaces_an_outage_instead_of_lying()
+    {
+        using var app = new AuthTestApp();
         app.Factory.Identity.NextUnitResult = Result.Failure<Unit>(AuthErrors.Unavailable);
+
         using var down = await app.PostJsonAsync(ResendPath, new { email = "pedro@example.com" });
+
         Assert.Equal(HttpStatusCode.ServiceUnavailable, down.StatusCode);
         Assert.Equal("auth_unavailable", await Code(down));
+        Assert.Null(AuthTestApp.Cookie(down, SignUpVerifier));
     }
 
     [Fact]
