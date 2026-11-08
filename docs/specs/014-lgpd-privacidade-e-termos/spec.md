@@ -128,8 +128,12 @@ No navegador ficam só: os cookies `httpOnly` da sessão (`velos_at`, `velos_rt`
   **hash** do email (não identifica sozinho) e expira; o **backup cifrado** dos últimos 90 dias
   ainda contém o registro, e isso é exatamente o caso do art. 16 ("limites técnicos das
   atividades"). A tela diz isso antes de confirmar, sem letra miúda.
-- **RN4 — Encerrar exige prova de que é a pessoa.** Digitar a senha (ou refazer o Google) e
-  confirmar por escrito. Sessão encerrada no ato, em todos os aparelhos.
+- **RN4 — Encerrar exige prova de que é a pessoa: a senha.** Digitar a senha e confirmar por
+  escrito. Sessão encerrada no ato, em todos os aparelhos. *(Decidido em 2026-11-08, depois da
+  spec aprovada.)* Quem entra **com Google e ainda não tem senha** é levado a criar uma, pelo
+  fluxo de recuperação que já existe, e então encerra — **se** o GoTrue aceitar recuperação para
+  conta criada por Google, o que o [plan.md](plan.md) manda provar antes de prometer. Não
+  aceitando, o caminho dessas contas é o canal do titular, em até 15 dias (RN6).
 - **RN5 — Exportar é legível e completo.** Dois arquivos que abrem sem o Velos: **JSON** com tudo
   (fiel, serve à portabilidade do art. 18, V) e **CSV das movimentações** (que é o que a pessoa
   abre no Excel). Serve também ao art. 18, II (acesso).
@@ -176,6 +180,9 @@ com `role="status"` / `role="alert"`.
 - [ ] **CA3** — Quando corrijo meu nome no perfil e recarrego, o nome novo aparece no app.
 - [ ] **CA4** — Quando exporto meus dados, baixo um arquivo que abre fora do Velos e contém minhas
       contas, categorias, movimentações, metas e aportes — conferido contra o banco, linha a linha.
+- [ ] **CA5-google** — Dado que entrei com Google e não tenho senha, quando tento encerrar a
+      conta, então a tela me diz como criar uma senha — ou, se isso não for possível, aponta o
+      canal do titular. Em nenhum caso fico sem saída.
 - [ ] **CA5** — Quando encerro minha conta, confirmando como a tela pede, então sou deslogado, e
       **nenhuma linha minha sobra** em `profiles`, `accounts`, `categories`, `transactions`,
       `goals` e `goal_contributions`. Tentar entrar com o mesmo email depois diz que não existe
